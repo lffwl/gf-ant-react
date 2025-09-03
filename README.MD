@@ -1,4 +1,3 @@
-# GoFrame Template For SingleRepo
+# GF-Ant-React
 
-Quick Start: 
-- https://goframe.org/quick
+goframe + Ant Design React + RABC 
