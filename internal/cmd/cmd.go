@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gcmd"
 
+	"gf-ant-react/internal/controller/admin"
 	"gf-ant-react/internal/controller/hello"
 )
 
@@ -17,10 +18,14 @@ var (
 		Brief: "start http server",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			s := g.Server()
+			s.Use(
+				ghttp.MiddlewareCORS,
+			)
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.Middleware(ghttp.MiddlewareHandlerResponse)
 				group.Bind(
 					hello.NewV1(),
+					admin.NewV1(),
 				)
 			})
 			s.Run()

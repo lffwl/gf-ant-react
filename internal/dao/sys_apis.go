@@ -8,15 +8,15 @@ import (
 	"gf-ant-react/internal/dao/internal"
 )
 
-// usersDao is the data access object for the table users.
+// sysApisDao is the data access object for the table sys_apis.
 // You can define custom methods on it to extend its functionality as needed.
-type usersDao struct {
-	*internal.UsersDao
+type sysApisDao struct {
+	*internal.SysApisDao
 }
 
 var (
-	// Users is a globally accessible object for table users operations.
-	Users = usersDao{internal.NewUsersDao()}
+	// SysApis is a globally accessible object for table sys_apis operations.
+	SysApis = sysApisDao{internal.NewSysApisDao()}
 )
 
 // Add your custom methods and functionality below.

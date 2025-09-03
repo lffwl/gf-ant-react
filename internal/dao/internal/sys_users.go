@@ -11,16 +11,16 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// UsersDao is the data access object for the table users.
-type UsersDao struct {
+// SysUsersDao is the data access object for the table sys_users.
+type SysUsersDao struct {
 	table    string             // table is the underlying table name of the DAO.
 	group    string             // group is the database configuration group name of the current DAO.
-	columns  UsersColumns       // columns contains all the column names of Table for convenient usage.
+	columns  SysUsersColumns    // columns contains all the column names of Table for convenient usage.
 	handlers []gdb.ModelHandler // handlers for customized model modification.
 }
 
-// UsersColumns defines and stores column names for the table users.
-type UsersColumns struct {
+// SysUsersColumns defines and stores column names for the table sys_users.
+type SysUsersColumns struct {
 	Id            string //
 	Username      string // 用户名
 	PasswordHash  string // 密码哈希
@@ -36,8 +36,8 @@ type UsersColumns struct {
 	DeletedAt     string // 软删除时间 (NULL=未删除)
 }
 
-// usersColumns holds the columns for the table users.
-var usersColumns = UsersColumns{
+// sysUsersColumns holds the columns for the table sys_users.
+var sysUsersColumns = SysUsersColumns{
 	Id:            "id",
 	Username:      "username",
 	PasswordHash:  "password_hash",
@@ -53,38 +53,38 @@ var usersColumns = UsersColumns{
 	DeletedAt:     "deleted_at",
 }
 
-// NewUsersDao creates and returns a new DAO object for table data access.
-func NewUsersDao(handlers ...gdb.ModelHandler) *UsersDao {
-	return &UsersDao{
+// NewSysUsersDao creates and returns a new DAO object for table data access.
+func NewSysUsersDao(handlers ...gdb.ModelHandler) *SysUsersDao {
+	return &SysUsersDao{
 		group:    "default",
-		table:    "users",
-		columns:  usersColumns,
+		table:    "sys_users",
+		columns:  sysUsersColumns,
 		handlers: handlers,
 	}
 }
 
 // DB retrieves and returns the underlying raw database management object of the current DAO.
-func (dao *UsersDao) DB() gdb.DB {
+func (dao *SysUsersDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
 // Table returns the table name of the current DAO.
-func (dao *UsersDao) Table() string {
+func (dao *SysUsersDao) Table() string {
 	return dao.table
 }
 
 // Columns returns all column names of the current DAO.
-func (dao *UsersDao) Columns() UsersColumns {
+func (dao *SysUsersDao) Columns() SysUsersColumns {
 	return dao.columns
 }
 
 // Group returns the database configuration group name of the current DAO.
-func (dao *UsersDao) Group() string {
+func (dao *SysUsersDao) Group() string {
 	return dao.group
 }
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
-func (dao *UsersDao) Ctx(ctx context.Context) *gdb.Model {
+func (dao *SysUsersDao) Ctx(ctx context.Context) *gdb.Model {
 	model := dao.DB().Model(dao.table)
 	for _, handler := range dao.handlers {
 		model = handler(model)
@@ -98,6 +98,6 @@ func (dao *UsersDao) Ctx(ctx context.Context) *gdb.Model {
 //
 // Note: Do not commit or roll back the transaction in function f,
 // as it is automatically handled by this function.
-func (dao *UsersDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
+func (dao *SysUsersDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
 }

@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// Users is the golang structure of table users for DAO operations like Where/Data.
-type Users struct {
-	g.Meta        `orm:"table:users, do:true"`
+// SysUsers is the golang structure of table sys_users for DAO operations like Where/Data.
+type SysUsers struct {
+	g.Meta        `orm:"table:sys_users, do:true"`
 	Id            any         //
 	Username      any         // 用户名
 	PasswordHash  any         // 密码哈希

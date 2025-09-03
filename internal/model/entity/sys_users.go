@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// Users is the golang structure for table users.
-type Users struct {
+// SysUsers is the golang structure for table sys_users.
+type SysUsers struct {
 	Id            uint64      `json:"id"            orm:"id"             description:""`                     //
 	Username      string      `json:"username"      orm:"username"       description:"用户名"`                  // 用户名
 	PasswordHash  string      `json:"passwordHash"  orm:"password_hash"  description:"密码哈希"`                 // 密码哈希
