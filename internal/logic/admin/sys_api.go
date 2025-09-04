@@ -34,7 +34,6 @@ func (s *sSysApiLogic) GetTree(ctx context.Context) ([]*SysApiTree, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	// 构建树形结构
 	return s.buildTree(apis, 0), nil
 }

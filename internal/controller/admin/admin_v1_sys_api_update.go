@@ -3,7 +3,7 @@ package admin
 import (
 	"context"
 
-	"gf-ant-react/api/admin/v1"
+	v1 "gf-ant-react/api/admin/v1"
 	"gf-ant-react/internal/logic/admin"
 	"gf-ant-react/internal/model/entity"
 )

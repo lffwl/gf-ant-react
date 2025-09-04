@@ -20,7 +20,11 @@ func (s *SysApi) Create(ctx context.Context, data *entity.SysApis) (uint64, erro
 }
 
 func (s *SysApi) Update(ctx context.Context, data *entity.SysApis) error {
-	_, err := dao.SysApis.Ctx(ctx).Where(dao.SysApis.Columns().Id, data.Id).Update(data)
+	_, err := dao.SysApis.Ctx(ctx).FieldsEx(
+		dao.SysApis.Columns().DeletedAt,
+		dao.SysApis.Columns().CreatedAt,
+		dao.SysApis.Columns().UpdatedAt,
+	).Where(dao.SysApis.Columns().Id, data.Id).Update(data)
 	return err
 }
 
@@ -31,7 +35,7 @@ func (s *SysApi) Delete(ctx context.Context, id uint64) error {
 
 func (s *SysApi) GetAll(ctx context.Context) ([]*entity.SysApis, error) {
 	var apis []*entity.SysApis
-	err := dao.SysApis.Ctx(ctx).Where("deleted_at IS NULL").Order("sort ASC").Scan(&apis)
+	err := dao.SysApis.Ctx(ctx).Order("sort DESC").Scan(&apis)
 	if err != nil {
 		return nil, err
 	}

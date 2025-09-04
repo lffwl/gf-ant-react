@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Space, Drawer, Form, Input, InputNumber, Select, Switch, message } from 'antd';
+import { Table, Button, Space, Drawer, Form, Input, InputNumber, Select, Switch, message, TreeSelect } from 'antd';
 import { apiService } from '../services/apiService';
 import type { ColumnsType } from 'antd/es/table';
 
 interface ApiData {
   key: React.Key;
+  parentId:number;
   name: string;
   path: string;
   method: string;
@@ -18,6 +19,7 @@ interface ApiData {
 
 const ApiManagement: React.FC = () => {
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<ApiData | null>(null);
   const [form] = Form.useForm();
   const [apiData, setApiData] = useState<ApiData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -92,11 +94,52 @@ const ApiManagement: React.FC = () => {
       key: 'description',
       width: '25%',
     },
+    {
+      title: '操作',
+      key: 'action',
+      width: '15%',
+      render: (_, record) => (
+        <Space size="middle">
+          <Button type="link" size="small" onClick={() => handleEdit(record)}>
+            编辑
+          </Button>
+          <Button type="link" size="small" danger onClick={() => handleDelete(record)}>
+            删除
+          </Button>
+        </Space>
+      ),
+    },
   ];
 
   useEffect(() => {
     fetchApiTree();
   }, []);
+
+  const handleEdit = (record: ApiData) => {
+    setEditingRecord(record);
+    form.setFieldsValue({
+      parentId: record.parentId,
+      name: record.name,
+      permissionCode: record.permissionCode,
+      url: record.path,
+      method: record.method,
+      sort: record.sort,
+      status: record.status === 1,
+      isMenu: record.isMenu === 1,
+      description: record.description
+    });
+    setDrawerVisible(true);
+  };
+
+  const handleDelete = async (record: ApiData) => {
+    try {
+      await apiService.deleteApi(record.key.toString());
+      message.success('删除成功');
+      fetchApiTree();
+    } catch (error) {
+      message.error('删除失败');
+    }
+  };
 
   const fetchApiTree = async () => {
     setLoading(true);
@@ -108,6 +151,7 @@ const ApiManagement: React.FC = () => {
         const transformApiData = (data: any[]): ApiData[] => {
           return data.map(item => ({
             key: item.id || item.key,
+            parentId: item.parentId || 0,
             name: item.name,
             path: item.url,
             method: item.method,
@@ -132,15 +176,17 @@ const ApiManagement: React.FC = () => {
 
   return (
     <div>
-      <h2>API管理页面</h2>
-      <Space style={{ marginBottom: 16 }}>
-        <Button type="primary" onClick={() => setDrawerVisible(true)}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h2>API管理页面</h2>
+        <Space>
+          <Button type="primary" onClick={() => setDrawerVisible(true)}>
             新增API
           </Button>
           <Button onClick={fetchApiTree} loading={loading}>
             刷新
           </Button>
-      </Space>
+        </Space>
+      </div>
       <Table
         columns={columns}
         dataSource={apiData}
@@ -150,10 +196,14 @@ const ApiManagement: React.FC = () => {
         loading={loading}
       />
       <Drawer
-        title="新增API"
+        title={editingRecord ? '编辑API' : '新增API'}
         width={720}
         open={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
+        onClose={() => {
+          setDrawerVisible(false);
+          setEditingRecord(null);
+          form.resetFields();
+        }}
         footer={
           <Space>
             <Button onClick={() => setDrawerVisible(false)}>取消</Button>
@@ -168,20 +218,40 @@ const ApiManagement: React.FC = () => {
           layout="vertical"
           onFinish={async (values) => {
             try {
-              await apiService.createApi(values);
+              if (editingRecord) {
+                await apiService.updateApi(editingRecord.key.toString(), values);
+                message.success('更新成功');
+              } else {
+                await apiService.createApi(values);
+                message.success('创建成功');
+              }
               setDrawerVisible(false);
+              setEditingRecord(null);
               form.resetFields();
+              fetchApiTree();
             } catch (error) {
               // 错误处理已经在apiService中完成
             }
           }}
         >
+          {editingRecord && (
+            <Form.Item label="ID">
+              <Input value={editingRecord.key.toString()} disabled />
+            </Form.Item>
+          )}
           <Form.Item
             name="parentId"
-            label="上级ID"
+            label="上级API"
             rules={[{ type: 'integer', message: '上级ID必须为整数' }]}
           >
-            <InputNumber placeholder="请输入上级ID，NULL表示根节点" style={{ width: '100%' }} />
+            <TreeSelect
+              placeholder="请选择上级API，不选表示根节点"
+              style={{ width: '100%' }}
+              treeData={apiData}
+              fieldNames={{ label: 'name', value: 'key', children: 'children' }}
+              treeDefaultExpandAll
+              allowClear
+            />
           </Form.Item>
 
           <Form.Item

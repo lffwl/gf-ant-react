@@ -2,16 +2,13 @@ import React, { useState } from 'react';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
-  ApiOutlined,
-  HomeOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, Button, theme } from 'antd';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import UserManagement from './pages/UserManagement';
 import ApiManagement from './pages/ApiManagement';
 import Welcome from './pages/Welcome';
+import { menuItems } from './config/menuItems';
 
 const { Header, Sider, Content } = Layout;
 
@@ -25,33 +22,14 @@ const LayoutContent: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const menuItems = [
-    {
-      key: '/',
-      icon: <HomeOutlined />,
-      label: '欢迎页面',
-      onClick: () => navigate('/'),
-    },
-    {
-      key: '/permission',
-      icon: <VideoCameraOutlined />,
-      label: '权限管理',
-      children: [
-        {
-          key: '/api',
-          icon: <ApiOutlined />,
-          label: 'API管理',
-          onClick: () => navigate('/api'),
-        },
-        {
-          key: '/user',
-          icon: <UserOutlined />,
-          label: '用户管理',
-          onClick: () => navigate('/user'),
-        },
-      ],
-    },
-  ];
+  const processedMenuItems = menuItems.map(item => ({
+    ...item,
+    onClick: item.children ? undefined : () => navigate(item.key),
+    children: item.children?.map(child => ({
+      ...child,
+      onClick: () => navigate(child.key),
+    })),
+  }));
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -61,7 +39,7 @@ const LayoutContent: React.FC = () => {
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
-          items={menuItems}
+          items={processedMenuItems}
         />
       </Sider>
       <Layout>
@@ -88,8 +66,8 @@ const LayoutContent: React.FC = () => {
         >
           <Routes>
             <Route path="/" element={<Welcome />} />
-            <Route path="/user" element={<UserManagement />} />
-            <Route path="/api" element={<ApiManagement />} />
+            <Route path="/permission/user" element={<UserManagement />} />
+            <Route path="/permission/api" element={<ApiManagement />} />
           </Routes>
         </Content>
       </Layout>
