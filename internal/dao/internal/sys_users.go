@@ -26,6 +26,7 @@ type SysUsersColumns struct {
 	PasswordHash  string // 密码哈希
 	Email         string // 邮箱
 	Mobile        string // 手机号
+	DepartmentId  string // 所属部门ID
 	Status        string // 状态: 0=禁用, 1=正常, 2=锁定
 	LastLoginAt   string // 最后登录时间
 	LastLoginIp   string // 最后登录IP
@@ -43,6 +44,7 @@ var sysUsersColumns = SysUsersColumns{
 	PasswordHash:  "password_hash",
 	Email:         "email",
 	Mobile:        "mobile",
+	DepartmentId:  "department_id",
 	Status:        "status",
 	LastLoginAt:   "last_login_at",
 	LastLoginIp:   "last_login_ip",

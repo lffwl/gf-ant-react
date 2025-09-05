@@ -167,8 +167,18 @@ const ApiManagement: React.FC = () => {
         const transformedData = transformApiData(response.data.list);
         console.log('转换后的表格数据:', transformedData);
         setApiData(transformedData);
-        // 初始展开所有行
-        setExpandedRowKeys(transformedData.map(item => item.key));
+        // 递归获取所有节点的key，实现N级展开
+        const getAllKeys = (data: ApiData[]): React.Key[] => {
+          let keys: React.Key[] = [];
+          data.forEach(item => {
+            keys.push(item.key);
+            if (item.children && item.children.length > 0) {
+              keys = keys.concat(getAllKeys(item.children));
+            }
+          });
+          return keys;
+        };
+        setExpandedRowKeys(getAllKeys(transformedData));
       }
     } catch (error) {
       message.error('获取API数据失败');

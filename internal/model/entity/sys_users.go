@@ -15,6 +15,7 @@ type SysUsers struct {
 	PasswordHash  string      `json:"passwordHash"  orm:"password_hash"  description:"密码哈希"`                 // 密码哈希
 	Email         string      `json:"email"         orm:"email"          description:"邮箱"`                   // 邮箱
 	Mobile        string      `json:"mobile"        orm:"mobile"         description:"手机号"`                  // 手机号
+	DepartmentId  uint64      `json:"departmentId"  orm:"department_id"  description:"所属部门ID"`               // 所属部门ID
 	Status        int         `json:"status"        orm:"status"         description:"状态: 0=禁用, 1=正常, 2=锁定"` // 状态: 0=禁用, 1=正常, 2=锁定
 	LastLoginAt   *gtime.Time `json:"lastLoginAt"   orm:"last_login_at"  description:"最后登录时间"`               // 最后登录时间
 	LastLoginIp   string      `json:"lastLoginIp"   orm:"last_login_ip"  description:"最后登录IP"`               // 最后登录IP

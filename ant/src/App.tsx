@@ -7,6 +7,7 @@ import { Layout, Menu, Button, theme } from 'antd';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import UserManagement from './pages/UserManagement';
 import ApiManagement from './pages/ApiManagement';
+import DepartmentManagement from './pages/DepartmentManagement';
 import Welcome from './pages/Welcome';
 import { menuItems } from './config/menuItems';
 
@@ -68,6 +69,7 @@ const LayoutContent: React.FC = () => {
             <Route path="/" element={<Welcome />} />
             <Route path="/permission/user" element={<UserManagement />} />
             <Route path="/permission/api" element={<ApiManagement />} />
+            <Route path="/permission/department" element={<DepartmentManagement />} />
           </Routes>
         </Content>
       </Layout>

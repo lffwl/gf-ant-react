@@ -4,6 +4,7 @@ import {
   VideoCameraOutlined,
   ApiOutlined,
   HomeOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 
 export interface MenuItem {
@@ -34,6 +35,11 @@ export const menuItems: MenuItem[] = [
         key: '/permission/user',
         icon: React.createElement(UserOutlined),
         label: '用户管理',
+      },
+      {
+        key: '/permission/department',
+        icon: React.createElement(TeamOutlined),
+        label: '部门管理',
       },
     ],
   },

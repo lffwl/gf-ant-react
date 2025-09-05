@@ -17,6 +17,7 @@ type SysUsers struct {
 	PasswordHash  any         // 密码哈希
 	Email         any         // 邮箱
 	Mobile        any         // 手机号
+	DepartmentId  any         // 所属部门ID
 	Status        any         // 状态: 0=禁用, 1=正常, 2=锁定
 	LastLoginAt   *gtime.Time // 最后登录时间
 	LastLoginIp   any         // 最后登录IP
