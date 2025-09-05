@@ -28,7 +28,7 @@ type SysApiCreateRes struct {
 
 // SysApiUpdateReq 更新API请求参数
 type SysApiUpdateReq struct {
-	g.Meta         `path:"/sys/api/update/{id}" tags:"SysApi" method:"put" summary:"更新API"`
+	g.Meta         `path:"/sys/api/update/:id" tags:"SysApi" method:"put" summary:"更新API"`
 	Id             uint64 `path:"id" v:"required|integer#ID不能为空|ID必须为整数" description:"主键"`
 	ParentId       uint64 `json:"parentId" v:"integer#上级ID必须为整数" description:"上级ID，NULL表示根节点"`
 	Name           string `json:"name" v:"required|length:1,50#名称不能为空|名称长度必须在1-50个字符之间" description:"名称，如：用户管理、查询用户"`
@@ -48,7 +48,7 @@ type SysApiUpdateRes struct {
 
 // SysApiDeleteReq 删除API请求参数
 type SysApiDeleteReq struct {
-	g.Meta `path:"/sys/api/delete/{id}" tags:"SysApi" method:"delete" summary:"删除API"`
+	g.Meta `path:"/sys/api/delete/:id" tags:"SysApi" method:"delete" summary:"删除API"`
 	Id     uint64 `path:"id" v:"required|integer#ID不能为空|ID必须为整数" description:"主键"`
 }
 

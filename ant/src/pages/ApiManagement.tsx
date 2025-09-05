@@ -220,10 +220,8 @@ const ApiManagement: React.FC = () => {
             try {
               if (editingRecord) {
                 await apiService.updateApi(editingRecord.key.toString(), values);
-                message.success('更新成功');
               } else {
                 await apiService.createApi(values);
-                message.success('创建成功');
               }
               setDrawerVisible(false);
               setEditingRecord(null);
