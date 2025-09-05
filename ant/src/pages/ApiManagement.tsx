@@ -23,6 +23,7 @@ const ApiManagement: React.FC = () => {
   const [form] = Form.useForm();
   const [apiData, setApiData] = useState<ApiData[]>([]);
   const [loading, setLoading] = useState(false);
+  const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
 
   const columns: ColumnsType<ApiData> = [
     {
@@ -118,7 +119,7 @@ const ApiManagement: React.FC = () => {
   const handleEdit = (record: ApiData) => {
     setEditingRecord(record);
     form.setFieldsValue({
-      parentId: record.parentId,
+      parentId: record.parentId === 0 ? undefined : record.parentId,
       name: record.name,
       permissionCode: record.permissionCode,
       url: record.path,
@@ -166,6 +167,8 @@ const ApiManagement: React.FC = () => {
         const transformedData = transformApiData(response.data.list);
         console.log('转换后的表格数据:', transformedData);
         setApiData(transformedData);
+        // 初始展开所有行
+        setExpandedRowKeys(transformedData.map(item => item.key));
       }
     } catch (error) {
       message.error('获取API数据失败');
@@ -191,7 +194,19 @@ const ApiManagement: React.FC = () => {
         columns={columns}
         dataSource={apiData}
         pagination={false}
-        expandable={{ defaultExpandedRowKeys: apiData.map(item => item.key) }}
+        rowKey={(record) => record.key}
+        expandable={{
+          expandedRowKeys,
+          onExpand: (expanded, record) => {
+            const keys = expanded
+              ? [...expandedRowKeys, record.key]
+              : expandedRowKeys.filter(key => key !== record.key);
+            setExpandedRowKeys(keys);
+          },
+          onExpandedRowsChange: (keys) => {
+            setExpandedRowKeys([...keys]);
+          }
+        }}
         size="middle"
         loading={loading}
       />
