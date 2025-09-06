@@ -65,5 +65,6 @@ type SysApiTreeReq struct {
 // SysApiTreeRes 获取API树形结构响应参数
 type SysApiTreeRes struct {
 	g.Meta `mime:"application/json"`
-	List   []*admin.SysApiTree `json:"list" description:"API树形结构"`
+	List   []*admin.SysApiTree    `json:"list" description:"API树形结构"`
+	Config map[string]interface{} `json:"config" description:"配置"`
 }

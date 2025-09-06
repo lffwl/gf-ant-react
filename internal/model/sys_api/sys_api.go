@@ -1,4 +1,4 @@
-package apipermission
+package sys_api
 
 // Status 状态：0=禁用，1=启用
 const (

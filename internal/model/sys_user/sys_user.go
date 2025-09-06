@@ -1,4 +1,4 @@
-package sysuser
+package sys_user
 
 // sys_user Status 状态: 0=禁用, 1=正常, 2=锁定
 const (

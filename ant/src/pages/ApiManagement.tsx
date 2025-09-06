@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button, Space, Drawer, Form, Input, InputNumber, Select, Switch, message, TreeSelect } from 'antd';
+import React, { useState, useEffect, useRef } from 'react';
+import { Table, Button, Space, Drawer, Form, Input, InputNumber, Select, Switch, TreeSelect, Popconfirm } from 'antd';
 import { apiService } from '../services/apiService';
 import type { ColumnsType } from 'antd/es/table';
 
@@ -24,6 +24,7 @@ const ApiManagement: React.FC = () => {
   const [apiData, setApiData] = useState<ApiData[]>([]);
   const [loading, setLoading] = useState(false);
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
+  const isMounted = useRef(false);
 
   const columns: ColumnsType<ApiData> = [
     {
@@ -104,15 +105,26 @@ const ApiManagement: React.FC = () => {
           <Button type="link" size="small" onClick={() => handleEdit(record)}>
             编辑
           </Button>
-          <Button type="link" size="small" danger onClick={() => handleDelete(record)}>
-            删除
-          </Button>
+          <Popconfirm
+            title={`是否删除ID为 ${record.key} 的API？`}
+            onConfirm={() => handleDelete(record)}
+            okText="是"
+            cancelText="否"
+          >
+            <Button type="link" size="small" danger>
+              删除
+            </Button>
+          </Popconfirm>
         </Space>
       ),
     },
   ];
 
   useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
     fetchApiTree();
   }, []);
 
@@ -135,10 +147,9 @@ const ApiManagement: React.FC = () => {
   const handleDelete = async (record: ApiData) => {
     try {
       await apiService.deleteApi(record.key.toString());
-      message.success('删除成功');
       fetchApiTree();
     } catch (error) {
-      message.error('删除失败');
+      // 错误处理已经在apiService中完成
     }
   };
 
@@ -181,7 +192,7 @@ const ApiManagement: React.FC = () => {
         setExpandedRowKeys(getAllKeys(transformedData));
       }
     } catch (error) {
-      message.error('获取API数据失败');
+      // 错误处理已经在apiService中完成
     } finally {
       setLoading(false);
     }

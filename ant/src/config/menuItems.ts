@@ -5,6 +5,7 @@ import {
   ApiOutlined,
   HomeOutlined,
   TeamOutlined,
+  SafetyOutlined,
 } from '@ant-design/icons';
 
 export interface MenuItem {
@@ -40,6 +41,11 @@ export const menuItems: MenuItem[] = [
         key: '/permission/department',
         icon: React.createElement(TeamOutlined),
         label: '部门管理',
+      },
+      {
+        key: '/permission/role',
+        icon: React.createElement(SafetyOutlined),
+        label: '角色管理',
       },
     ],
   },

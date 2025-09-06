@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from
 import UserManagement from './pages/UserManagement';
 import ApiManagement from './pages/ApiManagement';
 import DepartmentManagement from './pages/DepartmentManagement';
+import RoleManagement from './pages/RoleManagement';
 import Welcome from './pages/Welcome';
 import { menuItems } from './config/menuItems';
 
@@ -17,11 +18,25 @@ const { Header, Sider, Content } = Layout;
 
 const LayoutContent: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  // 监听路由变化，自动展开父级菜单
+  useEffect(() => {
+    const currentPath = location.pathname;
+    // 查找当前路径对应的父级菜单key
+    const parentKey = menuItems.find(item => 
+      item.children?.some(child => child.key === currentPath)
+    )?.key;
+    
+    if (parentKey) {
+      setOpenKeys([parentKey]);
+    }
+  }, [location.pathname]);
 
   const processedMenuItems = menuItems.map(item => ({
     ...item,
@@ -40,6 +55,8 @@ const LayoutContent: React.FC = () => {
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
+          openKeys={openKeys}
+          onOpenChange={setOpenKeys}
           items={processedMenuItems}
         />
       </Sider>
@@ -70,6 +87,7 @@ const LayoutContent: React.FC = () => {
             <Route path="/permission/user" element={<UserManagement />} />
             <Route path="/permission/api" element={<ApiManagement />} />
             <Route path="/permission/department" element={<DepartmentManagement />} />
+            <Route path="/permission/role" element={<RoleManagement />} />
           </Routes>
         </Content>
       </Layout>

@@ -81,7 +81,6 @@ export const apiService = {
           return result;
         } else {
           console.error('获取API树形结构失败详情:', result);
-          message.error(`获取API树形结构失败: ${result.message || response.statusText}`);
           throw new Error(`获取API树形结构失败: ${result.message || response.statusText}`);
         }
       } else {

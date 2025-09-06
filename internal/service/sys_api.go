@@ -50,3 +50,12 @@ func (s *SysApi) GetById(ctx context.Context, id uint64) (*entity.SysApis, error
 	}
 	return api, nil
 }
+
+func (s *SysApi) GetByPermissionCode(ctx context.Context, permissionCode string) (*entity.SysApis, error) {
+	var api *entity.SysApis
+	err := dao.SysApis.Ctx(ctx).Where(dao.SysApis.Columns().PermissionCode, permissionCode).Scan(&api)
+	if err != nil {
+		return nil, err
+	}
+	return api, nil
+}

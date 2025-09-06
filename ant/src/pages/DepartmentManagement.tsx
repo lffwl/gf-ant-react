@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button, Space, Drawer, Form, Input, InputNumber, Select, Switch, message, TreeSelect } from 'antd';
+import React, { useState, useEffect, useRef } from 'react';
+import { Table, Button, Space, Drawer, Form, Input, InputNumber, Switch, TreeSelect, Popconfirm } from 'antd';
 import { departmentService } from '../services/departmentService';
 import type { ColumnsType } from 'antd/es/table';
 
@@ -19,6 +19,7 @@ const DepartmentManagement: React.FC = () => {
   const [departmentData, setDepartmentData] = useState<DepartmentData[]>([]);
   const [loading, setLoading] = useState(false);
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
+  const isMounted = useRef(false);
 
   const columns: ColumnsType<DepartmentData> = [
     {
@@ -61,15 +62,27 @@ const DepartmentManagement: React.FC = () => {
           <Button type="link" size="small" onClick={() => handleEdit(record)}>
             编辑
           </Button>
-          <Button type="link" size="small" danger onClick={() => handleDelete(record)}>
-            删除
-          </Button>
+          <Popconfirm
+            title="确认删除"
+            description={`确认要删除ID为 ${record.key} 的部门吗？`}
+            onConfirm={() => handleDelete(record)}
+            okText="确认"
+            cancelText="取消"
+          >
+            <Button type="link" size="small" danger>
+              删除
+            </Button>
+          </Popconfirm>
         </Space>
       ),
     },
   ];
 
   useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
     fetchDepartmentTree();
   }, []);
 
@@ -87,10 +100,9 @@ const DepartmentManagement: React.FC = () => {
   const handleDelete = async (record: DepartmentData) => {
     try {
       await departmentService.deleteDepartment(record.key.toString());
-      message.success('删除成功');
       fetchDepartmentTree();
     } catch (error) {
-      message.error('删除失败');
+      // 错误处理已经在departmentService中完成
     }
   };
 
@@ -128,7 +140,7 @@ const DepartmentManagement: React.FC = () => {
         setExpandedRowKeys(getAllKeys(transformedData));
       }
     } catch (error) {
-      message.error('获取部门数据失败');
+      // 错误处理已经在departmentService中完成
     } finally {
       setLoading(false);
     }
