@@ -14,6 +14,7 @@ type SysRoleApis struct {
 	g.Meta         `orm:"table:sys_role_apis, do:true"`
 	Id             any         // 主键
 	RoleId         any         // 角色ID
+	ApiId          any         // apiID
 	PermissionCode any         // 权限码 (关联 api_permissions.permission_code)
 	CreatedAt      *gtime.Time //
 }

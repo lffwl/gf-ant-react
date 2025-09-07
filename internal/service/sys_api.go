@@ -59,3 +59,13 @@ func (s *SysApi) GetByPermissionCode(ctx context.Context, permissionCode string)
 	}
 	return api, nil
 }
+
+// GetByIds 批量获取API信息
+func (s *SysApi) GetByIds(ctx context.Context, ids []uint64) ([]*entity.SysApis, error) {
+	var apis []*entity.SysApis
+	err := dao.SysApis.Ctx(ctx).Where(dao.SysApis.Columns().Id, ids).Scan(&apis)
+	if err != nil {
+		return nil, err
+	}
+	return apis, nil
+}

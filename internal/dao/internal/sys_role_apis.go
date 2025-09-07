@@ -23,6 +23,7 @@ type SysRoleApisDao struct {
 type SysRoleApisColumns struct {
 	Id             string // 主键
 	RoleId         string // 角色ID
+	ApiId          string // apiID
 	PermissionCode string // 权限码 (关联 api_permissions.permission_code)
 	CreatedAt      string //
 }
@@ -31,6 +32,7 @@ type SysRoleApisColumns struct {
 var sysRoleApisColumns = SysRoleApisColumns{
 	Id:             "id",
 	RoleId:         "role_id",
+	ApiId:          "api_id",
 	PermissionCode: "permission_code",
 	CreatedAt:      "created_at",
 }

@@ -12,6 +12,7 @@ import (
 type SysRoleApis struct {
 	Id             uint64      `json:"id"             orm:"id"              description:"主键"`                                       // 主键
 	RoleId         uint64      `json:"roleId"         orm:"role_id"         description:"角色ID"`                                     // 角色ID
+	ApiId          uint64      `json:"apiId"          orm:"api_id"          description:"apiID"`                                    // apiID
 	PermissionCode string      `json:"permissionCode" orm:"permission_code" description:"权限码 (关联 api_permissions.permission_code)"` // 权限码 (关联 api_permissions.permission_code)
 	CreatedAt      *gtime.Time `json:"createdAt"      orm:"created_at"      description:""`                                         //
 }

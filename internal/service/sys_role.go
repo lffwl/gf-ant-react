@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"gf-ant-react/internal/dao"
 	"gf-ant-react/internal/model/entity"
@@ -37,20 +38,30 @@ func (s *SysRole) Create(ctx context.Context, data *entity.SysRoles, apiIds []ui
 
 	// 创建角色API关联
 	if len(apiIds) > 0 {
-		var roleApis []map[string]interface{}
-		for _, apiId := range apiIds {
-			// 获取API的权限码
-			api, err := SysApiService.GetById(ctx, apiId)
-			if err != nil {
-				return 0, err
-			}
-			roleApis = append(roleApis, map[string]interface{}{
-				"role_id":         roleId,
-				"permission_code": api.PermissionCode,
-			})
+		// 批量获取API的权限码
+		apis, err := SysApiService.GetByIds(ctx, apiIds)
+		if err != nil {
+			return 0, err
 		}
 
-		_, err = tx.Model(dao.SysRoleApis.Table()).Ctx(ctx).Save(roleApis)
+		// 创建权限码映射表
+		permissionCodeMap := make(map[uint64]string)
+		for _, api := range apis {
+			permissionCodeMap[api.Id] = api.PermissionCode
+		}
+
+		var roleApis []entity.SysRoleApis
+		for _, apiId := range apiIds {
+			if permissionCode, exists := permissionCodeMap[apiId]; exists {
+				roleApis = append(roleApis, entity.SysRoleApis{
+					RoleId:         uint64(roleId),
+					PermissionCode: permissionCode,
+					ApiId:          apiId,
+				})
+			}
+		}
+
+		_, err = tx.Model(dao.SysRoleApis.Table()).Ctx(ctx).FieldsEx(dao.SysRoleApis.Columns().CreatedAt).Save(roleApis)
 		if err != nil {
 			return 0, err
 		}
@@ -70,7 +81,13 @@ func (s *SysRole) Update(ctx context.Context, data *entity.SysRoles, apiIds []ui
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+
+	// 使用defer在函数返回时检查事务状态，如果未提交则回滚
+	defer func() {
+		if tx != nil {
+			tx.Rollback()
+		}
+	}()
 
 	// 更新角色
 	_, err = tx.Model(dao.SysRoles.Table()).Ctx(ctx).
@@ -89,27 +106,41 @@ func (s *SysRole) Update(ctx context.Context, data *entity.SysRoles, apiIds []ui
 
 	// 创建新的角色API关联
 	if len(apiIds) > 0 {
-		var roleApis []map[string]interface{}
-		for _, apiId := range apiIds {
-			// 获取API的权限码
-			api, err := SysApiService.GetById(ctx, apiId)
-			if err != nil {
-				return err
-			}
-			roleApis = append(roleApis, map[string]interface{}{
-				"role_id":         data.Id,
-				"permission_code": api.PermissionCode,
-			})
+		// 批量获取API的权限码
+		apis, err := SysApiService.GetByIds(ctx, apiIds)
+		if err != nil {
+			return err
 		}
 
-		_, err = tx.Model(dao.SysRoleApis.Table()).Ctx(ctx).Insert(roleApis)
+		// 创建权限码映射表
+		permissionCodeMap := make(map[uint64]string)
+		for _, api := range apis {
+			permissionCodeMap[api.Id] = api.PermissionCode
+		}
+
+		var roleApis []entity.SysRoleApis
+		for _, apiId := range apiIds {
+			if permissionCode, exists := permissionCodeMap[apiId]; exists {
+				roleApis = append(roleApis, entity.SysRoleApis{
+					RoleId:         data.Id,
+					PermissionCode: permissionCode,
+					ApiId:          apiId,
+				})
+			}
+		}
+
+		_, err = tx.Model(dao.SysRoleApis.Table()).Ctx(ctx).FieldsEx(dao.SysRoleApis.Columns().CreatedAt).Save(roleApis)
 		if err != nil {
 			return err
 		}
 	}
 
 	// 提交事务
-	return tx.Commit()
+	err = tx.Commit()
+	if err == nil {
+		tx = nil // 提交成功后将tx置为nil，避免defer执行回滚
+	}
+	return err
 }
 
 func (s *SysRole) Delete(ctx context.Context, id uint64) error {
@@ -118,7 +149,13 @@ func (s *SysRole) Delete(ctx context.Context, id uint64) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+
+	// 使用defer在函数返回时检查事务状态，如果未提交则回滚
+	defer func() {
+		if tx != nil {
+			tx.Rollback()
+		}
+	}()
 
 	// 删除角色API关联
 	_, err = tx.Model(dao.SysRoleApis.Table()).Ctx(ctx).
@@ -135,7 +172,11 @@ func (s *SysRole) Delete(ctx context.Context, id uint64) error {
 	}
 
 	// 提交事务
-	return tx.Commit()
+	err = tx.Commit()
+	if err == nil {
+		tx = nil // 提交成功后将tx置为nil，避免defer执行回滚
+	}
+	return err
 }
 
 func (s *SysRole) GetList(ctx context.Context, page, size int, name string, status *bool) ([]*SysRoleItem, int, error) {
@@ -161,19 +202,40 @@ func (s *SysRole) GetList(ctx context.Context, page, size int, name string, stat
 		return nil, 0, err
 	}
 
+	// 获取所有角色的API数量（分组查询）
+	var apiCounts []struct {
+		RoleId   uint64 `json:"role_id"`
+		ApiCount int    `json:"api_count"`
+	}
+
+	// 提取角色ID列表
+	roleIds := make([]uint64, len(roles))
+	for i, role := range roles {
+		roleIds[i] = role.Id
+	}
+
+	// 执行分组查询
+	err = dao.SysRoleApis.Ctx(ctx).
+		Fields(fmt.Sprintf("%s, count(*) as api_count", dao.SysRoleApis.Columns().RoleId)).
+		WhereIn(dao.SysRoleApis.Columns().RoleId, roleIds).
+		Group(dao.SysRoleApis.Columns().RoleId).
+		Scan(&apiCounts)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// 创建API数量映射表
+	apiCountMap := make(map[uint64]int)
+	for _, item := range apiCounts {
+		apiCountMap[item.RoleId] = item.ApiCount
+	}
+
 	// 构建返回结果
 	var result []*SysRoleItem
 	for _, role := range roles {
-		// 获取关联API数量
-		apiCount, err := dao.SysRoleApis.Ctx(ctx).
-			Where(dao.SysRoleApis.Columns().RoleId, role.Id).Count()
-		if err != nil {
-			return nil, 0, err
-		}
-
 		result = append(result, &SysRoleItem{
 			SysRoles: role,
-			ApiCount: apiCount,
+			ApiCount: apiCountMap[role.Id],
 		})
 	}
 
@@ -191,18 +253,14 @@ func (s *SysRole) GetById(ctx context.Context, id uint64) (*entity.SysRoles, []u
 	// 获取关联的API ID列表
 	var apiIds []uint64
 	var roleApis []*entity.SysRoleApis
-	err = dao.SysRoleApis.Ctx(ctx).Where(dao.SysRoleApis.Columns().RoleId, id).Scan(&roleApis)
+	err = dao.SysRoleApis.Ctx(ctx).Fields(dao.SysRoleApis.Columns().ApiId).Where(dao.SysRoleApis.Columns().RoleId, id).Scan(&roleApis)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// 通过权限码获取API ID
 	for _, roleApi := range roleApis {
-		api, err := SysApiService.GetByPermissionCode(ctx, roleApi.PermissionCode)
-		if err != nil {
-			return nil, nil, err
-		}
-		apiIds = append(apiIds, api.Id)
+		apiIds = append(apiIds, roleApi.ApiId)
 	}
 
 	return role, apiIds, nil
