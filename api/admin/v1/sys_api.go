@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"gf-ant-react/internal/logic/admin"
+	"gf-ant-react/internal/model/admin"
 
 	"github.com/gogf/gf/v2/frame/g"
 )
@@ -65,6 +65,6 @@ type SysApiTreeReq struct {
 // SysApiTreeRes 获取API树形结构响应参数
 type SysApiTreeRes struct {
 	g.Meta `mime:"application/json"`
-	List   []*admin.SysApiTree    `json:"list" description:"API树形结构"`
-	Config map[string]interface{} `json:"config" description:"配置"`
+	List   []*admin.SysApiTreeResultItem `json:"list" description:"API树形结构"`
+	Config map[string]interface{}        `json:"config" description:"配置"`
 }

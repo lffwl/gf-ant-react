@@ -3,6 +3,7 @@ package admin
 import (
 	"context"
 
+	"gf-ant-react/internal/model/admin"
 	"gf-ant-react/internal/model/entity"
 	"gf-ant-react/internal/service"
 )
@@ -15,15 +16,13 @@ type SysDepartmentTree struct {
 	Children []*SysDepartmentTree `json:"children"`
 }
 
-
-
 var SysDepartmentLogic = &sSysDepartmentLogic{}
 
-func (s *sSysDepartmentLogic) Create(ctx context.Context, data *entity.SysDepartments) (uint64, error) {
+func (s *sSysDepartmentLogic) Create(ctx context.Context, data *admin.SysDepartmentCreateParam) (uint64, error) {
 	return service.SysDepartmentService.Create(ctx, data)
 }
 
-func (s *sSysDepartmentLogic) Update(ctx context.Context, data *entity.SysDepartments) error {
+func (s *sSysDepartmentLogic) Update(ctx context.Context, data *admin.SysDepartmentUpdateParam) error {
 	return service.SysDepartmentService.Update(ctx, data)
 }
 

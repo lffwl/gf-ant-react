@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gf-ant-react/internal/dao"
+	"gf-ant-react/internal/model/admin"
 	"gf-ant-react/internal/model/entity"
 )
 
@@ -11,20 +12,16 @@ type SysApi struct{}
 
 var SysApiService = &SysApi{}
 
-func (s *SysApi) Create(ctx context.Context, data *entity.SysApis) (uint64, error) {
-	result, err := dao.SysApis.Ctx(ctx).InsertAndGetId(data)
+func (s *SysApi) Create(ctx context.Context, data *admin.SysApiCreateParam) (uint64, error) {
+	id, err := dao.SysApis.Ctx(ctx).InsertAndGetId(data)
 	if err != nil {
 		return 0, err
 	}
-	return uint64(result), nil
+	return uint64(id), nil
 }
 
-func (s *SysApi) Update(ctx context.Context, data *entity.SysApis) error {
-	_, err := dao.SysApis.Ctx(ctx).FieldsEx(
-		dao.SysApis.Columns().DeletedAt,
-		dao.SysApis.Columns().CreatedAt,
-		dao.SysApis.Columns().UpdatedAt,
-	).Where(dao.SysApis.Columns().Id, data.Id).Update(data)
+func (s *SysApi) Update(ctx context.Context, data *admin.SysApiUpdateParam) error {
+	_, err := dao.SysApis.Ctx(ctx).Where(dao.SysApis.Columns().Id, data.Id).Update(data)
 	return err
 }
 
@@ -35,7 +32,7 @@ func (s *SysApi) Delete(ctx context.Context, id uint64) error {
 
 func (s *SysApi) GetAll(ctx context.Context) ([]*entity.SysApis, error) {
 	var apis []*entity.SysApis
-	err := dao.SysApis.Ctx(ctx).Order("sort DESC").Scan(&apis)
+	err := dao.SysApis.Ctx(ctx).Order("sort DESC, id DESC").Scan(&apis)
 	if err != nil {
 		return nil, err
 	}

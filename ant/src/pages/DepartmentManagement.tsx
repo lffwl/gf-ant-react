@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Table, Button, Space, Drawer, Form, Input, InputNumber, Switch, TreeSelect, Popconfirm } from 'antd';
+import { Table, Button, Space, Drawer, Form, Input, InputNumber, Switch, TreeSelect, Popconfirm, Card, Row, Col } from 'antd';
 import { departmentService } from '../services/departmentService';
 import type { ColumnsType } from 'antd/es/table';
 
@@ -148,17 +148,20 @@ const DepartmentManagement: React.FC = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h2>部门管理页面</h2>
-        <Space>
-          <Button type="primary" onClick={() => setDrawerVisible(true)}>
-            新增部门
-          </Button>
-          <Button onClick={fetchDepartmentTree} loading={loading}>
-            刷新
-          </Button>
-        </Space>
-      </div>
+      <Card>
+        {/* 搜索区域 */}
+        <Row gutter={16} style={{ marginBottom: 16 }}>
+          <Col span={24} style={{ textAlign: 'right' }}>
+            <Space>
+              <Button type="primary" onClick={() => setDrawerVisible(true)}>
+                新增部门
+              </Button>
+              <Button onClick={fetchDepartmentTree} loading={loading}>
+                刷新
+              </Button>
+            </Space>
+          </Col>
+        </Row>
       <Table
         columns={columns}
         dataSource={departmentData}
@@ -179,6 +182,7 @@ const DepartmentManagement: React.FC = () => {
         size="middle"
         loading={loading}
       />
+      </Card>
       <Drawer
         title={editingRecord ? '编辑部门' : '新增部门'}
         width={600}

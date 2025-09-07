@@ -8,10 +8,10 @@ import (
 	adminModel "gf-ant-react/internal/model/admin"
 )
 
-func (c *ControllerV1) SysUserCreate(ctx context.Context, req *v1.SysUserCreateReq) (res *v1.SysUserCreateRes, err error) {
-	param := &adminModel.SysUserCreateParam{
+func (c *ControllerV1) SysUserUpdate(ctx context.Context, req *v1.SysUserUpdateReq) (res *v1.SysUserUpdateRes, err error) {
+	param := &adminModel.SysUserUpdateParam{
+		Id:           req.Id,
 		Username:     req.Username,
-		PasswordHash: req.PasswordHash,
 		Email:        req.Email,
 		Mobile:       req.Mobile,
 		DepartmentId: req.DepartmentId,
@@ -19,10 +19,10 @@ func (c *ControllerV1) SysUserCreate(ctx context.Context, req *v1.SysUserCreateR
 		RoleIds:      req.RoleIds,
 	}
 
-	id, err := admin.SysUserLogic.Create(ctx, param)
+	err = admin.SysUserLogic.Update(ctx, param)
 	if err != nil {
 		return nil, err
 	}
 
-	return &v1.SysUserCreateRes{Id: id}, nil
+	return &v1.SysUserUpdateRes{}, nil
 }

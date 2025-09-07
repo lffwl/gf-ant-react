@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gf-ant-react/internal/dao"
+	"gf-ant-react/internal/model/admin"
 	"gf-ant-react/internal/model/entity"
 )
 
@@ -11,7 +12,7 @@ type SysDepartment struct{}
 
 var SysDepartmentService = &SysDepartment{}
 
-func (s *SysDepartment) Create(ctx context.Context, data *entity.SysDepartments) (uint64, error) {
+func (s *SysDepartment) Create(ctx context.Context, data *admin.SysDepartmentCreateParam) (uint64, error) {
 	result, err := dao.SysDepartments.Ctx(ctx).InsertAndGetId(data)
 	if err != nil {
 		return 0, err
@@ -19,12 +20,9 @@ func (s *SysDepartment) Create(ctx context.Context, data *entity.SysDepartments)
 	return uint64(result), nil
 }
 
-func (s *SysDepartment) Update(ctx context.Context, data *entity.SysDepartments) error {
-	_, err := dao.SysDepartments.Ctx(ctx).FieldsEx(
-		dao.SysDepartments.Columns().DeletedAt,
-		dao.SysDepartments.Columns().CreatedAt,
-		dao.SysDepartments.Columns().UpdatedAt,
-	).Where(dao.SysDepartments.Columns().Id, data.Id).Update(data)
+func (s *SysDepartment) Update(ctx context.Context, data *admin.SysDepartmentUpdateParam) error {
+
+	_, err := dao.SysDepartments.Ctx(ctx).Where(dao.SysDepartments.Columns().Id, data.Id).Update(data)
 	return err
 }
 

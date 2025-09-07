@@ -3,7 +3,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from '@ant-design/icons';
-import { Layout, Menu, Button, theme } from 'antd';
+import { Layout, Menu, Button, theme, Breadcrumb } from 'antd';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import UserManagement from './pages/UserManagement';
 import ApiManagement from './pages/ApiManagement';
@@ -38,6 +38,34 @@ const LayoutContent: React.FC = () => {
     }
   }, [location.pathname]);
 
+  // 根据当前路由生成面包屑数据
+  const generateBreadcrumbItems = () => {
+    const currentPath = location.pathname;
+    const items = [{ title: '首页' }];
+    
+    // 查找当前路由对应的菜单项
+    const currentMenuItem = menuItems.find(item => item.key === currentPath) || 
+                          menuItems.flatMap(item => item.children || []).find(child => child.key === currentPath);
+    
+    if (currentMenuItem) {
+      // 如果是子菜单，先添加父级菜单
+      const parentMenu = menuItems.find(item => 
+        item.children?.some(child => child.key === currentPath)
+      );
+      
+      if (parentMenu) {
+        items.push({ title: parentMenu.label });
+      }
+      
+      items.push({ title: currentMenuItem.label });
+    } else {
+      // 如果没有找到匹配的菜单项，显示默认页面名称
+      items.push({ title: '页面' });
+    }
+    
+    return items;
+  };
+
   const processedMenuItems = menuItems.map(item => ({
     ...item,
     onClick: item.children ? undefined : () => navigate(item.key),
@@ -61,18 +89,25 @@ const LayoutContent: React.FC = () => {
         />
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }}>
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-            style={{
-              fontSize: '16px',
-              width: 64,
-              height: 64,
-            }}
-          />
+        <Header style={{ padding: '0 16px', background: colorBgContainer, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Button
+              type="text"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              style={{
+                fontSize: '16px',
+                width: 64,
+                height: 64,
+              }}
+            />
+            <Breadcrumb 
+              style={{ marginLeft: 16 }}
+              items={generateBreadcrumbItems()}
+            />
+          </div>
         </Header>
+      
         <Content
           style={{
             margin: '24px 16px',

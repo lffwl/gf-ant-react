@@ -5,11 +5,11 @@ import (
 
 	v1 "gf-ant-react/api/admin/v1"
 	"gf-ant-react/internal/logic/admin"
-	"gf-ant-react/internal/model/entity"
+	adminModel "gf-ant-react/internal/model/admin"
 )
 
 func (c *ControllerV1) SysApiCreate(ctx context.Context, req *v1.SysApiCreateReq) (res *v1.SysApiCreateRes, err error) {
-	api := &entity.SysApis{
+	apiParam := &adminModel.SysApiCreateParam{
 		ParentId:       req.ParentId,
 		Name:           req.Name,
 		PermissionCode: req.PermissionCode,
@@ -21,7 +21,7 @@ func (c *ControllerV1) SysApiCreate(ctx context.Context, req *v1.SysApiCreateReq
 		Description:    req.Description,
 	}
 
-	id, err := admin.SysApiLogic.Create(ctx, api)
+	id, err := admin.SysApiLogic.Create(ctx, apiParam)
 	if err != nil {
 		return nil, err
 	}

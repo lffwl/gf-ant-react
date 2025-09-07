@@ -5,21 +5,22 @@ import (
 
 	v1 "gf-ant-react/api/admin/v1"
 	"gf-ant-react/internal/logic/admin"
-	"gf-ant-react/internal/model/entity"
+	adminModel "gf-ant-react/internal/model/admin"
 )
 
 func (c *ControllerV1) SysRoleCreate(ctx context.Context, req *v1.SysRoleCreateReq) (res *v1.SysRoleCreateRes, err error) {
-	// 构建角色实体
-	role := &entity.SysRoles{
+	// 构建角色参数
+	roleParam := &adminModel.SysRoleCreateParam{
 		Name:        req.Name,
 		Description: req.Description,
 		DataScope:   req.DataScope,
 		Sort:        req.Sort,
 		Status:      req.Status,
+		ApiIds:      req.ApiIds,
 	}
 
 	// 调用业务层创建角色
-	roleId, err := admin.SysRoleLogic.Create(ctx, role, req.ApiIds)
+	roleId, err := admin.SysRoleLogic.Create(ctx, roleParam)
 	if err != nil {
 		return nil, err
 	}

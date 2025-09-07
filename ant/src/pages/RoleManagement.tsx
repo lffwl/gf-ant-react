@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Table, Button, Space, Drawer, Form, Input, InputNumber, Select, Switch, Popconfirm, Tag, TreeSelect, message } from 'antd';
+import { Table, Button, Space, Drawer, Form, Input, InputNumber, Select, Switch, Popconfirm, Tag, TreeSelect, message, Card, Row, Col } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { FormInstance } from 'antd/es/form';
 import { roleService, RoleCreateReq } from '../services/roleService';
@@ -278,38 +278,44 @@ const RoleManagement: React.FC = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h2>角色管理页面</h2>
-        <Space>
-          <Input
-            placeholder="搜索角色名称"
-            value={searchName}
-            onChange={(e) => setSearchName(e.target.value)}
-            style={{ width: 200 }}
-            allowClear
-          />
-          <Select
-            placeholder="状态筛选"
-            value={searchStatus}
-            onChange={(value) => setSearchStatus(value)}
-            style={{ width: 120 }}
-            allowClear
-          >
-            <Select.Option value={true}>启用</Select.Option>
-            <Select.Option value={false}>禁用</Select.Option>
-          </Select>
-          <Button type="primary" onClick={async () => {
-            // 在打开新增抽屉前获取API树数据
-            await fetchApiTree();
-            setDrawerVisible(true);
-          }}>
-            新增角色
-          </Button>
-          <Button onClick={fetchRoleList} loading={loading}>
-            刷新
-          </Button>
-        </Space>
-      </div>
+      <Card>
+        {/* 搜索区域 */}
+        <Row gutter={16} style={{ marginBottom: 16 }}>
+          <Col span={6}>
+            <Input
+              placeholder="搜索角色名称"
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              allowClear
+            />
+          </Col>
+          <Col span={6}>
+            <Select
+              placeholder="状态筛选"
+              value={searchStatus}
+              onChange={(value) => setSearchStatus(value)}
+              allowClear
+              style={{ width: '100%' }}
+            >
+              <Select.Option value={true}>启用</Select.Option>
+              <Select.Option value={false}>禁用</Select.Option>
+            </Select>
+          </Col>
+          <Col span={12}>
+            <Space>
+              <Button type="primary" onClick={async () => {
+                // 在打开新增抽屉前获取API树数据
+                await fetchApiTree();
+                setDrawerVisible(true);
+              }}>
+                新增角色
+              </Button>
+              <Button onClick={fetchRoleList} loading={loading}>
+                刷新
+              </Button>
+            </Space>
+          </Col>
+        </Row>
       
       <Table
         columns={columns}
@@ -327,6 +333,7 @@ const RoleManagement: React.FC = () => {
         size="middle"
         loading={loading}
       />
+      </Card>
 
       <Drawer
         title={editingRecord ? '编辑角色' : '新增角色'}

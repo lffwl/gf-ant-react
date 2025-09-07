@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"gf-ant-react/internal/dao"
+	"gf-ant-react/internal/model/admin"
 	"gf-ant-react/internal/model/entity"
 )
 
@@ -18,7 +19,7 @@ type SysRoleItem struct {
 	ApiCount int `json:"apiCount" description:"关联API数量"`
 }
 
-func (s *SysRole) Create(ctx context.Context, data *entity.SysRoles, apiIds []uint64) (uint64, error) {
+func (s *SysRole) Create(ctx context.Context, data *admin.SysRoleCreateParam) (uint64, error) {
 	// 开启事务
 	tx, err := dao.SysRoles.DB().Begin(ctx)
 	if err != nil {
@@ -27,19 +28,15 @@ func (s *SysRole) Create(ctx context.Context, data *entity.SysRoles, apiIds []ui
 	defer tx.Rollback()
 
 	// 创建角色
-	result, err := tx.Model(dao.SysRoles.Table()).Ctx(ctx).FieldsEx(dao.SysRoles.Columns().DeletedAt).Save(data)
-	if err != nil {
-		return 0, err
-	}
-	roleId, err := result.LastInsertId()
+	roleId, err := tx.Model(dao.SysRoles.Table()).Ctx(ctx).InsertAndGetId(data)
 	if err != nil {
 		return 0, err
 	}
 
 	// 创建角色API关联
-	if len(apiIds) > 0 {
+	if len(data.ApiIds) > 0 {
 		// 批量获取API的权限码
-		apis, err := SysApiService.GetByIds(ctx, apiIds)
+		apis, err := SysApiService.GetByIds(ctx, data.ApiIds)
 		if err != nil {
 			return 0, err
 		}
@@ -51,7 +48,7 @@ func (s *SysRole) Create(ctx context.Context, data *entity.SysRoles, apiIds []ui
 		}
 
 		var roleApis []entity.SysRoleApis
-		for _, apiId := range apiIds {
+		for _, apiId := range data.ApiIds {
 			if permissionCode, exists := permissionCodeMap[apiId]; exists {
 				roleApis = append(roleApis, entity.SysRoleApis{
 					RoleId:         uint64(roleId),
@@ -75,7 +72,7 @@ func (s *SysRole) Create(ctx context.Context, data *entity.SysRoles, apiIds []ui
 	return uint64(roleId), nil
 }
 
-func (s *SysRole) Update(ctx context.Context, data *entity.SysRoles, apiIds []uint64) error {
+func (s *SysRole) Update(ctx context.Context, data *admin.SysRoleUpdateParam) error {
 	// 开启事务
 	tx, err := dao.SysRoles.DB().Begin(ctx)
 	if err != nil {
@@ -91,7 +88,6 @@ func (s *SysRole) Update(ctx context.Context, data *entity.SysRoles, apiIds []ui
 
 	// 更新角色
 	_, err = tx.Model(dao.SysRoles.Table()).Ctx(ctx).
-		FieldsEx(dao.SysRoles.Columns().CreatedAt, dao.SysRoles.Columns().DeletedAt).
 		Where(dao.SysRoles.Columns().Id, data.Id).Update(data)
 	if err != nil {
 		return err
@@ -105,9 +101,9 @@ func (s *SysRole) Update(ctx context.Context, data *entity.SysRoles, apiIds []ui
 	}
 
 	// 创建新的角色API关联
-	if len(apiIds) > 0 {
+	if len(data.ApiIds) > 0 {
 		// 批量获取API的权限码
-		apis, err := SysApiService.GetByIds(ctx, apiIds)
+		apis, err := SysApiService.GetByIds(ctx, data.ApiIds)
 		if err != nil {
 			return err
 		}
@@ -119,7 +115,7 @@ func (s *SysRole) Update(ctx context.Context, data *entity.SysRoles, apiIds []ui
 		}
 
 		var roleApis []entity.SysRoleApis
-		for _, apiId := range apiIds {
+		for _, apiId := range data.ApiIds {
 			if permissionCode, exists := permissionCodeMap[apiId]; exists {
 				roleApis = append(roleApis, entity.SysRoleApis{
 					RoleId:         data.Id,
@@ -264,4 +260,14 @@ func (s *SysRole) GetById(ctx context.Context, id uint64) (*entity.SysRoles, []u
 	}
 
 	return role, apiIds, nil
+}
+
+// GetAll 获取所有角色
+func (s *SysRole) GetAll(ctx context.Context) ([]*entity.SysRoles, error) {
+	var roles []*entity.SysRoles
+	err := dao.SysRoles.Ctx(ctx).Scan(&roles)
+	if err != nil {
+		return nil, err
+	}
+	return roles, nil
 }

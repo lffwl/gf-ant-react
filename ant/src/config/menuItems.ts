@@ -28,24 +28,24 @@ export const menuItems: MenuItem[] = [
     label: '权限管理',
     children: [
       {
-        key: '/permission/api',
-        icon: React.createElement(ApiOutlined),
-        label: 'API管理',
-      },
-      {
         key: '/permission/user',
         icon: React.createElement(UserOutlined),
         label: '用户管理',
       },
       {
-        key: '/permission/department',
-        icon: React.createElement(TeamOutlined),
-        label: '部门管理',
-      },
-      {
         key: '/permission/role',
         icon: React.createElement(SafetyOutlined),
         label: '角色管理',
+      },
+      {
+        key: '/permission/api',
+        icon: React.createElement(ApiOutlined),
+        label: 'API管理',
+      },
+      {
+        key: '/permission/department',
+        icon: React.createElement(TeamOutlined),
+        label: '部门管理',
       },
     ],
   },

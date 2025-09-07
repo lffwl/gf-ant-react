@@ -27,6 +27,11 @@ export interface DepartmentTreeResponse {
   };
 }
 
+export interface DepartmentListResponse {
+  list: any[];
+  total: number;
+}
+
 export const departmentService = {
   async createDepartment(data: DepartmentCreateReq): Promise<ApiResponse> {
     try {
@@ -86,6 +91,34 @@ export const departmentService = {
       }
     } catch (error) {
       message.error('获取部门树形结构失败');
+      throw error;
+    }
+  },
+
+  async getDepartmentList(params: { page: number; size: number; name?: string; status?: number }): Promise<ApiResponse<DepartmentListResponse>> {
+    try {
+      const queryParams = new URLSearchParams();
+      queryParams.append('page', params.page.toString());
+      queryParams.append('size', params.size.toString());
+      if (params.name) queryParams.append('name', params.name);
+      if (params.status !== undefined) queryParams.append('status', params.status.toString());
+
+      const response = await fetch(`${API_BASE_URL}/sys/department/list?${queryParams}`, {
+        method: 'GET',
+      });
+
+      if (response.ok) {
+        const result: ApiResponse<DepartmentListResponse> = await response.json();
+        if (result.code === 0) {
+          return result;
+        } else {
+          throw new Error(`获取部门列表失败: ${result.message || response.statusText}`);
+        }
+      } else {
+        throw new Error(`获取部门列表失败: ${response.statusText}`);
+      }
+    } catch (error) {
+      message.error('获取部门列表失败');
       throw error;
     }
   },
