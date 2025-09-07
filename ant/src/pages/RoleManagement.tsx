@@ -162,10 +162,10 @@ const RoleManagement: React.FC = () => {
       });
 
       if (result.code === 0 && result.data) {
-        const dataWithKeys = result.data.list.map(item => ({
+        const dataWithKeys = result.data.list ? result.data.list.map(item => ({
           ...item,
           key: item.id
-        }));
+        })) : [];
         setRoleData(dataWithKeys);
         setTotal(result.data?.total || 0);
       }
@@ -219,20 +219,6 @@ const RoleManagement: React.FC = () => {
         });
       }
     } catch (error) {
-      // 如果详情接口调用失败，使用列表中的旧数据
-      // 将apiIds数组转换为{value: number}格式的对象数组
-      const apiIdsWithValue = Array.isArray(record.apiIds) 
-        ? record.apiIds.map(id => ({ value: id }))
-        : [];
-      
-      form.setFieldsValue({
-        name: record.name,
-        description: record.description,
-        dataScope: record.dataScope,
-        sort: record.sort,
-        status: record.status,
-        apiIds: apiIdsWithValue
-      });
     }
     
     setDrawerVisible(true);
