@@ -14,6 +14,7 @@ interface RoleData {
   sort: number;
   status: boolean;
   apiIds: number[];
+  apiCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -93,10 +94,21 @@ const RoleManagement: React.FC = () => {
       width: '8%',
     },
     {
+      title: '权限数量',
+      dataIndex: 'apiCount',
+      key: 'apiCount',
+      width: '10%',
+      render: (apiCount: number) => (
+        <Tag color={apiCount > 0 ? 'blue' : 'default'}>
+          {apiCount}
+        </Tag>
+      ),
+    },
+    {
       title: '创建时间',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      width: '12%',
+      width: '10%',
     },
     {
       title: '操作',

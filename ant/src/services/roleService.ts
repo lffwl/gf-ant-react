@@ -23,6 +23,7 @@ export interface RoleData {
   sort: number;
   status: boolean;
   apiIds: number[];
+  apiCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -40,6 +41,7 @@ export interface RoleDetailResponse {
   sort: number;
   status: boolean;
   apiIds: number[];
+  apiCount: number;
   createdAt: string;
   updatedAt: string;
 }
