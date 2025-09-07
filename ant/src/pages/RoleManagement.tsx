@@ -186,6 +186,11 @@ const RoleManagement: React.FC = () => {
       const detailResponse = await roleService.getRoleDetail(record.id);
       if (detailResponse.code === 0 && detailResponse.data) {
         const roleDetail = detailResponse.data;
+        // 将apiIds数组转换为{value: number}格式的对象数组
+        const apiIdsWithValue = Array.isArray(roleDetail.apiIds) 
+          ? roleDetail.apiIds.map(id => ({ value: id }))
+          : [];
+        
         // 延时100ms赋值
         setTimeout(() => {
           form.setFieldsValue({
@@ -194,29 +199,39 @@ const RoleManagement: React.FC = () => {
             dataScope: roleDetail.dataScope,
             sort: roleDetail.sort,
             status: roleDetail.status,
-            apiIds: roleDetail.apiIds || []
+            apiIds: apiIdsWithValue
           });
         }, 100);
       } else {
         // 如果详情接口失败，使用列表中的旧数据
+        // 将apiIds数组转换为{value: number}格式的对象数组
+        const apiIdsWithValue = Array.isArray(record.apiIds) 
+          ? record.apiIds.map(id => ({ value: id }))
+          : [];
+        
         form.setFieldsValue({
           name: record.name,
           description: record.description,
           dataScope: record.dataScope,
           sort: record.sort,
           status: record.status,
-          apiIds: record.apiIds || []
+          apiIds: apiIdsWithValue
         });
       }
     } catch (error) {
       // 如果详情接口调用失败，使用列表中的旧数据
+      // 将apiIds数组转换为{value: number}格式的对象数组
+      const apiIdsWithValue = Array.isArray(record.apiIds) 
+        ? record.apiIds.map(id => ({ value: id }))
+        : [];
+      
       form.setFieldsValue({
         name: record.name,
         description: record.description,
         dataScope: record.dataScope,
         sort: record.sort,
         status: record.status,
-        apiIds: record.apiIds || []
+        apiIds: apiIdsWithValue
       });
     }
     
