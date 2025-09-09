@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Table, Button, Space, Drawer, Form, Input, InputNumber, Select, Switch, Popconfirm, Tag, TreeSelect, message, Card, Row, Col } from 'antd';
+import { Table, Button, Space, Drawer, Form, Input, InputNumber, Select, Switch, Popconfirm, Tag, TreeSelect, message, Card, Row, Col, Layout } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { FormInstance } from 'antd/es/form';
-import { roleService, RoleCreateReq } from '../services/roleService';
-import { apiService } from '../services/apiService';
+import { roleService, RoleCreateReq } from '../../services/roleService';
+import { apiService } from '../../services/apiService';
+
+const { Header, Content } = Layout;
 
 interface RoleData {
   key: React.Key;
@@ -31,12 +33,15 @@ const RoleManagement: React.FC = () => {
   const [roleData, setRoleData] = useState<RoleData[]>([]);
   const [apiTreeData, setApiTreeData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
-  const [searchName, setSearchName] = useState('');
-  const [searchStatus, setSearchStatus] = useState<boolean | undefined>();
-  const isMounted = useRef(false);
+
+  // 创建统一的查询参数状态对象
+  const [queryParams, setQueryParams] = useState({
+    page: 1,
+    pageSize: 10,
+    name: '',
+    status: undefined as boolean | undefined
+  });
 
   const dataScopeMap = {
     1: '全部',
@@ -134,13 +139,10 @@ const RoleManagement: React.FC = () => {
     },
   ];
 
+  // 当查询参数变化时自动加载数据
   useEffect(() => {
-    if (!isMounted.current) {
-      isMounted.current = true;
-      return;
-    }
     fetchRoleList();
-  }, [currentPage, pageSize, searchName, searchStatus]);
+  }, [queryParams]); // 依赖于查询参数对象
 
   // 获取API树形数据
   const fetchApiTree = async () => {
@@ -167,10 +169,10 @@ const RoleManagement: React.FC = () => {
     setLoading(true);
     try {
       const result = await roleService.getRoleList({
-        page: currentPage,
-        size: pageSize,
-        name: searchName,
-        status: searchStatus
+        page: queryParams.page,
+        size: queryParams.pageSize,
+        name: queryParams.name,
+        status: queryParams.status
       });
 
       if (result.code === 0 && result.data) {
@@ -278,62 +280,78 @@ const RoleManagement: React.FC = () => {
 
   return (
     <div>
-      <Card>
-        {/* 搜索区域 */}
-        <Row gutter={16} style={{ marginBottom: 16 }}>
-          <Col span={6}>
-            <Input
-              placeholder="搜索角色名称"
-              value={searchName}
-              onChange={(e) => setSearchName(e.target.value)}
-              allowClear
-            />
-          </Col>
-          <Col span={6}>
-            <Select
-              placeholder="状态筛选"
-              value={searchStatus}
-              onChange={(value) => setSearchStatus(value)}
-              allowClear
-              style={{ width: '100%' }}
-            >
-              <Select.Option value={true}>启用</Select.Option>
-              <Select.Option value={false}>禁用</Select.Option>
-            </Select>
-          </Col>
-          <Col span={12}>
-            <Space>
-              <Button type="primary" onClick={async () => {
-                // 在打开新增抽屉前获取API树数据
-                await fetchApiTree();
-                setDrawerVisible(true);
-              }}>
-                新增角色
-              </Button>
-              <Button onClick={fetchRoleList} loading={loading}>
-                刷新
-              </Button>
-            </Space>
-          </Col>
-        </Row>
-      
-      <Table
-        columns={columns}
-        dataSource={roleData}
-        pagination={{
-          current: currentPage,
-          pageSize: pageSize,
-          total: total,
-          onChange: (page, pageSize) => {
-            setCurrentPage(page);
-            setPageSize(pageSize);
-          },
-        }}
-        rowKey="id"
-        size="middle"
-        loading={loading}
-      />
-      </Card>
+      <Layout>
+        <Header style={{ padding: "0 15px", background: '#fff', margin: "10px 0", borderRadius: '8px' }}>
+          {/* 搜索区域 */}
+          <Row gutter={16}>
+            <Col span={6}>
+              <Input
+                placeholder="搜索角色名称"
+                value={queryParams.name}
+                onChange={(e) => setQueryParams(prev => ({ ...prev, name: e.target.value }))}
+                allowClear
+                onPressEnter={fetchRoleList}
+              />
+            </Col>
+            <Col span={6}>
+              <Select
+                placeholder="状态筛选"
+                value={queryParams.status}
+                onChange={(value) => setQueryParams(prev => ({ ...prev, status: value }))}
+                allowClear
+                style={{ width: '100%' }}
+              >
+                <Select.Option value={true}>启用</Select.Option>
+                <Select.Option value={false}>禁用</Select.Option>
+              </Select>
+            </Col>
+          </Row>
+        </Header>
+        <Content>
+          {/* 表格区域 */}
+          <Card>
+            <Row gutter={16} style={{ marginBottom: 16 }}>
+              <Col span={9}>
+                <Space>
+                  <Button
+                    type="primary"
+                    onClick={async () => {
+                      // 在打开新增抽屉前获取API树数据
+                      await fetchApiTree();
+                      setDrawerVisible(true);
+                    }}
+                  >
+                    新增角色
+                  </Button>
+                </Space>
+              </Col>
+            </Row>
+            <Row gutter={16} style={{ marginTop: 16 }}>
+              <Col span={24}>
+                <Table
+                  columns={columns}
+                  dataSource={roleData}
+                  pagination={{
+                    current: queryParams.page,
+                    pageSize: queryParams.pageSize,
+                    total: total,
+                    showSizeChanger: true,
+                    showQuickJumper: true,
+                    showTotal: (total) => `共 ${total} 条记录`,
+                    onChange: (page, pageSize) => {
+                      setQueryParams(prev => ({ ...prev, page, pageSize: pageSize || 10 }));
+                    },
+                    onShowSizeChange: (_current, pageSize) => {
+                      setQueryParams(prev => ({ ...prev, page: 1, pageSize }));
+                    },
+                  }}
+                  rowKey="id"
+                  loading={loading}
+                />
+              </Col>
+            </Row>
+          </Card>
+        </Content>
 
       <Drawer
         title={editingRecord ? '编辑角色' : '新增角色'}
@@ -432,6 +450,7 @@ const RoleManagement: React.FC = () => {
           </Form.Item>
         </Form>
       </Drawer>
+      </Layout>
     </div>
   );
 };

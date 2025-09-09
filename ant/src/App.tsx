@@ -5,10 +5,10 @@ import {
 } from '@ant-design/icons';
 import { Layout, Menu, Button, theme, Breadcrumb } from 'antd';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import UserManagement from './pages/UserManagement';
-import ApiManagement from './pages/ApiManagement';
-import DepartmentManagement from './pages/DepartmentManagement';
-import RoleManagement from './pages/RoleManagement';
+import UserManagement from './pages/permission/UserManagement';
+import ApiManagement from './pages/permission/ApiManagement';
+import DepartmentManagement from './pages/permission/DepartmentManagement';
+import RoleManagement from './pages/permission/RoleManagement';
 import Welcome from './pages/Welcome';
 import { menuItems } from './config/menuItems';
 
@@ -21,9 +21,8 @@ const LayoutContent: React.FC = () => {
   const [openKeys, setOpenKeys] = useState<string[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
+  const themeData = theme.useToken();
+  const { colorBgContainer } = themeData.token;
 
   // 监听路由变化，自动展开父级菜单
   useEffect(() => {
@@ -110,11 +109,8 @@ const LayoutContent: React.FC = () => {
       
         <Content
           style={{
-            margin: '24px 16px',
-            padding: 24,
+            margin: '0 10px',
             minHeight: 280,
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
           }}
         >
           <Routes>

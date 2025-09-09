@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Table, Button, Space, Drawer, Form, Input, InputNumber, Switch, TreeSelect, Popconfirm, Card, Row, Col } from 'antd';
-import { departmentService } from '../services/departmentService';
+import React, { useState, useEffect } from 'react';
+import { Table, Button, Space, Drawer, Form, Input, InputNumber, Switch, TreeSelect, Popconfirm, Card, Row, Col, Layout } from 'antd';
+const { Content } = Layout;
+import { departmentService } from '../../services/departmentService';
 import type { ColumnsType } from 'antd/es/table';
 
 interface DepartmentData {
@@ -19,7 +20,6 @@ const DepartmentManagement: React.FC = () => {
   const [departmentData, setDepartmentData] = useState<DepartmentData[]>([]);
   const [loading, setLoading] = useState(false);
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
-  const isMounted = useRef(false);
 
   const columns: ColumnsType<DepartmentData> = [
     {
@@ -79,10 +79,6 @@ const DepartmentManagement: React.FC = () => {
   ];
 
   useEffect(() => {
-    if (!isMounted.current) {
-      isMounted.current = true;
-      return;
-    }
     fetchDepartmentTree();
   }, []);
 
@@ -148,21 +144,25 @@ const DepartmentManagement: React.FC = () => {
 
   return (
     <div>
-      <Card>
-        {/* 搜索区域 */}
-        <Row gutter={16} style={{ marginBottom: 16 }}>
-          <Col span={24} style={{ textAlign: 'right' }}>
-            <Space>
-              <Button type="primary" onClick={() => setDrawerVisible(true)}>
-                新增部门
-              </Button>
-              <Button onClick={fetchDepartmentTree} loading={loading}>
-                刷新
-              </Button>
-            </Space>
-          </Col>
-        </Row>
-      <Table
+      <Layout>
+        <Content style={{ padding: '10px 0' }}>
+          {/* 表格区域 */}
+          <Card>
+            <Row gutter={16}>
+              <Col span={9}>
+                <Space>
+                  <Button
+                    type="primary"
+                    onClick={() => setDrawerVisible(true)}
+                  >
+                    新增部门
+                  </Button>
+                </Space>
+              </Col>
+            </Row>
+            <Row gutter={16} style={{ marginTop: 16 }}>
+              <Col span={24}>
+                <Table
         columns={columns}
         dataSource={departmentData}
         pagination={false}
@@ -179,10 +179,12 @@ const DepartmentManagement: React.FC = () => {
             setExpandedRowKeys([...keys]);
           }
         }}
-        size="middle"
         loading={loading}
       />
-      </Card>
+              </Col>
+            </Row>
+          </Card>
+        </Content>
       <Drawer
         title={editingRecord ? '编辑部门' : '新增部门'}
         width={600}
@@ -287,6 +289,7 @@ const DepartmentManagement: React.FC = () => {
 
         </Form>
       </Drawer>
+      </Layout>
     </div>
   );
 };
