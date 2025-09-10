@@ -12,6 +12,7 @@ type AuthLoginReq struct {
 	Username string `json:"username" v:"required#请输入用户名"`
 	Password string `json:"password" v:"required#请输入密码"`
 	Code     string `json:"code" v:"required#请输入验证码"`
+	CodeKey  string `json:"codeKey" v:"required#请输入验证码"`
 }
 
 // AuthLoginRes 登录接口返回
