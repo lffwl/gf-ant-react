@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"gf-ant-react/internal/logic/admin"
+	"gf-ant-react/internal/model/admin"
 
 	"github.com/gogf/gf/v2/frame/g"
 )

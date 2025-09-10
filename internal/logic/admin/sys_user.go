@@ -13,18 +13,6 @@ type sSysUserLogic struct{}
 
 var SysUserLogic = &sSysUserLogic{}
 
-// SysUserItem 用户列表项
-type SysUserItem struct {
-	*entity.SysUsers
-	DepartmentName string `json:"departmentName" description:"部门名称"`
-}
-
-// SysUserDetail 用户详情
-type SysUserDetail struct {
-	*entity.SysUsers
-	DepartmentName string `json:"departmentName" description:"部门名称"`
-}
-
 func (s *sSysUserLogic) Create(ctx context.Context, data *admin.SysUserCreateParam) (uint64, error) {
 	// 密码加密
 	var err error
