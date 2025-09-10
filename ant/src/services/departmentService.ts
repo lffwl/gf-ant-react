@@ -1,4 +1,4 @@
-import { message } from 'antd';
+import { handleNetworkError, handleApiResponse } from '../utils/errorHandler';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -50,25 +50,12 @@ export const departmentService = {
         body: JSON.stringify(processedData),
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result.code === 0) {
-          message.success('部门创建成功');
-          return result;
-        } else {
-          console.error('部门创建失败详情:', result);
-          message.error(`创建失败: ${result.message || response.statusText}`);
-          throw new Error(result.message || response.statusText);
-        }
-      } else {
-        const errorData = await response.json();
-        console.error('部门创建失败详情:', errorData);
-        message.error(`创建失败: ${errorData.message || response.statusText}`);
-        throw new Error(errorData.message || response.statusText);
-      }
+      const result = await response.json();
+      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
+      handleApiResponse(result);
+      return result;
     } catch (error) {
-      message.error('网络错误，请检查后端服务是否启动');
-      throw error;
+      return handleNetworkError(error, '部门创建');
     }
   },
 
@@ -78,20 +65,15 @@ export const departmentService = {
         method: 'GET',
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result.code === 0) {
-          return result;
-        } else {
-          console.error('获取部门树形结构失败详情:', result);
-          throw new Error(`获取部门树形结构失败: ${result.message || response.statusText}`);
-        }
+      const result = await response.json();
+      // 列表接口不需要使用handleApiResponse
+      if (result.code === 0) {
+        return result;
       } else {
-        throw new Error(`获取部门树形结构失败: ${response.statusText}`);
+        throw new Error(result.message || '获取部门树形结构失败');
       }
     } catch (error) {
-      message.error('获取部门树形结构失败');
-      throw error;
+      return handleNetworkError(error, '获取部门树形结构');
     }
   },
 
@@ -107,19 +89,15 @@ export const departmentService = {
         method: 'GET',
       });
 
-      if (response.ok) {
-        const result: ApiResponse<DepartmentListResponse> = await response.json();
-        if (result.code === 0) {
-          return result;
-        } else {
-          throw new Error(`获取部门列表失败: ${result.message || response.statusText}`);
-        }
+      const result = await response.json();
+      // 列表接口不需要使用handleApiResponse
+      if (result.code === 0) {
+        return result;
       } else {
-        throw new Error(`获取部门列表失败: ${response.statusText}`);
+        throw new Error(result.message || '获取部门列表失败');
       }
     } catch (error) {
-      message.error('获取部门列表失败');
-      throw error;
+      return handleNetworkError(error, '获取部门列表');
     }
   },
 
@@ -140,25 +118,12 @@ export const departmentService = {
         body: JSON.stringify(processedData),
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result.code === 0) {
-          message.success('部门更新成功');
-          return result;
-        } else {
-          console.error('部门更新失败详情:', result);
-          message.error(`更新失败: ${result.message || response.statusText}`);
-          throw new Error(result.message || response.statusText);
-        }
-      } else {
-        const errorData = await response.json();
-        console.error('部门更新失败详情:', errorData);
-        message.error(`更新失败: ${errorData.message || response.statusText}`);
-        throw new Error(errorData.message || response.statusText);
-      }
+      const result = await response.json();
+      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
+      handleApiResponse(result);
+      return result;
     } catch (error) {
-      message.error('网络错误，请检查后端服务是否启动');
-      throw error;
+      return handleNetworkError(error, '部门更新');
     }
   },
 
@@ -168,25 +133,12 @@ export const departmentService = {
         method: 'DELETE',
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result.code === 0) {
-          message.success('部门删除成功');
-          return result;
-        } else {
-          console.error('部门删除失败详情:', result);
-          message.error(`删除失败: ${result.message || response.statusText}`);
-          throw new Error(result.message || response.statusText);
-        }
-      } else {
-        const errorData = await response.json();
-        console.error('部门删除失败详情:', errorData);
-        message.error(`删除失败: ${errorData.message || response.statusText}`);
-        throw new Error(errorData.message || response.statusText);
-      }
+      const result = await response.json();
+      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
+      handleApiResponse(result);
+      return result;
     } catch (error) {
-      message.error('网络错误，请检查后端服务是否启动');
-      throw error;
+      return handleNetworkError(error, '部门删除');
     }
   }
 };

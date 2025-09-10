@@ -1,4 +1,4 @@
-import { message } from 'antd';
+import { handleNetworkError, handleApiResponse } from '../utils/errorHandler';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -70,23 +70,12 @@ export const userService = {
         body: JSON.stringify(data),
       });
 
-      if (response.ok) {
-        const result: ApiResponse = await response.json();
-        if (result.code === 0) {
-          message.success('用户创建成功');
-          return result;
-        } else {
-          message.error(`创建失败: ${result.message || response.statusText}`);
-          throw new Error(result.message || response.statusText);
-        }
-      } else {
-        const errorData = await response.json();
-        message.error(`创建失败: ${errorData.message || response.statusText}`);
-        throw new Error(errorData.message || response.statusText);
-      }
+      const result = await response.json();
+      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
+      handleApiResponse(result);
+      return result;
     } catch (error) {
-      message.error('网络错误，请检查后端服务是否启动');
-      throw error;
+      return handleNetworkError(error, '用户创建');
     }
   },
 
@@ -100,23 +89,12 @@ export const userService = {
         body: JSON.stringify(data),
       });
 
-      if (response.ok) {
-        const result: ApiResponse = await response.json();
-        if (result.code === 0) {
-          message.success('用户更新成功');
-          return result;
-        } else {
-          message.error(`更新失败: ${result.message || response.statusText}`);
-          throw new Error(result.message || response.statusText);
-        }
-      } else {
-        const errorData = await response.json();
-        message.error(`更新失败: ${errorData.message || response.statusText}`);
-        throw new Error(errorData.message || response.statusText);
-      }
+      const result = await response.json();
+      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
+      handleApiResponse(result);
+      return result;
     } catch (error) {
-      message.error('网络错误，请检查后端服务是否启动');
-      throw error;
+      return handleNetworkError(error, '用户更新');
     }
   },
 
@@ -126,23 +104,12 @@ export const userService = {
         method: 'DELETE',
       });
 
-      if (response.ok) {
-        const result: ApiResponse = await response.json();
-        if (result.code === 0) {
-          message.success('用户删除成功');
-          return result;
-        } else {
-          message.error(`删除失败: ${result.message || response.statusText}`);
-          throw new Error(result.message || response.statusText);
-        }
-      } else {
-        const errorData = await response.json();
-        message.error(`删除失败: ${errorData.message || response.statusText}`);
-        throw new Error(errorData.message || response.statusText);
-      }
+      const result = await response.json();
+      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
+      handleApiResponse(result);
+      return result;
     } catch (error) {
-      message.error('网络错误，请检查后端服务是否启动');
-      throw error;
+      return handleNetworkError(error, '用户删除');
     }
   },
 
@@ -159,19 +126,14 @@ export const userService = {
         method: 'GET',
       });
 
-      if (response.ok) {
-        const result: ApiResponse<UserListResponse> = await response.json();
-        if (result.code === 0) {
-          return result;
-        } else {
-          throw new Error(`获取用户列表失败: ${result.message || response.statusText}`);
-        }
+      const result = await response.json();
+      if (result.code === 0) {
+        return result;
       } else {
-        throw new Error(`获取用户列表失败: ${response.statusText}`);
+        throw new Error(result.message || '获取用户列表失败');
       }
     } catch (error) {
-      message.error('获取用户列表失败');
-      throw error;
+      return handleNetworkError(error, '获取用户列表');
     }
   },
 
@@ -181,19 +143,12 @@ export const userService = {
         method: 'GET',
       });
 
-      if (response.ok) {
-        const result: ApiResponse<UserDetailResponse> = await response.json();
-        if (result.code === 0) {
-          return result;
-        } else {
-          throw new Error(`获取用户详情失败: ${result.message || response.statusText}`);
-        }
-      } else {
-        throw new Error(`获取用户详情失败: ${response.statusText}`);
-      }
+      const result = await response.json();
+      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
+      handleApiResponse(result);
+      return result;
     } catch (error) {
-      message.error('获取用户详情失败');
-      throw error;
+      return handleNetworkError(error, '获取用户详情');
     }
   },
 
@@ -207,23 +162,12 @@ export const userService = {
         body: JSON.stringify(data),
       });
 
-      if (response.ok) {
-        const result: ApiResponse = await response.json();
-        if (result.code === 0) {
-          message.success('密码修改成功');
-          return result;
-        } else {
-          message.error(`密码修改失败: ${result.message || response.statusText}`);
-          throw new Error(result.message || response.statusText);
-        }
-      } else {
-        const errorData = await response.json();
-        message.error(`密码修改失败: ${errorData.message || response.statusText}`);
-        throw new Error(errorData.message || response.statusText);
-      }
+      const result = await response.json();
+      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
+      handleApiResponse(result);
+      return result;
     } catch (error) {
-      message.error('网络错误，请检查后端服务是否启动');
-      throw error;
+      return handleNetworkError(error, '密码修改');
     }
   }
 };

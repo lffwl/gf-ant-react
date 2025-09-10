@@ -1,4 +1,4 @@
-import { message } from 'antd';
+import { handleNetworkError, handleApiResponse } from '../utils/errorHandler';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -63,23 +63,12 @@ export const roleService = {
         body: JSON.stringify(data),
       });
 
-      if (response.ok) {
-        const result: ApiResponse = await response.json();
-        if (result.code === 0) {
-          message.success('角色创建成功');
-          return result;
-        } else {
-          message.error(`创建失败: ${result.message || response.statusText}`);
-          throw new Error(result.message || response.statusText);
-        }
-      } else {
-        const errorData = await response.json();
-        message.error(`创建失败: ${errorData.message || response.statusText}`);
-        throw new Error(errorData.message || response.statusText);
-      }
+      const result = await response.json();
+      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
+      handleApiResponse(result);
+      return result;
     } catch (error) {
-      message.error('网络错误，请检查后端服务是否启动');
-      throw error;
+      return handleNetworkError(error, '角色创建');
     }
   },
 
@@ -93,23 +82,12 @@ export const roleService = {
         body: JSON.stringify(data),
       });
 
-      if (response.ok) {
-        const result: ApiResponse = await response.json();
-        if (result.code === 0) {
-          message.success('角色更新成功');
-          return result;
-        } else {
-          message.error(`更新失败: ${result.message || response.statusText}`);
-          throw new Error(result.message || response.statusText);
-        }
-      } else {
-        const errorData = await response.json();
-        message.error(`更新失败: ${errorData.message || response.statusText}`);
-        throw new Error(errorData.message || response.statusText);
-      }
+      const result = await response.json();
+      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
+      handleApiResponse(result);
+      return result;
     } catch (error) {
-      message.error('网络错误，请检查后端服务是否启动');
-      throw error;
+      return handleNetworkError(error, '角色更新');
     }
   },
 
@@ -119,23 +97,12 @@ export const roleService = {
         method: 'DELETE',
       });
 
-      if (response.ok) {
-        const result: ApiResponse = await response.json();
-        if (result.code === 0) {
-          message.success('角色删除成功');
-          return result;
-        } else {
-          message.error(`删除失败: ${result.message || response.statusText}`);
-          throw new Error(result.message || response.statusText);
-        }
-      } else {
-        const errorData = await response.json();
-        message.error(`删除失败: ${errorData.message || response.statusText}`);
-        throw new Error(errorData.message || response.statusText);
-      }
+      const result = await response.json();
+      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
+      handleApiResponse(result);
+      return result;
     } catch (error) {
-      message.error('网络错误，请检查后端服务是否启动');
-      throw error;
+      return handleNetworkError(error, '角色删除');
     }
   },
 
@@ -151,19 +118,15 @@ export const roleService = {
         method: 'GET',
       });
 
-      if (response.ok) {
-        const result: ApiResponse<RoleListResponse> = await response.json();
-        if (result.code === 0) {
-          return result;
-        } else {
-          throw new Error(`获取角色列表失败: ${result.message || response.statusText}`);
-        }
+      const result = await response.json();
+      // 列表接口不需要使用handleApiResponse
+      if (result.code === 0) {
+        return result;
       } else {
-        throw new Error(`获取角色列表失败: ${response.statusText}`);
+        throw new Error(result.message || '获取角色列表失败');
       }
     } catch (error) {
-      message.error('获取角色列表失败');
-      throw error;
+      return handleNetworkError(error, '获取角色列表');
     }
   },
 
@@ -173,19 +136,12 @@ export const roleService = {
         method: 'GET',
       });
 
-      if (response.ok) {
-        const result: ApiResponse<RoleDetailResponse> = await response.json();
-        if (result.code === 0) {
-          return result;
-        } else {
-          throw new Error(`获取角色详情失败: ${result.message || response.statusText}`);
-        }
-      } else {
-        throw new Error(`获取角色详情失败: ${response.statusText}`);
-      }
+      const result = await response.json();
+      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
+      handleApiResponse(result);
+      return result;
     } catch (error) {
-      message.error('获取角色详情失败');
-      throw error;
+      return handleNetworkError(error, '获取角色详情');
     }
   }
 };
