@@ -19,9 +19,10 @@ const { Header, Content } = Layout;
 import {
   PlusOutlined,
   EditOutlined,
-  DeleteOutlined
+  DeleteOutlined,
+  KeyOutlined
 } from '@ant-design/icons';
-import { userService, UserData, UserCreateReq, UserUpdateReq } from '../../services/userService';
+import { userService, UserData, UserCreateReq, UserUpdateReq, UserUpdatePasswordReq } from '../../services/userService';
 
 const { Option } = Select;
 
@@ -46,6 +47,9 @@ const UserManagement: React.FC = () => {
   const [modalType, setModalType] = useState<'create' | 'edit'>('create');
   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
   const [form] = Form.useForm();
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const [passwordForm] = Form.useForm();
+  const [selectedUser, setSelectedUser] = useState({ id: null as number | null, username: '' });
 
   // 加载用户列表
   const loadUsers = async () => {
@@ -145,6 +149,25 @@ const UserManagement: React.FC = () => {
         departmentId: user.departmentId === 0 ? undefined : user.departmentId,
         passwordHash: '' // 编辑时不显示密码
       });
+    }
+  };
+
+  // 打开修改密码模态框
+  const handleOpenPasswordModal = (user: UserData) => {
+    setSelectedUser({ id: user.id, username: user.username });
+    passwordForm.resetFields();
+    setPasswordModalVisible(true);
+  };
+
+  // 提交密码修改
+  const handleSubmitPassword = async (values: any) => {
+    if (!selectedUser.id) return;
+    
+    try {
+      await userService.updateUserPassword(selectedUser.id, values as UserUpdatePasswordReq);
+      setPasswordModalVisible(false);
+    } catch (error) {
+      // 错误处理已在service中完成
     }
   };
 
@@ -255,7 +278,14 @@ const UserManagement: React.FC = () => {
           >
             编辑
           </Button>
-          <Popconfirm
+          <Button
+              type="link"
+              icon={<KeyOutlined />}
+              onClick={() => handleOpenPasswordModal(record)}
+            >
+              修改密码
+            </Button>
+            <Popconfirm
             title={
               <span>
                 确定要删除用户 <span style={{ color: '#ff4d4f', fontWeight: 'bold' }}>{record.username}</span> 吗？
@@ -496,6 +526,59 @@ const UserManagement: React.FC = () => {
                 </Button>
                 <Button type="primary" htmlType="submit">
                   {modalType === 'create' ? '创建' : '更新'}
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        {/* 修改密码模态框 */}
+        <Modal
+          title="修改密码"
+          open={passwordModalVisible}
+          onCancel={() => setPasswordModalVisible(false)}
+          footer={null}
+          width={400}
+        >
+          <Form
+            form={passwordForm}
+            layout="vertical"
+            onFinish={handleSubmitPassword}
+          >
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  label="用户ID"
+                >
+                  <Input disabled value={selectedUser.id || ''} placeholder="用户ID" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label="用户名"
+                >
+                  <Input disabled value={selectedUser.username} placeholder="用户名" />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Form.Item
+              name="password"
+              label="新密码"
+              rules={[
+                { required: true, message: '请输入新密码' },
+                { min: 6, max: 100, message: '密码长度必须在6-100个字符之间' }
+              ]}
+            >
+              <Input.Password placeholder="请输入新密码" />
+            </Form.Item>
+            
+            <Form.Item style={{ textAlign: 'right', marginBottom: 0 }}>
+              <Space>
+                <Button onClick={() => setPasswordModalVisible(false)}>
+                  取消
+                </Button>
+                <Button type="primary" htmlType="submit">
+                  确认修改
                 </Button>
               </Space>
             </Form.Item>

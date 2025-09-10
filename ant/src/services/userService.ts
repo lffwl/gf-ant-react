@@ -55,6 +55,10 @@ export interface ApiResponse<T = any> {
   data?: T;
 }
 
+export interface UserUpdatePasswordReq {
+  password: string;
+}
+
 export const userService = {
   async createUser(data: UserCreateReq): Promise<ApiResponse> {
     try {
@@ -189,6 +193,36 @@ export const userService = {
       }
     } catch (error) {
       message.error('获取用户详情失败');
+      throw error;
+    }
+  },
+
+  async updateUserPassword(id: number, data: UserUpdatePasswordReq): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/sys/user/update-password/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const result: ApiResponse = await response.json();
+        if (result.code === 0) {
+          message.success('密码修改成功');
+          return result;
+        } else {
+          message.error(`密码修改失败: ${result.message || response.statusText}`);
+          throw new Error(result.message || response.statusText);
+        }
+      } else {
+        const errorData = await response.json();
+        message.error(`密码修改失败: ${errorData.message || response.statusText}`);
+        throw new Error(errorData.message || response.statusText);
+      }
+    } catch (error) {
+      message.error('网络错误，请检查后端服务是否启动');
       throw error;
     }
   }
