@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, Button, theme, Breadcrumb } from 'antd';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
@@ -106,6 +107,20 @@ const LayoutContent: React.FC = () => {
               style={{ marginLeft: 16 }}
               items={generateBreadcrumbItems()}
             />
+            
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Button
+              type="text"
+              icon={<ReloadOutlined />}
+              onClick={() => window.location.reload()}
+              title="刷新页面"
+              style={{
+                fontSize: '16px',
+                width: 100,
+                height: 64,
+              }}
+            >刷新</Button>
           </div>
         </Header>
       
