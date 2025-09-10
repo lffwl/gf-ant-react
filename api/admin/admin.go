@@ -25,4 +25,9 @@ type IAdminV1 interface {
 	SysRoleList(ctx context.Context, req *v1.SysRoleListReq) (res *v1.SysRoleListRes, err error)
 	SysRoleDetail(ctx context.Context, req *v1.SysRoleDetailReq) (res *v1.SysRoleDetailRes, err error)
 	SysUserCreate(ctx context.Context, req *v1.SysUserCreateReq) (res *v1.SysUserCreateRes, err error)
+	SysUserUpdate(ctx context.Context, req *v1.SysUserUpdateReq) (res *v1.SysUserUpdateRes, err error)
+	SysUserDelete(ctx context.Context, req *v1.SysUserDeleteReq) (res *v1.SysUserDeleteRes, err error)
+	SysUserList(ctx context.Context, req *v1.SysUserListReq) (res *v1.SysUserListRes, err error)
+	SysUserDetail(ctx context.Context, req *v1.SysUserDetailReq) (res *v1.SysUserDetailRes, err error)
+	SysUserUpdatePassword(ctx context.Context, req *v1.SysUserUpdatePasswordReq) (res *v1.SysUserUpdatePasswordRes, err error)
 }

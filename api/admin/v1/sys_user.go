@@ -86,3 +86,15 @@ type SysUserDetailRes struct {
 	*entity.SysUsers
 	RoleIds []uint64 `json:"roleIds" description:"角色ID列表"`
 }
+
+// 修改密码
+type SysUserUpdatePasswordReq struct {
+	g.Meta   `path:"/sys/user/update-password/:id" tags:"SysUser" method:"put" summary:"修改密码"`
+	Id       uint64 `path:"id" v:"required|integer#ID不能为空|ID必须为整数" description:"主键"`
+	Password string `json:"password" v:"required|length:6,100#密码不能为空|密码长度必须在6-100个字符之间" description:"密码"`
+}
+
+// 修改密码响应参数
+type SysUserUpdatePasswordRes struct {
+	g.Meta `mime:"application/json"`
+}

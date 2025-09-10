@@ -170,3 +170,13 @@ func (s *SysUser) GetById(ctx context.Context, id uint64) (*entity.SysUsers, []u
 
 	return user, roleIds, nil
 }
+
+// Save 保存用户
+func (s *SysUser) Save(ctx context.Context, data interface{}) error {
+
+	if _, err := dao.SysUsers.Ctx(ctx).Save(data); err != nil {
+		return err
+	}
+
+	return nil
+}

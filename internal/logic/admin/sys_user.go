@@ -61,3 +61,14 @@ func (s *sSysUserLogic) GetList(ctx context.Context, param *admin.SysUserListPar
 func (s *sSysUserLogic) GetById(ctx context.Context, id uint64) (*entity.SysUsers, []uint64, error) {
 	return service.SysUserService.GetById(ctx, id)
 }
+
+// UpdatePassword 修改密码
+func (s *sSysUserLogic) UpdatePassword(ctx context.Context, param *admin.SysUserUpdatePasswordParam) error {
+	// 密码加密
+	var err error
+	param.PasswordHash, err = password.HashPassword(param.PasswordHash)
+	if err != nil {
+		return err
+	}
+	return service.SysUserService.Save(ctx, param)
+}

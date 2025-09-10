@@ -48,3 +48,9 @@ type SysUserListResultItem struct {
 	// 角色集合
 	Roles []*entity.SysUserRoles `json:"roles"`
 }
+
+// SysUserUpdatePasswordParam 修改密码参数
+type SysUserUpdatePasswordParam struct {
+	Id           uint64 `json:"id"`
+	PasswordHash string `json:"passwordHash"`
+}
