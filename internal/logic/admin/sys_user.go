@@ -6,6 +6,7 @@ import (
 	"gf-ant-react/internal/model/admin"
 	"gf-ant-react/internal/model/entity"
 	"gf-ant-react/internal/service"
+	"gf-ant-react/utility/password"
 )
 
 type sSysUserLogic struct{}
@@ -25,6 +26,12 @@ type SysUserDetail struct {
 }
 
 func (s *sSysUserLogic) Create(ctx context.Context, data *admin.SysUserCreateParam) (uint64, error) {
+	// 密码加密
+	var err error
+	data.PasswordHash, err = password.HashPassword(data.PasswordHash)
+	if err != nil {
+		return 0, err
+	}
 	return service.SysUserService.Create(ctx, data)
 }
 
