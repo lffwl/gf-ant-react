@@ -8,6 +8,7 @@ import {
 import { Layout, Menu, Button, theme, Breadcrumb, message } from 'antd';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { menuItems, MenuItem } from './config/menuItems';
+import { getUserApiCodes, hasPermission } from './utils/permission.tsx';
 import 'antd/dist/reset.css'
 
 const { Header, Sider, Content } = Layout;
@@ -129,19 +130,6 @@ const LayoutContent: React.FC = () => {
     return items;
   };
 
-  // 获取用户的apiCodes权限列表
-  const getUserApiCodes = (): string[] => {
-    try {
-      const apiCodesStr = localStorage.getItem('apiCodes');
-      if (apiCodesStr) {
-        return JSON.parse(apiCodesStr) as string[];
-      }
-    } catch (error) {
-      console.error('解析apiCodes失败:', error);
-    }
-    return [];
-  };
-
   // 根据apiCodes和hidden属性过滤菜单项
   const filterMenuItemsByPermission = (items: MenuItem[]): MenuItem[] => {
     const apiCodes = getUserApiCodes();
@@ -193,7 +181,6 @@ const LayoutContent: React.FC = () => {
 
   // 检查用户是否有特定路径的访问权限
   const checkPermission = (path: string): boolean => {
-    const apiCodes = getUserApiCodes();
     
     // 查找当前路径对应的菜单项
     const menuItem = menuItems.find(item => item.key === path) || 
@@ -205,7 +192,7 @@ const LayoutContent: React.FC = () => {
     }
     
     // 检查用户是否有该菜单项的权限
-    return apiCodes.includes(menuItem.permission);
+    return hasPermission(menuItem.permission);
   };
 
   // 创建受保护的路由组件

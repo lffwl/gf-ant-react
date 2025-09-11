@@ -1,12 +1,12 @@
 import React from 'react';
-import {
-  UserOutlined,
-  VideoCameraOutlined,
-  ApiOutlined,
-  HomeOutlined,
-  TeamOutlined,
-  SafetyOutlined,
-  UserAddOutlined
+import { 
+  UserOutlined, 
+  VideoCameraOutlined, 
+  ApiOutlined, 
+  HomeOutlined, 
+  TeamOutlined, 
+  SafetyOutlined, 
+  UserAddOutlined 
 } from '@ant-design/icons';
 import Welcome from '../pages/Welcome';
 import UserManagement from '../pages/permission/UserManagement';
@@ -14,6 +14,7 @@ import ApiManagement from '../pages/permission/ApiManagement';
 import DepartmentManagement from '../pages/permission/DepartmentManagement';
 import RoleManagement from '../pages/permission/RoleManagement';
 import LoginPage from '../pages/auth/LoginPage';
+import PermissionExample from '../pages/PermissionExample';
 
 export interface MenuItem {
   key: string;
@@ -66,6 +67,13 @@ export const menuItems: MenuItem[] = [
         label: '部门管理',
         permission: 'sys.department.tree',
         component: DepartmentManagement
+      },
+      {
+        key: '/permission/example',
+        icon: React.createElement(UserAddOutlined),
+        label: '权限示例',
+        permission: 'sys.permission.example',
+        component: PermissionExample
       },
     ],
   },
