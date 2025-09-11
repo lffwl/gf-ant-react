@@ -42,8 +42,7 @@ export const apiService = {
         '/sys/api/create',
         processedData,
         {
-          operationName: 'API创建',
-          processResponse: false
+          operationName: 'API创建'
         }
       );
 
@@ -59,8 +58,7 @@ export const apiService = {
         '/sys/api/tree',
         {},
         {
-          operationName: '获取API树形结构',
-          processResponse: false
+          operationName: '获取API树形结构'
         }
       );
 
@@ -90,8 +88,7 @@ export const apiService = {
         `/sys/api/update/${id}`,
         processedData,
         {
-          operationName: 'API更新',
-          processResponse: false
+          operationName: 'API更新'
         }
       );
 
@@ -107,8 +104,7 @@ export const apiService = {
       const result = await del<ApiResponse>(
         `/sys/api/delete/${id}`,
         {
-          operationName: 'API删除',
-          processResponse: false
+          operationName: 'API删除'
         }
       );
 

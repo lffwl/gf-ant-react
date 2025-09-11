@@ -1,3 +1,4 @@
+import { message } from 'antd';
 // 获取API基础URL
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -88,6 +89,17 @@ export const request = async <T = any>(options: RequestOptions): Promise<T> => {
     // 处理响应
     const result = await response.json();
 
+    if (processResponse) {
+      if (result.code === 0 ) {
+        if (options.method?.toLowerCase() !== "get"){
+          const successMessage = operationName + '成功';
+          message.success(successMessage);
+        }
+      } else {
+        const errorMessage = result.message || '请求失败';
+        message.error(errorMessage);
+      }
+    }
 
 
     return result as T;
@@ -99,7 +111,7 @@ export const request = async <T = any>(options: RequestOptions): Promise<T> => {
     if (error instanceof DOMException && error.name === 'AbortError') {
       throw new Error(`${operationName}超时，请稍后重试`);
     }
-    
+
     throw error;
   }
 };

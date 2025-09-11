@@ -64,8 +64,7 @@ export const userService = {
         '/sys/user/create',
         data,
         {
-          operationName: '用户创建',
-          processResponse: false
+          operationName: '用户创建'
         }
       );
 
@@ -82,8 +81,7 @@ export const userService = {
         `/sys/user/update/${data.id}`,
         data,
         {
-          operationName: '用户更新',
-          processResponse: false
+          operationName: '用户更新'
         }
       );
 
@@ -99,8 +97,7 @@ export const userService = {
       const result = await del<ApiResponse>(
         `/sys/user/delete/${id}`,
         {
-          operationName: '用户删除',
-          processResponse: false
+          operationName: '用户删除'
         }
       );
 
@@ -117,8 +114,7 @@ export const userService = {
         '/sys/user/list',
         params,
         {
-          operationName: '获取用户列表',
-          processResponse: false
+          operationName: '获取用户列表'
         }
       );
 
@@ -138,8 +134,7 @@ export const userService = {
         `/sys/user/detail/${id}`,
         {},
         {
-          operationName: '获取用户详情',
-          processResponse: false
+          operationName: '获取用户详情'
         }
       );
 
@@ -156,8 +151,7 @@ export const userService = {
         `/sys/user/update-password/${id}`,
         data,
         {
-          operationName: '密码修改',
-          processResponse: false
+          operationName: '密码修改'
         }
       );
 

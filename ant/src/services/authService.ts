@@ -1,6 +1,12 @@
 import { message } from 'antd';
 import { post, get } from '../utils/request';
-import { ApiResponse } from '../utils/errorHandler';
+
+// ApiResponse接口定义
+export interface ApiResponse<T = any> {
+  code: number;
+  message: string;
+  data?: T;
+}
 export interface LoginRequest {
   username: string;
   password: string;
@@ -28,8 +34,7 @@ export const authService = {
         data,
         {
           operationName: '登录',
-          needToken: false, // 登录请求不需要token
-          processResponse: false // 不自动处理响应，因为我们需要先存储token
+          needToken: false // 登录请求不需要token
         }
       );
 
@@ -72,8 +77,7 @@ export const authService = {
         params,
         {
           operationName: '获取验证码',
-          needToken: false,
-          processResponse: false
+          needToken: false
         }
       );
 
