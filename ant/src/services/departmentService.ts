@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { post, get, put, del } from '../utils/request';
 
 export interface DepartmentCreateReq {
   parentId?: number;
@@ -40,17 +40,9 @@ export const departmentService = {
       
       console.log('发送到后端的参数:', processedData);
       
-      const response = await fetch(`${API_BASE_URL}/sys/department/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(processedData),
+      return post('/sys/department/create', processedData, {
+        operationName: '部门创建'
       });
-
-      const result = await response.json();
-      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
-      return result;
     } catch (error) {
       throw error;
     }
@@ -58,17 +50,7 @@ export const departmentService = {
 
   async getDepartmentTree(): Promise<DepartmentTreeResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sys/department/tree`, {
-        method: 'GET',
-      });
-
-      const result = await response.json();
-      // 列表接口不需要使用handleApiResponse
-      if (result.code === 0) {
-        return result;
-      } else {
-        throw new Error(result.message || '获取部门树形结构失败');
-      }
+      return get<DepartmentTreeResponse>('/sys/department/tree');
     } catch (error) {
       throw error;
     }
@@ -76,23 +58,7 @@ export const departmentService = {
 
   async getDepartmentList(params: { page: number; size: number; name?: string; status?: number }): Promise<ApiResponse<DepartmentListResponse>> {
     try {
-      const queryParams = new URLSearchParams();
-      queryParams.append('page', params.page.toString());
-      queryParams.append('size', params.size.toString());
-      if (params.name) queryParams.append('name', params.name);
-      if (params.status !== undefined) queryParams.append('status', params.status.toString());
-
-      const response = await fetch(`${API_BASE_URL}/sys/department/list?${queryParams}`, {
-        method: 'GET',
-      });
-
-      const result = await response.json();
-      // 列表接口不需要使用handleApiResponse
-      if (result.code === 0) {
-        return result;
-      } else {
-        throw new Error(result.message || '获取部门列表失败');
-      }
+      return get<ApiResponse<DepartmentListResponse>>('/sys/department/list', params);
     } catch (error) {
       throw error;
     }
@@ -107,17 +73,9 @@ export const departmentService = {
       
       console.log('发送到后端的更新参数:', processedData);
       
-      const response = await fetch(`${API_BASE_URL}/sys/department/update/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(processedData),
+      return put(`/sys/department/update/${id}`, processedData, {
+        operationName: '部门更新'
       });
-
-      const result = await response.json();
-      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
-      return result;
     } catch (error) {
       throw error;
     }
@@ -125,13 +83,9 @@ export const departmentService = {
 
   async deleteDepartment(id: string): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sys/department/delete/${id}`, {
-        method: 'DELETE',
+      return del(`/sys/department/delete/${id}`, {
+        operationName: '部门删除'
       });
-
-      const result = await response.json();
-      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
-      return result;
     } catch (error) {
       throw error;
     }
