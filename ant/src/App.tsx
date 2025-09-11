@@ -55,6 +55,7 @@ const LayoutContent: React.FC = () => {
       localStorage.removeItem('user');
       localStorage.removeItem('expireTime');
       localStorage.removeItem('refreshTime');
+      localStorage.removeItem('apiCodes');
       navigate('/auth/login');
       return;
     }

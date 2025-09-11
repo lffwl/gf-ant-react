@@ -50,6 +50,8 @@ export const authService = {
         localStorage.setItem('expireTime', result.data.expire);
         // 缓存刷新时间
         localStorage.setItem('refreshTime', result.data.refresh);
+        // 缓存ApiCodes
+        localStorage.setItem('apiCodes', JSON.stringify(result.data.apiCodes));
       }
 
       
