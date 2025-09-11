@@ -1,0 +1,8 @@
+# 密钥
+secret: "0UXGsV9tD2gLLAM7Qm0DsAgz5nKCLhkTAopZRdr3oRA="
+# 过期时间（秒）, 7天
+expire: 604800
+# 刷新时间（秒）, 3天
+refresh_expire: 259200
+# 签发者
+issuer: "gf-ant-react"

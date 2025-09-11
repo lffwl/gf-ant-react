@@ -271,3 +271,17 @@ func (s *SysRole) GetAll(ctx context.Context) ([]*entity.SysRoles, error) {
 	}
 	return roles, nil
 }
+
+// GetUserRoles 获取用户角色及权限信息
+func (s *SysRole) GetUserRoles(ctx context.Context, userId uint64) ([]*entity.SysRoles, error) {
+	var roles []*entity.SysRoles
+	// 通过 sys_user_roles 表关联用户和角色，并获取完整的角色信息
+	err := dao.SysRoles.Ctx(ctx).Fields(fmt.Sprintf("%s.*", dao.SysRoles.Table())).
+		InnerJoin(dao.SysUserRoles.Table(), fmt.Sprintf("%s.%s = %s.%s", dao.SysRoles.Table(), dao.SysRoles.Columns().Id, dao.SysUserRoles.Table(), dao.SysUserRoles.Columns().RoleId)).
+		Where(fmt.Sprintf("%s.%s", dao.SysUserRoles.Table(), dao.SysUserRoles.Columns().UserId), userId).
+		Scan(&roles)
+	if err != nil {
+		return nil, err
+	}
+	return roles, nil
+}

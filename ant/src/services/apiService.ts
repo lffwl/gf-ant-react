@@ -1,6 +1,4 @@
-import { handleNetworkError, handleApiResponse } from '../utils/errorHandler';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { post, get, put, del } from '../utils/request';
 
 export interface SysApiCreateReq {
   parentId?: number;
@@ -40,29 +38,32 @@ export const apiService = {
       
       console.log('发送到后端的参数:', processedData);
       
-      const response = await fetch(`${API_BASE_URL}/sys/api/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(processedData),
-      });
+      const result = await post<ApiResponse>(
+        '/sys/api/create',
+        processedData,
+        {
+          operationName: 'API创建',
+          processResponse: false
+        }
+      );
 
-      const result = await response.json();
-      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
-      handleApiResponse(result);
+      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
       return result;
     } catch (error) {
-      return handleNetworkError(error, 'API创建');
+      throw error;
     }
   },
   async getApiTree(): Promise<ApiTreeResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sys/api/tree`, {
-        method: 'GET',
-      });
+      const result = await get<ApiTreeResponse>(
+        '/sys/api/tree',
+        {},
+        {
+          operationName: '获取API树形结构',
+          processResponse: false
+        }
+      );
 
-      const result = await response.json();
       // 列表接口不需要使用handleApiResponse
       if (result.code === 0) {
         return result;
@@ -70,7 +71,7 @@ export const apiService = {
         throw new Error(result.message || '获取API树形结构失败');
       }
     } catch (error) {
-      return handleNetworkError(error, '获取API树形结构');
+      throw error;
     }
   },
 
@@ -85,35 +86,36 @@ export const apiService = {
       
       console.log('发送到后端的更新参数:', processedData);
       
-      const response = await fetch(`${API_BASE_URL}/sys/api/update/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(processedData),
-      });
+      const result = await put<ApiResponse>(
+        `/sys/api/update/${id}`,
+        processedData,
+        {
+          operationName: 'API更新',
+          processResponse: false
+        }
+      );
 
-      const result = await response.json();
-      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
-      handleApiResponse(result);
+      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
       return result;
     } catch (error) {
-      return handleNetworkError(error, 'API更新');
+      throw error;
     }
   },
 
   async deleteApi(id: string): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sys/api/delete/${id}`, {
-        method: 'DELETE',
-      });
+      const result = await del<ApiResponse>(
+        `/sys/api/delete/${id}`,
+        {
+          operationName: 'API删除',
+          processResponse: false
+        }
+      );
 
-      const result = await response.json();
-      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
-      handleApiResponse(result);
+      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
       return result;
     } catch (error) {
-      return handleNetworkError(error, 'API删除');
+      throw error;
     }
   }
 };

@@ -1,5 +1,3 @@
-import { handleNetworkError, handleApiResponse } from '../utils/errorHandler';
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export interface RoleCreateReq {
@@ -64,11 +62,10 @@ export const roleService = {
       });
 
       const result = await response.json();
-      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
-      handleApiResponse(result);
+      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
       return result;
     } catch (error) {
-      return handleNetworkError(error, '角色创建');
+      throw error;
     }
   },
 
@@ -83,11 +80,10 @@ export const roleService = {
       });
 
       const result = await response.json();
-      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
-      handleApiResponse(result);
+      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
       return result;
     } catch (error) {
-      return handleNetworkError(error, '角色更新');
+      throw error;
     }
   },
 
@@ -98,11 +94,10 @@ export const roleService = {
       });
 
       const result = await response.json();
-      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
-      handleApiResponse(result);
+      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
       return result;
     } catch (error) {
-      return handleNetworkError(error, '角色删除');
+      throw error;
     }
   },
 
@@ -126,7 +121,7 @@ export const roleService = {
         throw new Error(result.message || '获取角色列表失败');
       }
     } catch (error) {
-      return handleNetworkError(error, '获取角色列表');
+      throw error;
     }
   },
 
@@ -137,11 +132,10 @@ export const roleService = {
       });
 
       const result = await response.json();
-      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
-      handleApiResponse(result);
+      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
       return result;
     } catch (error) {
-      return handleNetworkError(error, '获取角色详情');
+      throw error;
     }
   }
 };

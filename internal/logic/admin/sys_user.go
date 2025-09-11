@@ -70,5 +70,5 @@ func (s *sSysUserLogic) UpdatePassword(ctx context.Context, param *admin.SysUser
 	if err != nil {
 		return err
 	}
-	return service.SysUserService.Save(ctx, param)
+	return service.SysUserService.UpdateColumns(ctx, param.Id, param)
 }

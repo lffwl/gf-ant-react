@@ -1,5 +1,3 @@
-import { handleNetworkError, handleApiResponse } from '../utils/errorHandler';
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export interface DepartmentCreateReq {
@@ -51,11 +49,10 @@ export const departmentService = {
       });
 
       const result = await response.json();
-      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
-      handleApiResponse(result);
+      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
       return result;
     } catch (error) {
-      return handleNetworkError(error, '部门创建');
+      throw error;
     }
   },
 
@@ -73,7 +70,7 @@ export const departmentService = {
         throw new Error(result.message || '获取部门树形结构失败');
       }
     } catch (error) {
-      return handleNetworkError(error, '获取部门树形结构');
+      throw error;
     }
   },
 
@@ -97,7 +94,7 @@ export const departmentService = {
         throw new Error(result.message || '获取部门列表失败');
       }
     } catch (error) {
-      return handleNetworkError(error, '获取部门列表');
+      throw error;
     }
   },
 
@@ -119,11 +116,10 @@ export const departmentService = {
       });
 
       const result = await response.json();
-      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
-      handleApiResponse(result);
+      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
       return result;
     } catch (error) {
-      return handleNetworkError(error, '部门更新');
+      throw error;
     }
   },
 
@@ -134,11 +130,10 @@ export const departmentService = {
       });
 
       const result = await response.json();
-      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
-      handleApiResponse(result);
+      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
       return result;
     } catch (error) {
-      return handleNetworkError(error, '部门删除');
+      throw error;
     }
   }
 };

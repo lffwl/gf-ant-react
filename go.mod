@@ -7,6 +7,7 @@ toolchain go1.23.3
 require (
 	github.com/gogf/gf/contrib/drivers/mysql/v2 v2.9.3
 	github.com/gogf/gf/v2 v2.9.3
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/mojocn/base64Captcha v1.3.8
 	golang.org/x/crypto v0.41.0
 )

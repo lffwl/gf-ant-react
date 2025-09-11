@@ -171,12 +171,22 @@ func (s *SysUser) GetById(ctx context.Context, id uint64) (*entity.SysUsers, []u
 	return user, roleIds, nil
 }
 
-// Save 保存用户
-func (s *SysUser) Save(ctx context.Context, data interface{}) error {
+// UpdateColumns 更新
+func (s *SysUser) UpdateColumns(ctx context.Context, id uint64, data interface{}) error {
 
-	if _, err := dao.SysUsers.Ctx(ctx).Save(data); err != nil {
+	if _, err := dao.SysUsers.Ctx(ctx).FieldsEx(dao.SysUsers.Columns().Id).Where(dao.SysUsers.Columns().Id, id).Update(data); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// 根据用户名获取用户信息
+func (s *SysUser) GetByUsername(ctx context.Context, username string) (*entity.SysUsers, error) {
+	var user *entity.SysUsers
+	err := dao.SysUsers.Ctx(ctx).Where(dao.SysUsers.Columns().Username, username).Scan(&user)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }

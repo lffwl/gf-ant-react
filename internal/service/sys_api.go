@@ -57,6 +57,32 @@ func (s *SysApi) GetByPermissionCode(ctx context.Context, permissionCode string)
 	return api, nil
 }
 
+// GetApisByRoleIds 根据角色ID数组获取所有API（去重）
+func (s *SysApi) GetApisByRoleIds(ctx context.Context, roleIds []uint64) ([]*entity.SysApis, error) {
+	// 查询与这些角色关联的所有API ID
+	var roleApis []*entity.SysRoleApis
+	err := dao.SysRoleApis.Ctx(ctx).
+		Distinct().
+		Where(dao.SysRoleApis.Columns().RoleId, roleIds).
+		Fields(dao.SysRoleApis.Columns().ApiId).
+		Scan(&roleApis)
+	if err != nil {
+		return nil, err
+	}
+
+	var uniqueApiIds []uint64
+	for _, roleApi := range roleApis {
+		uniqueApiIds = append(uniqueApiIds, roleApi.ApiId)
+	}
+
+	// 根据去重后的API ID查询完整的API信息
+	if len(uniqueApiIds) == 0 {
+		return []*entity.SysApis{}, nil
+	}
+
+	return s.GetByIds(ctx, uniqueApiIds)
+}
+
 // GetByIds 批量获取API信息
 func (s *SysApi) GetByIds(ctx context.Context, ids []uint64) ([]*entity.SysApis, error) {
 	var apis []*entity.SysApis

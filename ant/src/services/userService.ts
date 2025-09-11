@@ -1,6 +1,4 @@
-import { handleNetworkError, handleApiResponse } from '../utils/errorHandler';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { post, get, put, del } from '../utils/request';
 
 export interface UserCreateReq {
   username: string;
@@ -62,112 +60,111 @@ export interface UserUpdatePasswordReq {
 export const userService = {
   async createUser(data: UserCreateReq): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sys/user/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+      const result = await post<ApiResponse>(
+        '/sys/user/create',
+        data,
+        {
+          operationName: '用户创建',
+          processResponse: false
+        }
+      );
 
-      const result = await response.json();
-      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
-      handleApiResponse(result);
+      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
       return result;
     } catch (error) {
-      return handleNetworkError(error, '用户创建');
+      throw error;
     }
   },
 
   async updateUser(data: UserUpdateReq): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sys/user/update/${data.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+      const result = await put<ApiResponse>(
+        `/sys/user/update/${data.id}`,
+        data,
+        {
+          operationName: '用户更新',
+          processResponse: false
+        }
+      );
 
-      const result = await response.json();
-      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
-      handleApiResponse(result);
+      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
       return result;
     } catch (error) {
-      return handleNetworkError(error, '用户更新');
+      throw error;
     }
   },
 
   async deleteUser(id: number): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sys/user/delete/${id}`, {
-        method: 'DELETE',
-      });
+      const result = await del<ApiResponse>(
+        `/sys/user/delete/${id}`,
+        {
+          operationName: '用户删除',
+          processResponse: false
+        }
+      );
 
-      const result = await response.json();
-      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
-      handleApiResponse(result);
+      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
       return result;
     } catch (error) {
-      return handleNetworkError(error, '用户删除');
+      throw error;
     }
   },
 
   async getUserList(params: { page: number; size: number; username?: string; departmentId?: number; status?: number }): Promise<ApiResponse<UserListResponse>> {
     try {
-      const queryParams = new URLSearchParams();
-      queryParams.append('page', params.page.toString());
-      queryParams.append('size', params.size.toString());
-      if (params.username) queryParams.append('username', params.username);
-      if (params.departmentId) queryParams.append('departmentId', params.departmentId.toString());
-      if (params.status !== undefined) queryParams.append('status', params.status.toString());
+      const result = await get<ApiResponse<UserListResponse>>(
+        '/sys/user/list',
+        params,
+        {
+          operationName: '获取用户列表',
+          processResponse: false
+        }
+      );
 
-      const response = await fetch(`${API_BASE_URL}/sys/user/list?${queryParams}`, {
-        method: 'GET',
-      });
-
-      const result = await response.json();
       if (result.code === 0) {
         return result;
       } else {
         throw new Error(result.message || '获取用户列表失败');
       }
     } catch (error) {
-      return handleNetworkError(error, '获取用户列表');
+      throw error;
     }
   },
 
   async getUserDetail(id: number): Promise<ApiResponse<UserDetailResponse>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sys/user/detail/${id}`, {
-        method: 'GET',
-      });
+      const result = await get<ApiResponse<UserDetailResponse>>(
+        `/sys/user/detail/${id}`,
+        {},
+        {
+          operationName: '获取用户详情',
+          processResponse: false
+        }
+      );
 
-      const result = await response.json();
-      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
-      handleApiResponse(result);
+      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
       return result;
     } catch (error) {
-      return handleNetworkError(error, '获取用户详情');
+      throw error;
     }
   },
 
   async updateUserPassword(id: number, data: UserUpdatePasswordReq): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sys/user/update-password/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+      const result = await put<ApiResponse>(
+        `/sys/user/update-password/${id}`,
+        data,
+        {
+          operationName: '密码修改',
+          processResponse: false
+        }
+      );
 
-      const result = await response.json();
-      // 使用handleApiResponse处理API响应，会自动显示成功提示并返回数据
-      handleApiResponse(result);
+      // 直接返回结果，不再使用handleApiResponse自动显示成功提示
       return result;
     } catch (error) {
-      return handleNetworkError(error, '密码修改');
+      throw error;
     }
   }
 };

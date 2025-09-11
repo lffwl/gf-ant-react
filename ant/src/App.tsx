@@ -7,16 +7,32 @@ import {
 } from '@ant-design/icons';
 import { Layout, Menu, Button, theme, Breadcrumb } from 'antd';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import UserManagement from './pages/permission/UserManagement';
-import ApiManagement from './pages/permission/ApiManagement';
-import DepartmentManagement from './pages/permission/DepartmentManagement';
-import RoleManagement from './pages/permission/RoleManagement';
-import Welcome from './pages/Welcome';
-import { menuItems } from './config/menuItems';
+import { menuItems, MenuItem } from './config/menuItems';
 import 'antd/dist/reset.css'
 
 const { Header, Sider, Content } = Layout;
 
+// 从menuItems中提取所有带有component的菜单项
+const extractRouteItems = (items: MenuItem[]): Array<MenuItem & { component: React.ComponentType }> => {
+  const routeItems: Array<MenuItem & { component: React.ComponentType }> = [];
+  
+  const traverse = (menuItems: MenuItem[]) => {
+    menuItems.forEach(item => {
+      // 只添加有component属性的菜单项
+      if (item.component) {
+        routeItems.push(item as MenuItem & { component: React.ComponentType });
+      }
+      
+      // 递归处理子菜单
+      if (item.children && item.children.length > 0) {
+        traverse(item.children);
+      }
+    });
+  };
+  
+  traverse(items);
+  return routeItems;
+};
 
 
 const LayoutContent: React.FC = () => {
@@ -26,6 +42,50 @@ const LayoutContent: React.FC = () => {
   const location = useLocation();
   const themeData = theme.useToken();
   const { colorBgContainer } = themeData.token;
+
+  // 全局认证检查
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const expireTimeStr = localStorage.getItem('expireTime');
+    
+    // 如果不存在token，直接重定向到登录页面
+    if (!token) {
+      // 清除所有缓存
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('expireTime');
+      localStorage.removeItem('refreshTime');
+      navigate('/auth/login');
+      return;
+    }
+    
+    // 如果存在token，检查是否过期
+    if (expireTimeStr) {
+      try {
+        // 解析ISO 8601格式的时间字符串
+        const expireTimeDate = new Date(expireTimeStr);
+        const currentTime = new Date();
+        
+        // 检查token是否过期
+        if (currentTime >= expireTimeDate) {
+          // token已过期，清除所有缓存并重定向到登录页面
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('expireTime');
+          localStorage.removeItem('refreshTime');
+          navigate('/auth/login');
+        }
+      } catch (error) {
+        console.error('解析过期时间失败:', error);
+        // 解析失败时，也清除缓存并重定向到登录页面
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('expireTime');
+        localStorage.removeItem('refreshTime');
+        navigate('/auth/login');
+      }
+    }
+  }, [navigate]);
 
   // 监听路由变化，自动展开父级菜单
   useEffect(() => {
@@ -68,7 +128,10 @@ const LayoutContent: React.FC = () => {
     return items;
   };
 
-  const processedMenuItems = menuItems.map(item => ({
+  // 过滤掉hidden为true的菜单项，不显示在菜单中
+  const filteredMenuItems = menuItems.filter(item => !item.hidden);
+
+  const processedMenuItems = filteredMenuItems.map(item => ({
     ...item,
     onClick: item.children ? undefined : () => navigate(item.key),
     children: item.children?.map(child => ({
@@ -76,6 +139,9 @@ const LayoutContent: React.FC = () => {
       onClick: () => navigate(child.key),
     })),
   }));
+
+  // 生成路由配置，但排除登录页面
+  const routeItems = extractRouteItems(menuItems).filter(item => item.key !== '/auth/login');
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -131,11 +197,13 @@ const LayoutContent: React.FC = () => {
           }}
         >
           <Routes>
-            <Route path="/" element={<Welcome />} />
-            <Route path="/permission/user" element={<UserManagement />} />
-            <Route path="/permission/api" element={<ApiManagement />} />
-            <Route path="/permission/department" element={<DepartmentManagement />} />
-            <Route path="/permission/role" element={<RoleManagement />} />
+            {routeItems.map(item => (
+              <Route 
+                key={item.key} 
+                path={item.key} 
+                element={<item.component />}
+              />
+            ))}
           </Routes>
         </Content>
       </Layout>
@@ -144,9 +212,21 @@ const LayoutContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  // 获取登录页面组件
+  const loginItem = extractRouteItems(menuItems).find(item => item.key === '/auth/login');
+  const LoginPage = loginItem?.component;
+
   return (
     <Router>
-      <LayoutContent />
+      <Routes>
+        {/* 登录页面路由，不使用LayoutContent布局 */}
+        {LoginPage && (
+          <Route path="/auth/login" element={<LoginPage />} />
+        )}
+        
+        {/* 其他页面路由，使用LayoutContent布局 */}
+        <Route path="/*" element={<LayoutContent />} />
+      </Routes>
     </Router>
   );
 };
