@@ -23,6 +23,7 @@ import {
   KeyOutlined
 } from '@ant-design/icons';
 import { userService, UserData, UserCreateReq, UserUpdateReq, UserUpdatePasswordReq } from '../../services/userService';
+import { PermissionAction } from '../../utils/permission';
 
 const { Option } = Select;
 
@@ -271,6 +272,7 @@ const UserManagement: React.FC = () => {
       key: 'action',
       render: (_: any, record: UserData) => (
         <Space size="middle">
+          <PermissionAction permission="sys.user.update">
           <Button
             type="link"
             icon={<EditOutlined />}
@@ -278,6 +280,8 @@ const UserManagement: React.FC = () => {
           >
             编辑
           </Button>
+          </PermissionAction>
+          <PermissionAction permission="sys.user.update-password">
           <Button
               type="link"
               icon={<KeyOutlined />}
@@ -285,6 +289,8 @@ const UserManagement: React.FC = () => {
             >
               修改密码
             </Button>
+            </PermissionAction>
+          <PermissionAction permission="sys.user.delete">
             <Popconfirm
             title={
               <span>
@@ -299,6 +305,7 @@ const UserManagement: React.FC = () => {
               删除
             </Button>
           </Popconfirm>
+          </PermissionAction>
         </Space>
       ),
     },
@@ -352,6 +359,7 @@ const UserManagement: React.FC = () => {
           {/* 表格区域 */}
           <Card>
             <Row gutter={16}>
+              <PermissionAction permission="sys.user.create">
               <Col span={9}>
                 <Space>
                   <Button
@@ -363,6 +371,7 @@ const UserManagement: React.FC = () => {
                   </Button>
                 </Space>
               </Col>
+              </PermissionAction>
             </Row>
             <Row gutter={16} style={{ marginTop: 16 }}>
               <Col span={24}>
