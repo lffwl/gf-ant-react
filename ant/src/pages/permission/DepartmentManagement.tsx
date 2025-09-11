@@ -3,6 +3,7 @@ import { Table, Button, Space, Drawer, Form, Input, InputNumber, Switch, TreeSel
 const { Content } = Layout;
 import { departmentService } from '../../services/departmentService';
 import type { ColumnsType } from 'antd/es/table';
+import { PermissionAction } from '../../utils/permission';
 
 interface DepartmentData {
   key: React.Key;
@@ -59,20 +60,24 @@ const DepartmentManagement: React.FC = () => {
       width: '15%',
       render: (_, record) => (
         <Space size="middle">
-          <Button type="link" size="small" onClick={() => handleEdit(record)}>
-            编辑
-          </Button>
-          <Popconfirm
-            title="确认删除"
-            description={`确认要删除ID为 ${record.key} 的部门吗？`}
-            onConfirm={() => handleDelete(record)}
-            okText="确认"
-            cancelText="取消"
-          >
-            <Button type="link" size="small" danger>
-              删除
+          <PermissionAction permission="sys.department.update">
+            <Button type="link" size="small" onClick={() => handleEdit(record)}>
+              编辑
             </Button>
-          </Popconfirm>
+          </PermissionAction>
+          <PermissionAction permission="sys.department.delete">
+            <Popconfirm
+              title="确认删除"
+              description={`确认要删除ID为 ${record.key} 的部门吗？`}
+              onConfirm={() => handleDelete(record)}
+              okText="确认"
+              cancelText="取消"
+            >
+              <Button type="link" size="small" danger>
+                删除
+              </Button>
+            </Popconfirm>
+          </PermissionAction>
         </Space>
       ),
     },
@@ -114,7 +119,7 @@ const DepartmentManagement: React.FC = () => {
             key: item.id || item.key,
             parentId: item.parentId || 0,
             name: item.name,
-            status: item.status ,
+            status: item.status,
             sort: item.sort || 0,
             children: item.children ? transformDepartmentData(item.children) : undefined
           }));
@@ -148,147 +153,149 @@ const DepartmentManagement: React.FC = () => {
         <Content style={{ padding: '10px 0' }}>
           {/* 表格区域 */}
           <Card>
-            <Row gutter={16}>
-              <Col span={9}>
-                <Space>
-                  <Button
-                    type="primary"
-                    onClick={() => setDrawerVisible(true)}
-                  >
-                    新增部门
-                  </Button>
-                </Space>
-              </Col>
-            </Row>
+            <PermissionAction permission="sys.department.create">
+              <Row gutter={16}>
+                <Col span={9}>
+                  <Space>
+                    <Button
+                      type="primary"
+                      onClick={() => setDrawerVisible(true)}
+                    >
+                      新增部门
+                    </Button>
+                  </Space>
+                </Col>
+              </Row>
+            </PermissionAction>
             <Row gutter={16} style={{ marginTop: 16 }}>
               <Col span={24}>
                 <Table
-        columns={columns}
-        dataSource={departmentData}
-        pagination={false}
-        rowKey={(record) => record.key}
-        expandable={{
-          expandedRowKeys,
-          onExpand: (expanded, record) => {
-            const keys = expanded
-              ? [...expandedRowKeys, record.key]
-              : expandedRowKeys.filter(key => key !== record.key);
-            setExpandedRowKeys(keys);
-          },
-          onExpandedRowsChange: (keys) => {
-            setExpandedRowKeys([...keys]);
-          }
-        }}
-        loading={loading}
-      />
+                  columns={columns}
+                  dataSource={departmentData}
+                  pagination={false}
+                  rowKey={(record) => record.key}
+                  expandable={{
+                    expandedRowKeys,
+                    onExpand: (expanded, record) => {
+                      const keys = expanded
+                        ? [...expandedRowKeys, record.key]
+                        : expandedRowKeys.filter(key => key !== record.key);
+                      setExpandedRowKeys(keys);
+                    },
+                    onExpandedRowsChange: (keys) => {
+                      setExpandedRowKeys([...keys]);
+                    }
+                  }}
+                  loading={loading}
+                />
               </Col>
             </Row>
           </Card>
         </Content>
-      <Drawer
-        title={editingRecord ? '编辑部门' : '新增部门'}
-        width={600}
-        open={drawerVisible}
-        onClose={() => {
-          setDrawerVisible(false);
-          setEditingRecord(null);
-          form.resetFields();
-        }}
-        footer={
-          <Space>
-            <Button onClick={() => setDrawerVisible(false)}>取消</Button>
-            <Button type="primary" onClick={() => form.submit()}>
-              提交
-            </Button>
-          </Space>
-        }
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={async (values) => {
-            try {
-              // 转换status字段为后端需要的数字类型
-              const submitData = {
-                ...values,
-                status: values.status ? 1 : 0
-              };
-              
-              if (editingRecord) {
-                await departmentService.updateDepartment(editingRecord.key.toString(), submitData);
-              } else {
-                await departmentService.createDepartment(submitData);
-              }
-              setDrawerVisible(false);
-              setEditingRecord(null);
-              form.resetFields();
-              fetchDepartmentTree();
-            } catch (error) {
-              // 错误处理已经在departmentService中完成
-            }
+        <Drawer
+          title={editingRecord ? '编辑部门' : '新增部门'}
+          width={600}
+          open={drawerVisible}
+          onClose={() => {
+            setDrawerVisible(false);
+            setEditingRecord(null);
+            form.resetFields();
           }}
+          footer={
+            <Space>
+              <Button onClick={() => setDrawerVisible(false)}>取消</Button>
+              <Button type="primary" onClick={() => form.submit()}>
+                提交
+              </Button>
+            </Space>
+          }
         >
-          {editingRecord && (
-            <Form.Item label="ID">
-              <Input value={editingRecord.key.toString()} disabled />
-            </Form.Item>
-          )}
-          <Form.Item
-            name="parentId"
-            label="上级部门"
-            rules={[{ type: 'integer', message: '上级ID必须为整数' }]}
-          >
-            <TreeSelect
-              placeholder="请选择上级部门，不选表示根节点"
-              style={{ width: '100%' }}
-              treeData={departmentData}
-              fieldNames={{ label: 'name', value: 'key', children: 'children' }}
-              treeDefaultExpandAll
-              allowClear
-            />
-          </Form.Item>
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={async (values) => {
+              try {
+                // 转换status字段为后端需要的数字类型
+                const submitData = {
+                  ...values,
+                  status: values.status ? 1 : 0
+                };
 
-          <Form.Item
-            name="name"
-            label="部门名称"
-            rules={[
-              { required: true, message: '部门名称不能为空' },
-              { min: 1, message: '部门名称长度不能少于1个字符' },
-              { max: 50, message: '部门名称长度不能超过50个字符' }
-            ]}
-          >
-            <Input placeholder="请输入部门名称" />
-          </Form.Item>
-
-
-
-          <Form.Item
-            name="sort"
-            label="排序"
-            rules={[{ type: 'integer', message: '排序必须为整数' }]}
-          >
-            <InputNumber placeholder="请输入排序" style={{ width: '100%' }} />
-          </Form.Item>
-
-          <Form.Item
-            name="status"
-            label="状态"
-            valuePropName="checked"
-            initialValue={true}
-            getValueFromEvent={(checked) => {
-              console.log('status转换:', checked, '->', checked ? 1 : 0);
-              return checked ? 1 : 0;
+                if (editingRecord) {
+                  await departmentService.updateDepartment(editingRecord.key.toString(), submitData);
+                } else {
+                  await departmentService.createDepartment(submitData);
+                }
+                setDrawerVisible(false);
+                setEditingRecord(null);
+                form.resetFields();
+                fetchDepartmentTree();
+              } catch (error) {
+                // 错误处理已经在departmentService中完成
+              }
             }}
           >
-            <Switch
-              checkedChildren="启用"
-              unCheckedChildren="禁用"
-            />
-          </Form.Item>
+            {editingRecord && (
+              <Form.Item label="ID">
+                <Input value={editingRecord.key.toString()} disabled />
+              </Form.Item>
+            )}
+            <Form.Item
+              name="parentId"
+              label="上级部门"
+              rules={[{ type: 'integer', message: '上级ID必须为整数' }]}
+            >
+              <TreeSelect
+                placeholder="请选择上级部门，不选表示根节点"
+                style={{ width: '100%' }}
+                treeData={departmentData}
+                fieldNames={{ label: 'name', value: 'key', children: 'children' }}
+                treeDefaultExpandAll
+                allowClear
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="name"
+              label="部门名称"
+              rules={[
+                { required: true, message: '部门名称不能为空' },
+                { min: 1, message: '部门名称长度不能少于1个字符' },
+                { max: 50, message: '部门名称长度不能超过50个字符' }
+              ]}
+            >
+              <Input placeholder="请输入部门名称" />
+            </Form.Item>
 
 
-        </Form>
-      </Drawer>
+
+            <Form.Item
+              name="sort"
+              label="排序"
+              rules={[{ type: 'integer', message: '排序必须为整数' }]}
+            >
+              <InputNumber placeholder="请输入排序" style={{ width: '100%' }} />
+            </Form.Item>
+
+            <Form.Item
+              name="status"
+              label="状态"
+              valuePropName="checked"
+              initialValue={true}
+              getValueFromEvent={(checked) => {
+                console.log('status转换:', checked, '->', checked ? 1 : 0);
+                return checked ? 1 : 0;
+              }}
+            >
+              <Switch
+                checkedChildren="启用"
+                unCheckedChildren="禁用"
+              />
+            </Form.Item>
+
+
+          </Form>
+        </Drawer>
       </Layout>
     </div>
   );
