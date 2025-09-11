@@ -116,10 +116,18 @@ export const PermissionButton: React.FC<PermissionButtonProps> = ({
   }
 
   // 如果用户有权限，返回原始按钮
-  return React.cloneElement(children as React.ReactElement, {
-    ...props,
-    onClick: onClick,
-  });
+  // 只有当传入了onClick属性时才覆盖子元素的onClick
+  if (onClick) {
+    return React.cloneElement(children as React.ReactElement, {
+      ...props,
+      onClick: onClick,
+    });
+  } else {
+    // 否则保留子元素原有的onClick事件
+    return React.cloneElement(children as React.ReactElement, {
+      ...props
+    });
+  }
 };
 
 /**
