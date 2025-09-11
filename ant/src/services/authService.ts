@@ -42,15 +42,14 @@ export const authService = {
       
       // 如果登录成功，存储token
       if (result.code === 0 && result.data && result.data.token) {
+        // 缓存用户信息
+        localStorage.setItem('user', JSON.stringify(result.data));
+        // 缓存token
         localStorage.setItem('token', result.data.token);
-        // 存储用户信息
-        if (result.data.userInfo) {
-          localStorage.setItem('userInfo', JSON.stringify(result.data.userInfo));
-        }
-        // 存储过期时间（如果有的话）
-        if (result.data.expireTime) {
-          localStorage.setItem('expireTime', result.data.expireTime.toString());
-        }
+        // 缓存过期时间
+        localStorage.setItem('expireTime', result.data.expire);
+        // 缓存刷新时间
+        localStorage.setItem('refreshTime', result.data.refresh);
       }
 
       // 直接返回结果，不再使用handleApiResponse自动显示成功提示

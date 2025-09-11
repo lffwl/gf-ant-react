@@ -49,15 +49,6 @@ const LoginPage: React.FC = () => {
       const result = await authService.login(loginData);
       if (result.code === 0) {
 
-        // 缓存用户信息
-        localStorage.setItem('user', JSON.stringify(result.data));
-        // 缓存token
-        localStorage.setItem('token', result.data.token);
-        // 缓存过期时间
-        localStorage.setItem('expireTime', result.data.expire);
-        // 缓存刷新时间
-        localStorage.setItem('refreshTime', result.data.refresh);
-
         // 登录成功后，页面会被重定向到主页
         window.location.href = '/';
       } else {
