@@ -5,8 +5,8 @@ import {
   MenuUnfoldOutlined,
   ReloadOutlined,
 } from '@ant-design/icons';
-import { Layout, Menu, Button, theme, Breadcrumb } from 'antd';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Layout, Menu, Button, theme, Breadcrumb, message } from 'antd';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { menuItems, MenuItem } from './config/menuItems';
 import 'antd/dist/reset.css'
 
@@ -129,8 +129,98 @@ const LayoutContent: React.FC = () => {
     return items;
   };
 
-  // 过滤掉hidden为true的菜单项，不显示在菜单中
-  const filteredMenuItems = menuItems.filter(item => !item.hidden);
+  // 获取用户的apiCodes权限列表
+  const getUserApiCodes = (): string[] => {
+    try {
+      const apiCodesStr = localStorage.getItem('apiCodes');
+      if (apiCodesStr) {
+        return JSON.parse(apiCodesStr) as string[];
+      }
+    } catch (error) {
+      console.error('解析apiCodes失败:', error);
+    }
+    return [];
+  };
+
+  // 根据apiCodes和hidden属性过滤菜单项
+  const filterMenuItemsByPermission = (items: MenuItem[]): MenuItem[] => {
+    const apiCodes = getUserApiCodes();
+    
+    return items
+      .filter(item => {
+        // 先过滤掉hidden为true的菜单项
+        if (item.hidden) {
+          return false;
+        }
+        
+        // 如果菜单项没有设置permission，则默认显示
+        if (!item.permission) {
+          // 如果有子菜单，检查是否有子菜单可以显示
+          if (item.children && item.children.length > 0) {
+            const hasVisibleChildren = item.children.some(child => 
+              !child.hidden && (!child.permission || apiCodes.includes(child.permission))
+            );
+            return hasVisibleChildren;
+          }
+          return true;
+        }
+        
+        // 检查用户是否有该菜单项的权限
+        const hasPermission = apiCodes.includes(item.permission);
+        
+        // 如果有子菜单，即使当前菜单项有权限，也要检查是否有子菜单可以显示
+        if (hasPermission && item.children && item.children.length > 0) {
+          const hasVisibleChildren = item.children.some(child => 
+            !child.hidden && (!child.permission || apiCodes.includes(child.permission))
+          );
+          return hasVisibleChildren;
+        }
+        
+        return hasPermission;
+      })
+      .map(item => {
+        // 深拷贝菜单项并递归过滤子菜单
+        const result = { ...item };
+        if (item.children && item.children.length > 0) {
+          result.children = filterMenuItemsByPermission(item.children);
+        }
+        return result;
+      });
+  };
+
+  // 根据apiCodes和hidden属性过滤菜单项
+  const filteredMenuItems = filterMenuItemsByPermission(menuItems);
+
+  // 检查用户是否有特定路径的访问权限
+  const checkPermission = (path: string): boolean => {
+    const apiCodes = getUserApiCodes();
+    
+    // 查找当前路径对应的菜单项
+    const menuItem = menuItems.find(item => item.key === path) || 
+                    menuItems.flatMap(item => item.children || []).find(child => child.key === path);
+    
+    // 如果没有找到菜单项或者菜单项没有设置permission，则默认允许访问
+    if (!menuItem || !menuItem.permission) {
+      return true;
+    }
+    
+    // 检查用户是否有该菜单项的权限
+    return apiCodes.includes(menuItem.permission);
+  };
+
+  // 创建受保护的路由组件
+  const ProtectedRoute: React.FC<{ element: React.ReactNode; path: string }> = ({ element, path }) => {
+    const hasPermission = checkPermission(path);
+    
+    if (!hasPermission) {
+      // 显示无权限提示
+      message.error('您没有权限访问该页面');
+      // 可以选择重定向到某个页面，比如首页
+      return <Navigate to="/" replace />;
+    }
+    
+    return element;
+  };
 
   const processedMenuItems = filteredMenuItems.map(item => ({
     ...item,
@@ -202,7 +292,12 @@ const LayoutContent: React.FC = () => {
               <Route 
                 key={item.key} 
                 path={item.key} 
-                element={<item.component />}
+                element={
+                  <ProtectedRoute 
+                    path={item.key} 
+                    element={<item.component />} 
+                  />
+                }
               />
             ))}
           </Routes>

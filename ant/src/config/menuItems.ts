@@ -57,14 +57,14 @@ export const menuItems: MenuItem[] = [
         key: '/permission/api',
         icon: React.createElement(ApiOutlined),
         label: 'API管理',
-        permission: 'sys.api.list',
+        permission: 'sys.api.tree',
         component: ApiManagement
       },
       {
         key: '/permission/department',
         icon: React.createElement(TeamOutlined),
         label: '部门管理',
-        permission: 'sys.department.list',
+        permission: 'sys.department.tree',
         component: DepartmentManagement
       },
     ],
