@@ -7,13 +7,73 @@ export interface ApiResponse<T = any> {
   message: string;
   data?: T;
 }
+
+// User接口定义
+export interface User {
+  id: number;
+  username: string;
+  passwordHash: string;
+  email: string;
+  mobile: string;
+  departmentId: number;
+  status: number;
+  lastLoginAt: string | null;
+  lastLoginIp: string;
+  loginAttempts: number;
+  lockedUntil: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+// Role接口定义
+export interface Role {
+  id: number;
+  name: string;
+  description: string;
+  dataScope: number;
+  sort: number;
+  status: boolean;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string;
+}
+
+// Api接口定义
+export interface Api {
+  id: number;
+  parentId: number;
+  name: string;
+  permissionCode: string;
+  url: string;
+  method: string;
+  sort: number;
+  status: number;
+  isMenu: number;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+// LoginRes接口定义
+export interface LoginRes {
+  user: User;
+  roles: Role[];
+  roleIds: number[];
+  apis: Api[];
+  apiCodes: string[];
+  token: string;
+  expire: string;
+  refresh: string;
+}
+
 export interface LoginRequest {
   username: string;
   password: string;
   captchaId: string;
   captchaCode: string;
 }
-
 
 export interface CaptchaResponse {
   id: string;
@@ -27,9 +87,9 @@ export const authService = {
    * @param data 登录请求数据
    * @returns 登录响应数据
    */
-  async login(data: LoginRequest): Promise<ApiResponse> {
+  async login(data: LoginRequest): Promise<ApiResponse<LoginRes>> {
     try {
-      const result = await post<ApiResponse>(
+      const result = await post<ApiResponse<LoginRes>>(
         '/auth/login',
         data,
         {
@@ -38,12 +98,13 @@ export const authService = {
         }
       );
 
+    
       console.log('登录响应:', result);
       
       // 如果登录成功，存储token
       if (result.code === 0 && result.data && result.data.token) {
         // 缓存用户信息
-        localStorage.setItem('user', JSON.stringify(result.data));
+        localStorage.setItem('user', JSON.stringify(result.data.user));
         // 缓存token
         localStorage.setItem('token', result.data.token);
         // 缓存过期时间
@@ -52,6 +113,8 @@ export const authService = {
         localStorage.setItem('refreshTime', result.data.refresh);
         // 缓存ApiCodes
         localStorage.setItem('apiCodes', JSON.stringify(result.data.apiCodes));
+        // 缓存角色信息
+        localStorage.setItem('roles', JSON.stringify(result.data.roles));
       }
 
       

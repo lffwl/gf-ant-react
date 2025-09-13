@@ -4,8 +4,9 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   ReloadOutlined,
+  UserOutlined
 } from '@ant-design/icons';
-import { Layout, Menu, Button, theme, Breadcrumb, message } from 'antd';
+import { Layout, Menu, Button, theme, Breadcrumb, message, Avatar, Dropdown, Space } from 'antd';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { menuItems, MenuItem } from './config/menuItems';
 import { getUserApiCodes, hasPermission } from './utils/permission.tsx';
@@ -44,6 +45,88 @@ const LayoutContent: React.FC = () => {
   const themeData = theme.useToken();
   const { colorBgContainer } = themeData.token;
 
+  // 清除所有缓存
+  const clearAllCache = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('expireTime');
+    localStorage.removeItem('refreshTime');
+    localStorage.removeItem('apiCodes');
+    localStorage.removeItem('roles');
+  };
+
+  // 处理退出登录
+  const handleLogout = () => {
+    clearAllCache();
+    navigate('/auth/login');
+  };
+
+  // 获取下拉菜单选项
+  const getMenuItems = () => {
+    if (userRoles.length > 0) {
+      return [
+        ...userRoles.map((role: any) => ({
+          key: role.id,
+          label: role.name
+        })),
+        {
+          type: 'divider'
+        },
+        {
+          key: 'logout',
+          label: '退出登录',
+          onClick: handleLogout
+        }
+      ];
+    } else {
+      return [
+        {
+          key: 'no-role',
+          label: '无角色信息',
+          disabled: true
+        },
+        {
+          type: 'divider'
+        },
+        {
+          key: 'logout',
+          label: '退出登录',
+          onClick: handleLogout
+        }
+      ];
+    }
+  };
+
+  // 获取用户信息
+  const getUserInfo = () => {
+    try {
+      const userStr = localStorage.getItem('user') || '{}';
+      const user = JSON.parse(userStr);
+      return user;
+    } catch (error) {
+      console.error('解析用户信息失败:', error);
+    }
+    return {
+      username: '未登录',
+    };
+  };
+
+  const userInfo = getUserInfo();
+
+  // 获取角色信息
+  const getRoleInfo = () => {
+    try {
+      const roleStr = localStorage.getItem('roles') || '[]';
+      const roles = JSON.parse(roleStr);
+      return roles;
+    } catch (error) {
+      console.error('解析角色信息失败:', error);
+    }
+    return [];
+  };
+
+  const userRoles = getRoleInfo();
+  
   // 全局认证检查
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -52,11 +135,7 @@ const LayoutContent: React.FC = () => {
     // 如果不存在token，直接重定向到登录页面
     if (!token) {
       // 清除所有缓存
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('expireTime');
-      localStorage.removeItem('refreshTime');
-      localStorage.removeItem('apiCodes');
+      clearAllCache();
       navigate('/auth/login');
       return;
     }
@@ -71,19 +150,13 @@ const LayoutContent: React.FC = () => {
         // 检查token是否过期
         if (currentTime >= expireTimeDate) {
           // token已过期，清除所有缓存并重定向到登录页面
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          localStorage.removeItem('expireTime');
-          localStorage.removeItem('refreshTime');
+          clearAllCache();
           navigate('/auth/login');
         }
       } catch (error) {
         console.error('解析过期时间失败:', error);
         // 解析失败时，也清除缓存并重定向到登录页面
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('expireTime');
-        localStorage.removeItem('refreshTime');
+        clearAllCache();
         navigate('/auth/login');
       }
     }
@@ -253,7 +326,7 @@ const LayoutContent: React.FC = () => {
             />
             
           </div>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <Button
               type="text"
               icon={<ReloadOutlined />}
@@ -265,6 +338,21 @@ const LayoutContent: React.FC = () => {
                 height: 64,
               }}
             >刷新</Button>
+
+            {/* 用户名显示和角色列表悬停 */}
+            <Dropdown
+              placement="bottomRight"
+              menu={{
+                items: getMenuItems()
+              }}
+            >
+              <Space
+                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+              >
+                <Avatar icon={<UserOutlined />} />
+                <span>{userInfo.username}</span>
+              </Space>
+            </Dropdown>
           </div>
         </Header>
       
