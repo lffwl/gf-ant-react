@@ -31,3 +31,9 @@ type LoginRes struct {
 	Expire   time.Time          `json:"expire"`
 	Refresh  time.Time          `json:"refresh"`
 }
+
+// 重置密码
+type ResetPasswordReq struct {
+	Id       uint64 `json:"id"`
+	Password string `json:"password"`
+}

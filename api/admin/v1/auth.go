@@ -34,3 +34,14 @@ type AuthLoginRes struct {
 	g.Meta `mime:"application/json"`
 	*admin.LoginRes
 }
+
+// 重置密码
+type AuthResetPasswordReq struct {
+	g.Meta   `path:"/auth/reset-password" tags:"Auth" method:"post" summary:"重置密码"`
+	Password string `json:"password" v:"required#请输入密码"`
+}
+
+// 重置密码返回
+type AuthResetPasswordRes struct {
+	g.Meta `mime:"application/json"`
+}

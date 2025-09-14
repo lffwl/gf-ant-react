@@ -89,3 +89,18 @@ func (c *sAuthLogic) Login(ctx context.Context, req *adminModel.LoginReq) (res *
 
 	return
 }
+
+// 重置密码
+func (c *sAuthLogic) ResetPassword(ctx context.Context, req *adminModel.ResetPasswordReq) error {
+
+	// 检查用户是否存在
+	exist, err := service.SysUserService.CheckById(ctx, req.Id)
+	if err != nil {
+		return err
+	}
+	if !exist {
+		return errors.New("用户不存在")
+	}
+
+	return service.SysUserService.ResetPassword(ctx, req.Id, req)
+}

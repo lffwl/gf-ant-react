@@ -190,3 +190,14 @@ func (s *SysUser) GetByUsername(ctx context.Context, username string) (*entity.S
 	}
 	return user, nil
 }
+
+// 重置密码
+func (s *SysUser) ResetPassword(ctx context.Context, id uint64, data *admin.ResetPasswordReq) error {
+	_, err := dao.SysUsers.Ctx(ctx).FieldsEx(dao.SysUsers.Columns().Id).Where(dao.SysUsers.Columns().Id, id).Data(data).Update()
+	return err
+}
+
+// 根据id检查用户是否存在
+func (s *SysUser) CheckById(ctx context.Context, id uint64) (bool, error) {
+	return dao.SysUsers.Ctx(ctx).Where(dao.SysUsers.Columns().Id, id).Exist()
+}
