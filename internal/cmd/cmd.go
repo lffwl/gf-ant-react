@@ -65,22 +65,33 @@ func MiddlewareAuthAdmin(r *ghttp.Request) {
 			return
 		}
 
-		// 验证权限
-		ok, err := adminLogic.AuthLogic.CheckPermission(r.Context(), &adminModel.CheckPermissionReq{
-			UserId: claims.UserID,
-			Url:    r.Router.Uri,
-			Method: strings.ToUpper(r.Request.Method),
-		})
-		if err != nil {
-			JsonExit(r, errorUtil.CodeNoAuth, err.Error())
-			return
+		// 设置上下文用户ID
+		r.SetCtxVar(g.Cfg("auth").MustGet(r.Context(), "CtxUserKey").String(), claims.UserID)
+
+		// 只需要登录不需要权限的路由
+		publicRoutes := g.Cfg("auth").MustGet(r.Context(), "publicRoutes").MapStrStr()
+		method, publicOk := publicRoutes[r.Router.Uri]
+		if !publicOk || method != strings.ToUpper(r.Request.Method) {
+
+			// 验证权限
+			ok, err := adminLogic.AuthLogic.CheckPermission(r.Context(), &adminModel.CheckPermissionReq{
+				UserId: claims.UserID,
+				Url:    r.Router.Uri,
+				Method: strings.ToUpper(r.Request.Method),
+			})
+			if err != nil {
+				JsonExit(r, errorUtil.CodeNoAuth, err.Error())
+				return
+			}
+
+			// 没有权限
+			if !ok {
+				JsonExit(r, errorUtil.CodeNoAuth, "没有权限")
+				return
+			}
+
 		}
 
-		// 没有权限
-		if !ok {
-			JsonExit(r, errorUtil.CodeNoAuth, "没有权限")
-			return
-		}
 	}
 
 	r.Middleware.Next()

@@ -6,10 +6,11 @@ import {
   ReloadOutlined,
   UserOutlined
 } from '@ant-design/icons';
-import { Layout, Menu, Button, theme, Breadcrumb, message, Avatar, Dropdown, Space } from 'antd';
+import { Layout, Menu, Button, theme, Breadcrumb, message, Avatar, Dropdown, Space, Modal, Input, Form } from 'antd';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { menuItems, MenuItem } from './config/menuItems';
 import { getUserApiCodes, hasPermission } from './utils/permission.tsx';
+import { authService } from './services/authService';
 import 'antd/dist/reset.css'
 
 const { Header, Sider, Content } = Layout;
@@ -44,6 +45,8 @@ const LayoutContent: React.FC = () => {
   const location = useLocation();
   const themeData = theme.useToken();
   const { colorBgContainer } = themeData.token;
+  const [resetPasswordForm] = Form.useForm();
+  const [isResetPasswordModalVisible, setIsResetPasswordModalVisible] = useState(false);
 
   // 清除所有缓存
   const clearAllCache = () => {
@@ -61,6 +64,11 @@ const LayoutContent: React.FC = () => {
     navigate('/auth/login');
   };
 
+  // 处理重置密码
+  const handleResetPassword = () => {
+    setIsResetPasswordModalVisible(true);
+  };
+
   // 获取下拉菜单选项
   const getMenuItems = () => {
     if (userRoles.length > 0) {
@@ -69,6 +77,14 @@ const LayoutContent: React.FC = () => {
           key: role.id,
           label: role.name
         })),
+        {
+          type: 'divider'
+        },
+        {
+          key: 'reset-password',
+          label: '重置密码',
+          onClick: handleResetPassword
+        },
         {
           type: 'divider'
         },
@@ -84,6 +100,14 @@ const LayoutContent: React.FC = () => {
           key: 'no-role',
           label: '无角色信息',
           disabled: true
+        },
+        {
+          type: 'divider'
+        },
+        {
+          key: 'reset-password',
+          label: '重置密码',
+          onClick: handleResetPassword
         },
         {
           type: 'divider'
@@ -378,6 +402,52 @@ const LayoutContent: React.FC = () => {
           </Routes>
         </Content>
       </Layout>
+      
+      {/* 重置密码弹窗 */}
+      <Modal
+        title="重置密码"
+        open={isResetPasswordModalVisible}
+        okText="确定"
+        cancelText="取消"
+        onOk={async () => {
+          try {
+            const values = await resetPasswordForm.validateFields();
+            const result = await authService.resetPassword(values.newPassword);
+            if (result.code === 0) {
+              resetPasswordForm.resetFields();
+              setIsResetPasswordModalVisible(false);
+            } else {
+              message.error(result.message || '密码重置失败');
+            }
+          } catch (error) {
+            if (error instanceof Error && error.name === 'ValidateError') {
+              // 表单验证失败，不需要额外处理
+              return;
+            }
+            message.error('密码重置失败');
+            console.error('重置密码失败:', error);
+          }
+        }}
+        onCancel={() => {
+          setIsResetPasswordModalVisible(false);
+        }}
+        afterClose={() => {
+          resetPasswordForm.resetFields();
+        }}
+      >
+        <Form form={resetPasswordForm} layout="vertical">
+          <Form.Item
+            name="newPassword"
+            label="新密码"
+            rules={[
+              { required: true, message: '请输入新密码' },
+              { min: 6, message: '密码长度不能小于6位' }
+            ]}
+          >
+            <Input.Password placeholder="请输入新密码" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </Layout>
   );
 };

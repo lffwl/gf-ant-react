@@ -189,4 +189,25 @@ export const authService = {
   isLoggedIn(): boolean {
     return !!localStorage.getItem('token');
   },
+
+  /**
+   * 重置密码
+   * @param password 新密码
+   * @returns 重置密码响应
+   */
+  async resetPassword(password: string): Promise<ApiResponse> {
+    try {
+      const result = await post<ApiResponse>(
+        '/auth/reset-password',
+        { password },
+        {
+          operationName: '重置密码',
+          needToken: true
+        }
+      );
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
 };

@@ -103,6 +103,12 @@ func (c *sAuthLogic) ResetPassword(ctx context.Context, req *adminModel.ResetPas
 		return errors.New("用户不存在")
 	}
 
+	// 加密密码
+	req.PasswordHash, err = password.HashPassword(req.PasswordHash)
+	if err != nil {
+		return err
+	}
+
 	return service.SysUserService.ResetPassword(ctx, req.Id, req)
 }
 

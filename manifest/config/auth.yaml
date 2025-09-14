@@ -1,6 +1,6 @@
 # 只需要登录不需要权限的路由
 publicRoutes:
-  - /auth/reset-password
+  "/auth/reset-password": "POST"
 
 # 不需要鉴权的接口
 ignoreRoutes:
@@ -9,3 +9,6 @@ ignoreRoutes:
 
 # TokenHeader 登录后返回的 token 头信息
 TokenHeader: X-Token
+
+# ctx user 上下文key
+CtxUserKey: Admin-User-Id

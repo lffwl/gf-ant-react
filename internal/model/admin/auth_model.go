@@ -34,8 +34,8 @@ type LoginRes struct {
 
 // 重置密码
 type ResetPasswordReq struct {
-	Id       uint64 `json:"id"`
-	Password string `json:"password"`
+	Id           uint64 `json:"id"`
+	PasswordHash string `json:"passwordHash"`
 }
 
 // 验证用户是否有权限访问接口
