@@ -10,7 +10,7 @@ import {
 } from '@ant-design/icons';
 import Welcome from '../pages/Welcome';
 import UserManagement from '../pages/permission/UserManagement';
-import ApiManagement from '../pages/permission/ApiManagement';
+import ApiManagement from '../pages/permission/ApiManagement/ApiManagementMain';
 import DepartmentManagement from '../pages/permission/DepartmentManagement';
 import RoleManagement from '../pages/permission/RoleManagement';
 import LoginPage from '../pages/auth/LoginPage';
