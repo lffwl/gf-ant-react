@@ -103,8 +103,9 @@ func (s *SysRole) Update(ctx context.Context, data *admin.SysRoleUpdateParam) er
 
 	// 创建新的角色API关联
 	if len(data.ApiIds) > 0 {
+		var apis []*entity.SysApis
 		// 批量获取API的权限码
-		apis, err := SysApiService.GetByIds(ctx, data.ApiIds)
+		apis, err = SysApiService.GetByIds(ctx, data.ApiIds)
 		if err != nil {
 			return err
 		}
