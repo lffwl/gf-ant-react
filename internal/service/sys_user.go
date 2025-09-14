@@ -134,7 +134,7 @@ func (s *SysUser) GetList(ctx context.Context, param *admin.SysUserListParam) ([
 	}
 
 	// 获取分页数据
-	err = model.Page(param.Page, param.Size).Order("id DESC").ScanList(&users, "User")
+	err = model.FieldsEx(dao.SysUsers.Columns().PasswordHash).Page(param.Page, param.Size).Order("id DESC").ScanList(&users, "User")
 	if err != nil {
 		return nil, 0, err
 	}
@@ -151,7 +151,7 @@ func (s *SysUser) GetList(ctx context.Context, param *admin.SysUserListParam) ([
 
 func (s *SysUser) GetById(ctx context.Context, id uint64) (*entity.SysUsers, []uint64, error) {
 	var user *entity.SysUsers
-	err := dao.SysUsers.Ctx(ctx).Where(dao.SysUsers.Columns().Id, id).Scan(&user)
+	err := dao.SysUsers.Ctx(ctx).FieldsEx(dao.SysUsers.Columns().PasswordHash).Where(dao.SysUsers.Columns().Id, id).Scan(&user)
 	if err != nil {
 		return nil, nil, err
 	}
