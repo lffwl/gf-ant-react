@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Table,
   Button,
@@ -36,7 +36,7 @@ const UserManagement: React.FC = () => {
   const [queryParams, setQueryParams] = useState({
     page: 1,
     pageSize: 10,
-    username: '',
+    username: undefined as string | undefined,
     departmentId: undefined as number | undefined,
     status: undefined as number | undefined
   });
@@ -51,6 +51,9 @@ const UserManagement: React.FC = () => {
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [passwordForm] = Form.useForm();
   const [selectedUser, setSelectedUser] = useState({ id: null as number | null, username: '' });
+
+  // 使用ref来跟踪上一次的查询参数
+  const prevQueryParamsRef = useRef<string>('');
 
   // 加载用户列表
   const loadUsers = async () => {
@@ -85,18 +88,29 @@ const UserManagement: React.FC = () => {
         setDepartments(response.data.departmentList || []);
       }
     } catch (error) {
-      message.error('加载用户列表失败');
+      // message.error('加载用户列表失败');
     } finally {
       setLoading(false);
     }
   };
 
-
-
   // 当查询参数变化时自动加载数据
   useEffect(() => {
-    loadUsers();
-  }, [queryParams]); // 依赖于查询参数对象
+    // 将查询参数序列化为字符串进行比较
+    const currentQueryParams = JSON.stringify({
+      page: queryParams.page,
+      pageSize: queryParams.pageSize,
+      username: queryParams.username,
+      departmentId: queryParams.departmentId,
+      status: queryParams.status
+    });
+    
+    // 只有当查询参数真正发生变化时才调用接口
+    if (prevQueryParamsRef.current !== currentQueryParams) {
+      prevQueryParamsRef.current = currentQueryParams;
+      loadUsers();
+    }
+  }, [queryParams.page, queryParams.pageSize, queryParams.username, queryParams.departmentId, queryParams.status]);
 
   // 搜索
   const handleSearch = () => {

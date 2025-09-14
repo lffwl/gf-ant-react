@@ -2,14 +2,14 @@ package admin
 
 // Status 状态：0=禁用，1=启用
 const (
-	StatusDisabled = 0 // 禁用
-	StatusEnabled  = 1 // 启用
+	ApiStatusDisabled = 0 // 禁用
+	ApiStatusEnabled  = 1 // 启用
 )
 
 var (
 	StatusMap = map[int]string{
-		StatusDisabled: "禁用",
-		StatusEnabled:  "启用",
+		ApiStatusDisabled: "禁用",
+		ApiStatusEnabled:  "启用",
 	}
 )
 

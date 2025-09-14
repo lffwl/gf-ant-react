@@ -8,6 +8,7 @@ import (
 	adminModel "gf-ant-react/internal/model/admin"
 	"gf-ant-react/internal/service"
 	"gf-ant-react/utility/captcha"
+	errorUtil "gf-ant-react/utility/error"
 	"gf-ant-react/utility/jwt"
 	"gf-ant-react/utility/password"
 )
@@ -103,4 +104,47 @@ func (c *sAuthLogic) ResetPassword(ctx context.Context, req *adminModel.ResetPas
 	}
 
 	return service.SysUserService.ResetPassword(ctx, req.Id, req)
+}
+
+// 验证用户是否有权限访问接口
+func (c *sAuthLogic) CheckPermission(ctx context.Context, req *adminModel.CheckPermissionReq) (bool, error) {
+
+	// 获取用户信息
+	user, roles, err := service.SysUserService.GetById(ctx, req.UserId)
+	if err != nil {
+		return false, err
+	}
+
+	// 检查账号是否禁用
+	if user.Status != adminModel.UserStatusEnabled {
+		// 检查账号是否锁定
+		if user.Status == adminModel.UserStatusLocked {
+			return false, errorUtil.ErrorUserLocked
+		}
+		return false, errorUtil.ErrorUserDisabled
+	}
+
+	// 检查用户是否存在
+	if user == nil {
+		return false, errors.New("用户不存在")
+	}
+
+	if len(roles) == 0 {
+		return false, errors.New("用户没有角色，不能访问接口")
+	}
+
+	// 获取接口权限码
+	permissionCode, err := service.SysApiService.GetPermissionCode(ctx, req.Method, req.Url)
+	if err != nil {
+		return false, err
+	}
+
+	// 检查角色是否有访问接口的权限
+	ok, err := service.SysRoleService.CheckPermission(ctx, roles, permissionCode)
+	if err != nil {
+		return false, err
+	}
+
+	return ok, nil
+
 }

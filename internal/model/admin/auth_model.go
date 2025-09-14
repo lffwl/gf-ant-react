@@ -37,3 +37,10 @@ type ResetPasswordReq struct {
 	Id       uint64 `json:"id"`
 	Password string `json:"password"`
 }
+
+// 验证用户是否有权限访问接口
+type CheckPermissionReq struct {
+	UserId uint64 `json:"userId"`
+	Url    string `json:"url"`
+	Method string `json:"method"`
+}

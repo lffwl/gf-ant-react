@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Table, Button, Space, Drawer, Form, Input, InputNumber, Switch, TreeSelect, Popconfirm, Card, Row, Col, Layout } from 'antd';
 const { Content } = Layout;
 import { departmentService } from '../../services/departmentService';
@@ -21,6 +21,9 @@ const DepartmentManagement: React.FC = () => {
   const [departmentData, setDepartmentData] = useState<DepartmentData[]>([]);
   const [loading, setLoading] = useState(false);
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
+  
+  // 使用ref来跟踪上一次的查询参数
+  const prevQueryParamsRef = useRef<string>('');
 
   const columns: ColumnsType<DepartmentData> = [
     {
@@ -83,8 +86,16 @@ const DepartmentManagement: React.FC = () => {
     },
   ];
 
+  // 初始加载部门数据
   useEffect(() => {
-    fetchDepartmentTree();
+    // 将当前查询参数序列化为字符串进行比较
+    const currentQueryParams = JSON.stringify({ action: 'initialLoad' });
+    
+    // 只有当查询参数真正发生变化时才调用接口
+    if (prevQueryParamsRef.current !== currentQueryParams) {
+      prevQueryParamsRef.current = currentQueryParams;
+      fetchDepartmentTree();
+    }
   }, []);
 
   const handleEdit = (record: DepartmentData) => {
@@ -101,7 +112,12 @@ const DepartmentManagement: React.FC = () => {
   const handleDelete = async (record: DepartmentData) => {
     try {
       await departmentService.deleteDepartment(record.key.toString());
-      fetchDepartmentTree();
+      // 删除后重新加载数据
+      const currentQueryParams = JSON.stringify({ action: 'delete', recordId: record.key });
+      if (prevQueryParamsRef.current !== currentQueryParams) {
+        prevQueryParamsRef.current = currentQueryParams;
+        fetchDepartmentTree();
+      }
     } catch (error) {
       // 错误处理已经在departmentService中完成
     }
@@ -229,7 +245,15 @@ const DepartmentManagement: React.FC = () => {
                 setDrawerVisible(false);
                 setEditingRecord(null);
                 form.resetFields();
-                fetchDepartmentTree();
+                // 提交表单后重新加载数据
+                const currentQueryParams = JSON.stringify({
+                  action: editingRecord ? 'update' : 'create',
+                  recordId: editingRecord?.key
+                });
+                if (prevQueryParamsRef.current !== currentQueryParams) {
+                  prevQueryParamsRef.current = currentQueryParams;
+                  fetchDepartmentTree();
+                }
               } catch (error) {
                 // 错误处理已经在departmentService中完成
               }

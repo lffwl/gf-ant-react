@@ -35,12 +35,15 @@ const RoleManagement: React.FC = () => {
   const [apiTreeData, setApiTreeData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
+  
+  // 使用ref来跟踪上一次的查询参数
+  const prevQueryParamsRef = useRef<string>('');
 
   // 创建统一的查询参数状态对象
   const [queryParams, setQueryParams] = useState({
     page: 1,
     pageSize: 10,
-    name: '',
+    name: undefined as string | undefined,
     status: undefined as boolean | undefined
   });
 
@@ -146,8 +149,20 @@ const RoleManagement: React.FC = () => {
 
   // 当查询参数变化时自动加载数据
   useEffect(() => {
-    fetchRoleList();
-  }, [queryParams]); // 依赖于查询参数对象
+    // 将查询参数序列化为字符串进行比较
+    const currentQueryParams = JSON.stringify({
+      page: queryParams.page,
+      pageSize: queryParams.pageSize,
+      name: queryParams.name,
+      status: queryParams.status
+    });
+    
+    // 只有当查询参数真正发生变化时才调用接口
+    if (prevQueryParamsRef.current !== currentQueryParams) {
+      prevQueryParamsRef.current = currentQueryParams;
+      fetchRoleList();
+    }
+  }, [queryParams.page, queryParams.pageSize, queryParams.name, queryParams.status]);
 
   // 获取API树形数据
   const fetchApiTree = async () => {
@@ -246,7 +261,16 @@ const RoleManagement: React.FC = () => {
   const handleDelete = async (record: RoleData) => {
     try {
       await roleService.deleteRole(record.id);
-      fetchRoleList();
+      // 删除后重新加载数据
+      const currentQueryParams = JSON.stringify({ 
+        action: 'delete', 
+        recordId: record.id,
+        ...queryParams 
+      });
+      if (prevQueryParamsRef.current !== currentQueryParams) {
+        prevQueryParamsRef.current = currentQueryParams;
+        fetchRoleList();
+      }
     } catch (error) {
       // 错误处理已经在roleService中完成
     }
@@ -277,7 +301,16 @@ const RoleManagement: React.FC = () => {
       setDrawerVisible(false);
       setEditingRecord(null);
       form.resetFields();
-      fetchRoleList();
+      // 提交表单后重新加载数据
+      const currentQueryParams = JSON.stringify({
+        action: editingRecord ? 'update' : 'create',
+        recordId: editingRecord?.id,
+        ...queryParams
+      });
+      if (prevQueryParamsRef.current !== currentQueryParams) {
+        prevQueryParamsRef.current = currentQueryParams;
+        fetchRoleList();
+      }
     } catch (error) {
       // 错误处理已经在roleService中完成
     }

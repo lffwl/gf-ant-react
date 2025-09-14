@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { get, post, put, del } from '../utils/request';
 
 export interface RoleCreateReq {
   name: string;
@@ -53,15 +53,13 @@ export interface ApiResponse<T = any> {
 export const roleService = {
   async createRole(data: RoleCreateReq): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sys/role/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
+      const result = await post<ApiResponse>(
+        '/sys/role/create',
+        data,
+        {
+          operationName: '角色创建'
+        }
+      );
       
       return result;
     } catch (error) {
@@ -71,15 +69,13 @@ export const roleService = {
 
   async updateRole(data: RoleUpdateReq): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sys/role/update/${data.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
+      const result = await put<ApiResponse>(
+        `/sys/role/update/${data.id}`,
+        data,
+        {
+          operationName: '角色更新'
+        }
+      );
       
       return result;
     } catch (error) {
@@ -89,11 +85,12 @@ export const roleService = {
 
   async deleteRole(id: number): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sys/role/delete/${id}`, {
-        method: 'DELETE',
-      });
-
-      const result = await response.json();
+      const result = await del<ApiResponse>(
+        `/sys/role/delete/${id}`,
+        {
+          operationName: '角色删除'
+        }
+      );
       
       return result;
     } catch (error) {
@@ -103,17 +100,14 @@ export const roleService = {
 
   async getRoleList(params: { page: number; size: number; name?: string; status?: boolean }): Promise<ApiResponse<RoleListResponse>> {
     try {
-      const queryParams = new URLSearchParams();
-      queryParams.append('page', params.page.toString());
-      queryParams.append('size', params.size.toString());
-      if (params.name) queryParams.append('name', params.name);
-      if (params.status !== undefined) queryParams.append('status', params.status.toString());
-
-      const response = await fetch(`${API_BASE_URL}/sys/role/list?${queryParams}`, {
-        method: 'GET',
-      });
-
-      const result = await response.json();
+      const result = await get<ApiResponse<RoleListResponse>>(
+        '/sys/role/list',
+        params,
+        {
+          operationName: '获取角色列表'
+        }
+      );
+      
       // 列表接口不需要使用handleApiResponse
       if (result.code === 0) {
         return result;
@@ -127,11 +121,13 @@ export const roleService = {
 
   async getRoleDetail(id: number): Promise<ApiResponse<RoleDetailResponse>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sys/role/detail/${id}`, {
-        method: 'GET',
-      });
-
-      const result = await response.json();
+      const result = await get<ApiResponse<RoleDetailResponse>>(
+        `/sys/role/detail/${id}`,
+        {},
+        {
+          operationName: '获取角色详情'
+        }
+      );
       
       return result;
     } catch (error) {

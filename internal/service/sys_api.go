@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"gf-ant-react/internal/dao"
 	"gf-ant-react/internal/model/admin"
@@ -91,4 +92,18 @@ func (s *SysApi) GetByIds(ctx context.Context, ids []uint64) ([]*entity.SysApis,
 		return nil, err
 	}
 	return apis, nil
+}
+
+// 根据请求类型和路径获取权限code
+func (s *SysApi) GetPermissionCode(ctx context.Context, method, url string) (string, error) {
+
+	var api *entity.SysApis
+	if err := dao.SysApis.Ctx(ctx).Fields(dao.SysApis.Columns().PermissionCode).Where(dao.SysApis.Columns().Url, url).Where(dao.SysApis.Columns().Method, method).Scan(&api); err != nil {
+		return "", err
+	}
+	if api == nil {
+		return "", errors.New("接口不存在")
+	}
+
+	return api.PermissionCode, nil
 }

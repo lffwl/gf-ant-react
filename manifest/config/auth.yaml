@@ -2,3 +2,10 @@
 publicRoutes:
   - /auth/reset-password
 
+# 不需要鉴权的接口
+ignoreRoutes:
+  "/auth/login":  "POST"
+  "/auth/captcha": "GET"
+
+# TokenHeader 登录后返回的 token 头信息
+TokenHeader: X-Token

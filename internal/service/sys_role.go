@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"gf-ant-react/internal/dao"
@@ -284,4 +285,21 @@ func (s *SysRole) GetUserRoles(ctx context.Context, userId uint64) ([]*entity.Sy
 		return nil, err
 	}
 	return roles, nil
+}
+
+// 检查角色集合是否可以访问权限
+func (s *SysRole) CheckPermission(ctx context.Context, roleIds []uint64, permissionCode string) (bool, error) {
+
+	// 检查角色是否为空
+	if len(roleIds) == 0 {
+		return false, errors.New("角色不能为空")
+	}
+
+	// 检查角色是否有访问接口的权限
+	count, err := dao.SysRoleApis.Ctx(ctx).Where(dao.SysRoleApis.Columns().RoleId, roleIds).Where(dao.SysRoleApis.Columns().PermissionCode, permissionCode).Count()
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
 }
