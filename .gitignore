@@ -20,3 +20,4 @@ bin
 /ant/node_modules/
 /ant/dist/
 *.exe
+gf-ant-react

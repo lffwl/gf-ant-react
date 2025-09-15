@@ -2,6 +2,11 @@
 
 goframe + Ant Design React + RABC 
 
+## Demo 演示
+> http://gf-ant-admin.lffwl.top:20000/
+> 账号：admin
+> 密码：123456
+
 ## 前端运行
 
 ```bash
