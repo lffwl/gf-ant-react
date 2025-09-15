@@ -21,3 +21,4 @@ bin
 /ant/dist/
 *.exe
 gf-ant-react
+hack/config.yaml
