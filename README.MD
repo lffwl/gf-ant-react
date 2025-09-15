@@ -18,6 +18,7 @@ npm run dev
 ## 后端运行
 
 ```bash
+cp manifest/config/config.dev.yaml manifest/config/config.yaml
 go run .
 ```
 
