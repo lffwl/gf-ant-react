@@ -1,0 +1,18 @@
+# https://goframe.org/docs/web/server-config-file-template
+server:
+  address:     ":8000"
+  openapiPath: "/api.json"
+  swaggerPath: "/swagger"
+  serverAgent: "gf-ant-react"
+
+# https://goframe.org/docs/core/glog-config
+logger:
+  level : "all"
+  stdout: true
+
+# https://goframe.org/docs/core/gdb-config-file
+database:
+  default:
+    link: "mysql:root:123456@tcp(127.0.0.1:3306)/demo?loc=Local&parseTime=true"
+    debug: true                # (可选)开启调试模式
+    dryRun: true               # (可选)ORM空跑(只读不写)
