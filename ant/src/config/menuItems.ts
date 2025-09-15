@@ -9,10 +9,10 @@ import {
   UserAddOutlined 
 } from '@ant-design/icons';
 import Welcome from '../pages/Welcome';
-import UserManagement from '../pages/permission/UserManagement';
-import ApiManagement from '../pages/permission/ApiManagement/ApiManagementMain';
-import DepartmentManagement from '../pages/permission/DepartmentManagement';
-import RoleManagement from '../pages/permission/RoleManagement';
+import UserManagement from '../pages/permission/user/index';
+import ApiManagement from '../pages/permission/api/index';
+import DepartmentList from '../pages/permission/department/index.tsx';
+import RoleManagement from '../pages/permission/role/index';
 import LoginPage from '../pages/auth/LoginPage';
 import PermissionExample from '../pages/PermissionExample';
 
@@ -66,13 +66,12 @@ export const menuItems: MenuItem[] = [
         icon: React.createElement(TeamOutlined),
         label: '部门管理',
         permission: 'sys.department.tree',
-        component: DepartmentManagement
+        component: DepartmentList
       },
       {
         key: '/permission/example',
         icon: React.createElement(UserAddOutlined),
         label: '权限示例',
-        permission: 'sys.permission.example',
         component: PermissionExample
       },
     ],

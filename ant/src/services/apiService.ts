@@ -12,6 +12,8 @@ export interface SysApiCreateReq {
   description?: string;
 }
 
+import { RequestOptions } from '../utils/request';
+
 export interface ApiResponse<T = any> {
   code: number;
   message: string;
@@ -27,7 +29,7 @@ export interface ApiTreeResponse {
 }
 
 export const apiService = {
-  async createApi(data: SysApiCreateReq): Promise<ApiResponse> {
+  async createApi(data: SysApiCreateReq, options?: Omit<RequestOptions, 'url' | 'method' | 'data'>): Promise<ApiResponse> {
     try {
       // 确保status和isMenu字段是数字0或1
       const processedData = {
@@ -42,7 +44,8 @@ export const apiService = {
         '/sys/api/create',
         processedData,
         {
-          operationName: 'API创建'
+          operationName: 'API创建',
+          ...options
         }
       );
 
@@ -52,13 +55,14 @@ export const apiService = {
       throw error;
     }
   },
-  async getApiTree(): Promise<ApiTreeResponse> {
+  async getApiTree(options?: Omit<RequestOptions, 'url' | 'method' | 'data'>): Promise<ApiTreeResponse> {
     try {
       const result = await get<ApiTreeResponse>(
         '/sys/api/tree',
         {},
         {
-          operationName: '获取API树形结构'
+          operationName: '获取API树形结构',
+          ...options
         }
       );
 
@@ -73,7 +77,7 @@ export const apiService = {
     }
   },
 
-  async updateApi(id: string, data: SysApiCreateReq): Promise<ApiResponse> {
+  async updateApi(id: string, data: SysApiCreateReq, options?: Omit<RequestOptions, 'url' | 'method' | 'data'>): Promise<ApiResponse> {
     try {
       // 确保status和isMenu字段是数字0或1
       const processedData = {
@@ -88,7 +92,8 @@ export const apiService = {
         `/sys/api/update/${id}`,
         processedData,
         {
-          operationName: 'API更新'
+          operationName: 'API更新',
+          ...options
         }
       );
 

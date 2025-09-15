@@ -1,28 +1,15 @@
-import React from 'react';
-import { Drawer, Form, Input, InputNumber, Select, Switch, TreeSelect } from 'antd';
-import type { FormInstance } from 'antd/es/form';
-
-interface ApiData {
-  key: React.Key;
-  parentId: number;
-  name: string;
-  path: string;
-  method: string;
-  permissionCode: string;
-  isMenu: number;
-  status: number;
-  sort: number;
-  description: string;
-  children?: ApiData[];
-}
+import React, { useEffect } from 'react';
+import { Modal, Form, Input, InputNumber, Select, Switch, TreeSelect, Button } from 'antd';
+import { apiService } from '../../../services/apiService';
+import { message } from 'antd';
+import { ApiData, validateHttpMethod, transformToTreeData } from '../../../utils/api/ApiUtils';
 
 interface ApiEditProps {
   visible: boolean;
   editingRecord: ApiData | null;
   apiData: ApiData[];
   onClose: () => void;
-  onSubmit: (values: any) => void;
-  form: FormInstance;
+  onSuccess: () => void;
 }
 
 const ApiEdit: React.FC<ApiEditProps> = ({
@@ -30,84 +17,96 @@ const ApiEdit: React.FC<ApiEditProps> = ({
   editingRecord,
   apiData,
   onClose,
-  onSubmit,
-  form
+  onSuccess
 }) => {
+  const [form] = Form.useForm();
+
+  // 当编辑记录变化时，更新表单值
+  useEffect(() => {
+    if (visible) {
+      if (editingRecord) {
+        form.setFieldsValue({
+          parentId: editingRecord.parentId === 0 ? undefined : editingRecord.parentId,
+          name: editingRecord.name,
+          permissionCode: editingRecord.permissionCode,
+          url: editingRecord.path,
+          method: editingRecord.method,
+          sort: editingRecord.sort,
+          status: editingRecord.status === 1,
+          isMenu: editingRecord.isMenu === 1,
+          description: editingRecord.description
+        });
+      } else {
+        form.resetFields();
+      }
+    }
+  }, [visible, editingRecord, form]);
+
   const handleStatusChange = (checked: boolean) => {
-    console.log('status转换:', checked, '->', checked ? 1 : 0);
     return checked ? 1 : 0;
   };
 
   const handleIsMenuChange = (checked: boolean) => {
-    console.log('isMenu转换:', checked, '->', checked ? 1 : 0);
     return checked ? 1 : 0;
   };
 
+  // 自定义验证器函数，符合Ant Design表单验证器的签名
   const validateMethod = (_: any, value: string) => {
-    return ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'].includes(value)
-      ? Promise.resolve()
-      : Promise.reject(new Error('请求方法必须是GET,POST,PUT,DELETE,PATCH,OPTIONS,HEAD中的一个'));
+    const validationResult = validateHttpMethod(value);
+    return validationResult.isValid ? Promise.resolve() : Promise.reject(new Error(validationResult.message));
+  };
+
+  // 使用工具类转换API数据为TreeSelect需要的格式
+
+  const handleSubmit = async (values: any) => {
+    try {
+      // 确保status和isMenu字段是数字0或1
+      const processedValues = {
+        ...values,
+        status: Number(values.status),
+        isMenu: Number(values.isMenu)
+      };
+
+      if (editingRecord) {
+        await apiService.updateApi(editingRecord.key.toString(), processedValues, { processResponse: false });
+        message.success('API更新成功');
+      } else {
+        await apiService.createApi(processedValues, { processResponse: false });
+        message.success('API创建成功');
+      }
+      onSuccess();
+    } catch (error) {
+      console.error('提交失败:', error);
+    }
   };
 
   return (
-    <Drawer
+    <Modal
       title={editingRecord ? '编辑API' : '新增API'}
-      width={720}
       open={visible}
-      onClose={onClose}
-      footer={
-        <div style={{ textAlign: 'right', marginBottom: 10 }}>
-
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              marginRight: 8,
-              padding: '4px 15px',
-              border: '1px solid #d9d9d9',
-              borderRadius: 2,
-              background: '#fff',
-              cursor: 'pointer',
-            }}
-          >
-            取消
-          </button>
-          <button
-            type="button"
-            onClick={() => form.submit()}
-            style={{
-              padding: '4px 15px',
-              border: '1px solid #1890ff',
-              borderRadius: 2,
-              background: '#1890ff',
-              color: '#fff',
-              cursor: 'pointer',
-            }}
-          >
-            提交
-          </button>
-        </div>
-      }
+      onCancel={onClose}
+      footer={null}
+      width={720}
     >
       <Form
         form={form}
         layout="vertical"
-        onFinish={onSubmit}
+        onFinish={handleSubmit}
       >
         {editingRecord && (
           <Form.Item label="ID">
             <Input value={editingRecord.key.toString()} disabled />
           </Form.Item>
         )}
+
         <Form.Item
-          name="parentId"
           label="上级API"
-          rules={[{ type: 'integer', message: '上级ID必须为整数' }]}
+          name="parentId"
         >
           <TreeSelect
             placeholder="请选择上级API，不选表示根节点"
             style={{ width: '100%' }}
-            treeData={apiData}
+            treeData={transformToTreeData(apiData)}
             fieldNames={{ label: 'name', value: 'key', children: 'children' }}
             treeDefaultExpandAll
             allowClear
@@ -206,12 +205,23 @@ const ApiEdit: React.FC<ApiEditProps> = ({
         <Form.Item
           name="description"
           label="描述"
-          rules={[{ max: 500, message: '描述长度不能超过500个字符' }]}
+          rules={[
+            { max: 200, message: '描述长度不能超过200个字符' }
+          ]}
         >
-          <Input.TextArea rows={3} placeholder="请输入描述" />
+          <Input.TextArea rows={4} placeholder="请输入描述信息" />
+        </Form.Item>
+
+        <Form.Item style={{ textAlign: 'right' }}>
+          <Button style={{ marginRight: 8 }} onClick={onClose}>
+            取消
+          </Button>
+          <Button type="primary" htmlType="submit">
+            提交
+          </Button>
         </Form.Item>
       </Form>
-    </Drawer>
+    </Modal>
   );
 };
 

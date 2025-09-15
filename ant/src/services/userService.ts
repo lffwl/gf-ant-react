@@ -1,4 +1,4 @@
-import { post, get, put, del } from '../utils/request';
+import { post, get, put, del, RequestOptions } from '../utils/request';
 
 export interface UserCreateReq {
   username: string;
@@ -58,13 +58,14 @@ export interface UserUpdatePasswordReq {
 }
 
 export const userService = {
-  async createUser(data: UserCreateReq): Promise<ApiResponse> {
+  async createUser(data: UserCreateReq, options?: Omit<RequestOptions, 'url' | 'method' | 'data'>): Promise<ApiResponse> {
     try {
       const result = await post<ApiResponse>(
         '/sys/user/create',
         data,
         {
-          operationName: '用户创建'
+          operationName: '用户创建',
+          ...options
         }
       );
 
@@ -75,13 +76,14 @@ export const userService = {
     }
   },
 
-  async updateUser(data: UserUpdateReq): Promise<ApiResponse> {
+  async updateUser(data: UserUpdateReq, options?: Omit<RequestOptions, 'url' | 'method' | 'data'>): Promise<ApiResponse> {
     try {
       const result = await put<ApiResponse>(
         `/sys/user/update/${data.id}`,
         data,
         {
-          operationName: '用户更新'
+          operationName: '用户更新',
+          ...options
         }
       );
 
@@ -92,12 +94,13 @@ export const userService = {
     }
   },
 
-  async deleteUser(id: number): Promise<ApiResponse> {
+  async deleteUser(id: number, options?: Omit<RequestOptions, 'url' | 'method'>): Promise<ApiResponse> {
     try {
       const result = await del<ApiResponse>(
         `/sys/user/delete/${id}`,
         {
-          operationName: '用户删除'
+          operationName: '用户删除',
+          ...options
         }
       );
 
@@ -108,13 +111,14 @@ export const userService = {
     }
   },
 
-  async getUserList(params: { page: number; size: number; username?: string; departmentId?: number; status?: number }): Promise<ApiResponse<UserListResponse>> {
+  async getUserList(params: { page: number; size: number; username?: string; departmentId?: number; status?: number }, options?: Omit<RequestOptions, 'url' | 'method' | 'data'>): Promise<ApiResponse<UserListResponse>> {
     try {
       const result = await get<ApiResponse<UserListResponse>>(
         '/sys/user/list',
         params,
         {
-          operationName: '获取用户列表'
+          operationName: '获取用户列表',
+          ...options
         }
       );
 
@@ -128,13 +132,14 @@ export const userService = {
     }
   },
 
-  async getUserDetail(id: number): Promise<ApiResponse<UserDetailResponse>> {
+  async getUserDetail(id: number, options?: Omit<RequestOptions, 'url' | 'method' | 'data'>): Promise<ApiResponse<UserDetailResponse>> {
     try {
       const result = await get<ApiResponse<UserDetailResponse>>(
         `/sys/user/detail/${id}`,
         {},
         {
-          operationName: '获取用户详情'
+          operationName: '获取用户详情',
+          ...options
         }
       );
 
@@ -145,13 +150,14 @@ export const userService = {
     }
   },
 
-  async updateUserPassword(id: number, data: UserUpdatePasswordReq): Promise<ApiResponse> {
+  async updateUserPassword(id: number, data: UserUpdatePasswordReq, options?: Omit<RequestOptions, 'url' | 'method' | 'data'>): Promise<ApiResponse> {
     try {
       const result = await put<ApiResponse>(
         `/sys/user/update-password/${id}`,
         data,
         {
-          operationName: '密码修改'
+          operationName: '密码修改',
+          ...options
         }
       );
 

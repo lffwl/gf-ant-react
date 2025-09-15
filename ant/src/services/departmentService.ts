@@ -47,6 +47,15 @@ export const departmentService = {
       throw error;
     }
   },
+  
+  // 获取部门详情
+  async getDepartmentDetail(id: string): Promise<ApiResponse> {
+    try {
+      return get<ApiResponse>(`/sys/department/detail/${id}`);
+    } catch (error) {
+      throw error;
+    }
+  },
 
   async getDepartmentTree(): Promise<DepartmentTreeResponse> {
     try {
