@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Drawer, Form, Input, Select, Switch, Space, Button, message } from 'antd';
+import { Modal, Form, Input, Select, Switch, message, Button, Space } from 'antd';
 import { userService, UserData } from '../../../services/userService.ts';
 
 interface UserEditProps {
@@ -207,30 +207,34 @@ const UserEdit: React.FC<UserEditProps> = ({
   };
 
   return (
-    <Drawer
+    <Modal
       title={getTitle()}
-      width={520}
       open={visible}
-      onClose={handleCancel}
-      footer={
-        <Space>
-          <Button onClick={handleCancel}>取消</Button>
-          <Button type="primary" onClick={handleSubmit}>
-            提交
-          </Button>
-        </Space>
-      }
+      onCancel={handleCancel}
+      footer={null}
+      width={520}
+      centered
     >
       <Form
-        form={form}
-        layout="vertical"
-        initialValues={{
-          status: true,
-        }}
-      >
-        {renderFormItems()}
-      </Form>
-    </Drawer>
+          form={form}
+          layout="vertical"
+          initialValues={{
+            status: true,
+          }}
+        >
+          {renderFormItems()}
+          <Form.Item style={{ textAlign: 'right', marginTop: 24 }}>
+            <Space>
+              <Button onClick={handleCancel}>
+                取消
+              </Button>
+              <Button type="primary" onClick={handleSubmit}>
+                提交
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
   );
 };
 

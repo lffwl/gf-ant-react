@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Drawer, Form, Input, InputNumber, Select, Switch, TreeSelect, message, Button, Space } from 'antd';
+import { Modal, Form, Input, InputNumber, Select, Switch, TreeSelect, message, Button, Space, Row, Col } from 'antd';
 import { roleService, RoleCreateReq } from '../../../services/roleService.ts';
 import { apiService } from '../../../services/apiService.ts';
 import { RoleData, convertApiIdsToObjects, convertApiIdsToValues, transformApiData } from '../../../utils/role/RoleUtils.tsx';
@@ -125,22 +125,13 @@ const RoleEdit: React.FC<RoleEditProps> = ({
   };
 
   return (
-    <Drawer
+    <Modal
       title={editingRecord ? '编辑角色' : '新增角色'}
-      width={600}
       open={visible}
-      onClose={onClose}
-      loading={loading}
-      footer={
-        <Space>
-          <Button key="cancel" onClick={onClose}>
-            取消
-          </Button>
-          <Button key="submit" type="primary" onClick={() => formInstance.submit()}>
-            提交
-          </Button>
-        </Space>
-      }
+      onCancel={onClose}
+      footer={null}
+      width={960}
+      centered
     >
       <Form
         form={formInstance}
@@ -148,79 +139,113 @@ const RoleEdit: React.FC<RoleEditProps> = ({
         onFinish={handleCreateOrUpdate}
       >
         {editingRecord && (
-          <Form.Item label="ID">
-            <Input value={editingRecord.id.toString()} disabled />
-          </Form.Item>
+          <Row gutter={24}>
+            <Col span={24}>
+              <Form.Item label="ID">
+                <Input value={editingRecord.id.toString()} disabled />
+              </Form.Item>
+            </Col>
+          </Row>
         )}
 
-        <Form.Item
-          name="name"
-          label="角色名称"
-          rules={[
-            { required: true, message: '角色名称不能为空' },
-            { min: 1, max: 50, message: '角色名称长度必须在1-50个字符之间' }
-          ]}
-        >
-          <Input placeholder="请输入角色名称" />
-        </Form.Item>
+        <Row gutter={24}>
+          <Col span={12}>
+            <Form.Item
+              name="name"
+              label="角色名称"
+              rules={[
+                { required: true, message: '角色名称不能为空' },
+                { min: 1, max: 50, message: '角色名称长度必须在1-50个字符之间' }
+              ]}
+            >
+              <Input placeholder="请输入角色名称" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="dataScope"
+              label="数据权限范围"
+              rules={[{ required: true, message: '数据权限范围不能为空' }]}
+            >
+              <Select placeholder="请选择数据权限范围">
+                <Select.Option value={1}>全部</Select.Option>
+                <Select.Option value={2}>本部门</Select.Option>
+                <Select.Option value={3}>本部门及子部门</Select.Option>
+                <Select.Option value={4}>仅本人</Select.Option>
+                <Select.Option value={5}>自定义</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <Form.Item
-          name="description"
-          label="描述"
-          rules={[{ max: 500, message: '描述长度不能超过500个字符' }]}
-        >
-          <TextArea rows={3} placeholder="请输入角色描述" />
-        </Form.Item>
+        <Row gutter={24}>
+          <Col span={12}>
+            <Form.Item
+              name="sort"
+              label="排序"
+              rules={[{ type: 'integer', message: '排序必须为整数' }]}
+            >
+              <InputNumber placeholder="请输入排序" style={{ width: '100%' }} />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="status"
+              label="状态"
+              valuePropName="checked"
+              initialValue={true}
+            >
+              <Switch checkedChildren="启用" unCheckedChildren="禁用" />
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <Form.Item
-          name="dataScope"
-          label="数据权限范围"
-          rules={[{ required: true, message: '数据权限范围不能为空' }]}
-        >
-          <Select placeholder="请选择数据权限范围">
-            <Select.Option value={1}>全部</Select.Option>
-            <Select.Option value={2}>本部门</Select.Option>
-            <Select.Option value={3}>本部门及子部门</Select.Option>
-            <Select.Option value={4}>仅本人</Select.Option>
-            <Select.Option value={5}>自定义</Select.Option>
-          </Select>
-        </Form.Item>
+        <Row gutter={24}>
+          <Col span={24}>
+            <Form.Item
+              name="description"
+              label="描述"
+              rules={[{ max: 500, message: '描述长度不能超过500个字符' }]}
+            >
+              <TextArea rows={3} placeholder="请输入角色描述" />
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <Form.Item
-          name="sort"
-          label="排序"
-          rules={[{ type: 'integer', message: '排序必须为整数' }]}
-        >
-          <InputNumber placeholder="请输入排序" style={{ width: '100%' }} />
-        </Form.Item>
-
-        <Form.Item
-          name="status"
-          label="状态"
-          valuePropName="checked"
-          initialValue={true}
-        >
-          <Switch checkedChildren="启用" unCheckedChildren="禁用" />
-        </Form.Item>
-
-        <Form.Item
-          name="apiIds"
-          label="API权限"
-        >
+        <Row gutter={24}>
+          <Col span={24}>
+            <Form.Item
+              name="apiIds"
+              label="API权限"
+            >
           <TreeSelect
-            treeData={apiTreeData}
-            placeholder="请选择API权限"
-            style={{ width: '100%' }}
-            multiple
-            treeCheckable
-            showCheckedStrategy={TreeSelect.SHOW_ALL}
-            treeCheckStrictly={true}
-            fieldNames={{ label: 'title', value: 'value', children: 'children' }}
-            treeDefaultExpandAll
-          />
-        </Form.Item>
-      </Form>
-    </Drawer>
+              treeData={apiTreeData}
+              placeholder="请选择API权限"
+              style={{ width: '100%' }}
+              multiple
+              treeCheckable
+              showCheckedStrategy={TreeSelect.SHOW_ALL}
+              treeCheckStrictly={true}
+              fieldNames={{ label: 'title', value: 'value', children: 'children' }}
+              treeDefaultExpandAll
+              dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+            />
+          </Form.Item>
+          </Col>
+        </Row>
+          
+          <Form.Item style={{ textAlign: 'right', marginTop: 24 }}>
+            <Space>
+              <Button onClick={onClose}>
+                取消
+              </Button>
+              <Button type="primary" onClick={() => formInstance.submit()} loading={loading}>
+                提交
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+    </Modal>
   );
 };
 

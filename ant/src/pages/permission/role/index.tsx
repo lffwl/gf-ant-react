@@ -9,7 +9,7 @@ import { RoleData, renderDataScopeTag, renderStatusTag, renderApiCountTag } from
 const { Header, Content } = Layout;
 
 const RoleList: React.FC = () => {
-  const [drawerVisible, setDrawerVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [editingRecord, setEditingRecord] = useState<RoleData | null>(null);
   const [roleData, setRoleData] = useState<RoleData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -150,7 +150,7 @@ const RoleList: React.FC = () => {
 
   const handleEdit = (record: RoleData) => {
     setEditingRecord(record);
-    setDrawerVisible(true);
+    setModalVisible(true);
   };
 
   const handleDelete = async (record: RoleData) => {
@@ -173,11 +173,11 @@ const RoleList: React.FC = () => {
 
   const handleCreate = () => {
     setEditingRecord(null);
-    setDrawerVisible(true);
+    setModalVisible(true);
   };
 
   const handleSuccess = () => {
-    setDrawerVisible(false);
+    setModalVisible(false);
     setEditingRecord(null);
     // 提交表单后重新加载数据
     const currentQueryParams = JSON.stringify({
@@ -265,10 +265,10 @@ const RoleList: React.FC = () => {
         </Content>
 
         <RoleEdit
-          visible={drawerVisible}
+          visible={modalVisible}
           editingRecord={editingRecord}
           onClose={() => {
-            setDrawerVisible(false);
+            setModalVisible(false);
             setEditingRecord(null);
           }}
           onSuccess={handleSuccess}
