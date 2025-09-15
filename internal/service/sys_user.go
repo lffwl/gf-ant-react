@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"gf-ant-react/internal/dao"
 	"gf-ant-react/internal/model/admin"
@@ -200,4 +201,13 @@ func (s *SysUser) ResetPassword(ctx context.Context, id uint64, data *admin.Rese
 // 根据id检查用户是否存在
 func (s *SysUser) CheckById(ctx context.Context, id uint64) (bool, error) {
 	return dao.SysUsers.Ctx(ctx).Where(dao.SysUsers.Columns().Id, id).Exist()
+}
+
+// 更新登录时间和登录IP
+func (s *SysUser) UpdateLoginInfo(ctx context.Context, id uint64, ip string) error {
+	_, err := dao.SysUsers.Ctx(ctx).FieldsEx(dao.SysUsers.Columns().Id).Where(dao.SysUsers.Columns().Id, id).Data(map[string]interface{}{
+		dao.SysUsers.Columns().LastLoginIp: ip,
+		dao.SysUsers.Columns().LastLoginAt: time.Now(),
+	}).Update()
+	return err
 }

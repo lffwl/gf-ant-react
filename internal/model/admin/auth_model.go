@@ -19,6 +19,7 @@ type CaptchaRes struct {
 type LoginReq struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Ip       string `json:"ip"`
 }
 
 type LoginRes struct {

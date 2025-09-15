@@ -88,6 +88,12 @@ func (c *sAuthLogic) Login(ctx context.Context, req *adminModel.LoginReq) (res *
 	// 刷新时间
 	res.Refresh = res.Expire.Add(time.Duration(jwt.JwtUtility.RefreshExpire) * time.Second)
 
+	// 更新登录时间和登录IP
+	err = service.SysUserService.UpdateLoginInfo(ctx, res.User.Id, req.Ip)
+	if err != nil {
+		return nil, err
+	}
+
 	return
 }
 
