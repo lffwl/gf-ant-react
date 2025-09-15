@@ -3,6 +3,8 @@ package v1
 import (
 	"gf-ant-react/internal/model/admin"
 
+	adminModel "gf-ant-react/internal/model/admin"
+
 	"github.com/gogf/gf/v2/frame/g"
 )
 
@@ -44,4 +46,15 @@ type AuthResetPasswordReq struct {
 // 重置密码返回
 type AuthResetPasswordRes struct {
 	g.Meta `mime:"application/json"`
+}
+
+// 个人中心
+type AuthProfileReq struct {
+	g.Meta `path:"/auth/profile" tags:"Auth" method:"get" summary:"个人中心"`
+}
+
+// 个人中心返回
+type AuthProfileRes struct {
+	g.Meta `mime:"application/json"`
+	*adminModel.ProfileRes
 }

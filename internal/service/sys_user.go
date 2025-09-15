@@ -211,3 +211,13 @@ func (s *SysUser) UpdateLoginInfo(ctx context.Context, id uint64, ip string) err
 	}).Update()
 	return err
 }
+
+// 个人中心
+func (s *SysUser) Profile(ctx context.Context, id uint64) (*entity.SysUsers, error) {
+	var user *entity.SysUsers
+	err := dao.SysUsers.Ctx(ctx).FieldsEx(dao.SysUsers.Columns().PasswordHash).Where(dao.SysUsers.Columns().Id, id).Scan(&user)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}

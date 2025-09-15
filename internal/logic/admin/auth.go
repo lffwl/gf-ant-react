@@ -94,6 +94,9 @@ func (c *sAuthLogic) Login(ctx context.Context, req *adminModel.LoginReq) (res *
 		return nil, err
 	}
 
+	// 去掉密码信息
+	res.User.PasswordHash = ""
+
 	return
 }
 
@@ -159,4 +162,18 @@ func (c *sAuthLogic) CheckPermission(ctx context.Context, req *adminModel.CheckP
 
 	return ok, nil
 
+}
+
+// 个人中心
+func (c *sAuthLogic) Profile(ctx context.Context, req *adminModel.ProfileReq) (res *adminModel.ProfileRes, err error) {
+
+	res = &adminModel.ProfileRes{}
+
+	// 获取用户信息
+	res.User, err = service.SysUserService.Profile(ctx, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }

@@ -72,6 +72,7 @@ export const menuItems: MenuItem[] = [
         key: '/permission/example',
         icon: React.createElement(UserAddOutlined),
         label: '权限示例',
+        hidden: true,
         component: PermissionExample
       },
     ],

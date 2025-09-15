@@ -1,6 +1,7 @@
 # 只需要登录不需要权限的路由
 publicRoutes:
   "/auth/reset-password": "POST"
+  "/auth/profile": "GET"
 
 # 不需要鉴权的接口
 ignoreRoutes:

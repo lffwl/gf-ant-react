@@ -45,3 +45,13 @@ type CheckPermissionReq struct {
 	Url    string `json:"url"`
 	Method string `json:"method"`
 }
+
+// 个人中心
+type ProfileReq struct {
+	UserId uint64 `json:"userId"`
+}
+
+// 个人中心返回
+type ProfileRes struct {
+	User *entity.SysUsers `json:"user"`
+}

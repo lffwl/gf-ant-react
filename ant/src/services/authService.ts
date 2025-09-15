@@ -210,4 +210,24 @@ export const authService = {
       throw error;
     }
   },
+
+  /**
+   * 获取个人中心信息
+   * @returns 个人中心信息
+   */
+  async getProfile(): Promise<ApiResponse<{ user: User }>> {
+    try {
+      const result = await get<ApiResponse<{ user: User }>>(
+        '/auth/profile',
+        {},
+        {
+          operationName: '获取个人中心信息',
+          needToken: true
+        }
+      );
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
