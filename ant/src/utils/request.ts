@@ -52,7 +52,8 @@ export const request = async <T = any>(options: RequestOptions): Promise<T> => {
 
   // 准备请求头
   const requestHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
+    // 对于FormData类型，不设置默认Content-Type，让浏览器自动处理boundary
+    ...(data instanceof FormData ? {} : {'Content-Type': 'application/json'}),
     ...headers
   };
 
@@ -74,11 +75,11 @@ export const request = async <T = any>(options: RequestOptions): Promise<T> => {
   }, timeout);
 
   try {
-    // 发送请求
+    // 发送请求 - 根据数据类型决定是否需要JSON序列化
     const response = await fetch(fullUrl, {
       method,
       headers: requestHeaders,
-      body: data ? JSON.stringify(data) : undefined,
+      body: data instanceof FormData ? data : (data ? JSON.stringify(data) : undefined),
       signal,
       ...rest
     });

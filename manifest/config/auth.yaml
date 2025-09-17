@@ -3,6 +3,7 @@ publicRoutes:
   "/auth/reset-password": "POST"
   "/auth/profile": "GET"
   "/sys/upload": "POST"
+  "/sys/upload/list": "GET"
 
 # 不需要鉴权的接口
 ignoreRoutes:

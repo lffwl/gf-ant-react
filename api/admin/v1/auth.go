@@ -1,8 +1,6 @@
 package v1
 
 import (
-	"gf-ant-react/internal/model/admin"
-
 	adminModel "gf-ant-react/internal/model/admin"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -34,7 +32,7 @@ type AuthLoginReq struct {
 // AuthLoginRes 登录接口返回
 type AuthLoginRes struct {
 	g.Meta `mime:"application/json"`
-	*admin.LoginRes
+	*adminModel.LoginRes
 }
 
 // 重置密码

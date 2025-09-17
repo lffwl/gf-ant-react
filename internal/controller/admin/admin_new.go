@@ -13,3 +13,9 @@ type ControllerV1 struct{}
 func NewV1() admin.IAdminV1 {
 	return &ControllerV1{}
 }
+
+type ControllerCms struct{}
+
+func NewCms() admin.IAdminCms {
+	return &ControllerCms{}
+}

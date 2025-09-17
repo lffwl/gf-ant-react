@@ -34,6 +34,7 @@ var (
 				group.Bind(
 					hello.NewV1(),
 					admin.NewV1(),
+					admin.NewCms(),
 				)
 			})
 			s.Run()

@@ -6,7 +6,10 @@ import {
   HomeOutlined, 
   TeamOutlined, 
   SafetyOutlined, 
-  UserAddOutlined 
+  UserAddOutlined,
+  SettingOutlined,
+  AppstoreOutlined,
+  UploadOutlined
 } from '@ant-design/icons';
 import Welcome from '../pages/Welcome';
 import UserManagement from '../pages/permission/user/index';
@@ -15,6 +18,8 @@ import DepartmentList from '../pages/permission/department/index.tsx';
 import RoleManagement from '../pages/permission/role/index';
 import LoginPage from '../pages/auth/LoginPage';
 import PermissionExample from '../pages/PermissionExample';
+import CategoryList from '../pages/cms/category/index';
+import DemoPage from '../pages/upload/DemoPage';
 
 export interface MenuItem {
   key: string;
@@ -33,6 +38,27 @@ export const menuItems: MenuItem[] = [
     icon: React.createElement(HomeOutlined),
     label: '欢迎页面',
     component: Welcome
+  },
+  {
+    key: '/cms',
+    icon: React.createElement(SettingOutlined),
+    label: 'CMS管理',
+    permission: 'sys.cms',
+    children: [
+      {
+        key: '/cms/category',
+        icon: React.createElement(AppstoreOutlined),
+        label: '栏目管理',
+        permission: 'sys.cms.category.tree',
+        component: CategoryList
+      }
+    ]
+  },
+  {
+    key: '/upload',
+    icon: React.createElement(UploadOutlined),
+    label: '文件上传',
+    component: DemoPage,
   },
   {
     key: '/permission',

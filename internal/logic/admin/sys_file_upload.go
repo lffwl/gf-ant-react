@@ -7,8 +7,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 	"time"
 
+	v1 "gf-ant-react/api/admin/v1"
 	"gf-ant-react/internal/model/admin"
 	"gf-ant-react/internal/model/entity"
 	"gf-ant-react/internal/service"
@@ -40,18 +43,39 @@ func (s *sSysFileUploadLogic) UploadFile(ctx context.Context, file *ghttp.Upload
 		return nil, fmt.Errorf("文件大小超过限制，最大支持 %.2f MB", float64(maxSize)/1024/1024)
 	}
 
-	// 创建存储目录
-	uploadPath := g.Cfg("upload").MustGet(ctx, "path", "resource/public/upload").String()
-	// 按日期创建子目录
-	dateDir := time.Now().Format("200601")
-	savePath := filepath.Join(uploadPath, dateDir)
-	if err := gfile.Mkdir(savePath); err != nil {
-		return nil, fmt.Errorf("创建存储目录失败: %v", err)
+	// 检查文件扩展名是否在允许列表中
+	allowedExts := g.Cfg("upload").MustGet(ctx, "allowedExtensions").Strings()
+	if !slices.Contains(allowedExts, strings.ToLower(fileExt)) {
+		return nil, fmt.Errorf("文件扩展名 %s 不被允许", fileExt)
+	}
+
+	// 检查文件类型是否在允许列表中
+	allowedTypes := g.Cfg("upload").MustGet(ctx, "allowedTypes").Strings()
+	if !slices.Contains(allowedTypes, fileType) {
+		return nil, fmt.Errorf("文件类型 %s 不被允许", fileType)
 	}
 
 	fileMd5, err := calculateFileMD5(file)
 	if err != nil {
 		return nil, fmt.Errorf("计算文件MD5失败: %v", err)
+	}
+
+	// 检查文件是否已存在
+	fileInfo, err := service.SysFileUploadService.GetFileByMd5(ctx, fileMd5)
+	if err != nil {
+		return nil, fmt.Errorf("检查文件是否已存在失败: %v", err)
+	}
+	if fileInfo != nil {
+		return fileInfo, nil
+	}
+
+	// 创建存储目录
+	uploadPath := g.Cfg("upload").MustGet(ctx, "path", "resource/public/upload").String()
+	// 按日期创建子目录
+	dateDir := time.Now().Format("200601")
+	savePath := filepath.Join(uploadPath, dateDir)
+	if err = gfile.Mkdir(savePath); err != nil {
+		return nil, fmt.Errorf("创建存储目录失败: %v", err)
 	}
 
 	// 保存文件
@@ -60,10 +84,10 @@ func (s *sSysFileUploadLogic) UploadFile(ctx context.Context, file *ghttp.Upload
 		return nil, fmt.Errorf("保存文件失败: %v", err)
 	}
 
-	fileURL := filepath.Join(dateDir, storedFileName)
+	fileURL := filepath.Join(savePath, storedFileName)
 
 	// 构建文件信息
-	fileInfo := &entity.SysFileUpload{
+	fileInfo = &entity.SysFileUpload{
 		FileName:       fileName,
 		FileNameStored: storedFileName,
 		FileSize:       uint64(fileSize),
@@ -132,4 +156,9 @@ func (s *sSysFileUploadLogic) DeleteFile(ctx context.Context, id uint64) error {
 
 	// 调用服务层从数据库中删除文件信息
 	return service.SysFileUploadService.DeleteFileFromDB(ctx, id)
+}
+
+// GetUploadList 获取文件列表
+func (s *sSysFileUploadLogic) GetUploadList(ctx context.Context, req *v1.UploadListReq) ([]*entity.SysFileUpload, int, error) {
+	return service.SysFileUploadService.GetFileList(ctx, req.BizType, req.FileName, req.Page, req.PageSize)
 }
