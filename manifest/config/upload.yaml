@@ -1,0 +1,24 @@
+# 上传配置
+
+# 上传文件的最大大小（单位：字节） 10MB
+maxSize: 10000000
+
+# 准许上传的文件类型
+allowedTypes:
+  - image/png
+  - image/jpeg
+  - image/gif
+  - image/bmp
+  - image/webp
+
+# 可以上传的文件后缀
+allowedExtensions:
+  - .png
+  - .jpg
+  - .jpeg
+  - .gif
+  - .bmp
+  - .webp
+
+# 上传文件的存储路径
+path: "resource/public/upload"

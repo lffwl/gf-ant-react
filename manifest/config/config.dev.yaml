@@ -16,3 +16,9 @@ database:
     link: "mysql:root:123456@tcp(127.0.0.1:3306)/demo?loc=Local&parseTime=true"
     debug: true                # (可选)开启调试模式
     dryRun: true               # (可选)ORM空跑(只读不写)
+
+# 文件上传配置
+upload:
+  path: "/resource/public/upload"     # 文件存储的本地路径
+  baseURL: "/public/upload"           # 文件访问的基础URL
+  maxSize: 104857600                  # 最大允许上传的文件大小（字节），默认100MB

@@ -34,4 +34,5 @@ type IAdminV1 interface {
 	SysUserList(ctx context.Context, req *v1.SysUserListReq) (res *v1.SysUserListRes, err error)
 	SysUserDetail(ctx context.Context, req *v1.SysUserDetailReq) (res *v1.SysUserDetailRes, err error)
 	SysUserUpdatePassword(ctx context.Context, req *v1.SysUserUpdatePasswordReq) (res *v1.SysUserUpdatePasswordRes, err error)
+	Upload(ctx context.Context, req *v1.UploadReq) (res *v1.UploadRes, err error)
 }
