@@ -78,6 +78,8 @@ export const uploadService = {
    * @returns 完整的文件URL
    */
   getFileUrl: (storagePath: string): string => {
-    return `/public/upload/${storagePath}`;
+    // 使用环境变量中的文件服务器URL构建完整的文件访问路径
+    const fileServerUrl = import.meta.env.VITE_FILE_SERVER_URL || '';
+    return `${fileServerUrl}/${storagePath}`;
   }
 };

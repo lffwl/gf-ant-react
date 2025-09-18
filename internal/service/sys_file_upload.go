@@ -6,6 +6,7 @@ import (
 	"gf-ant-react/internal/dao"
 	"gf-ant-react/internal/model/entity"
 
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 )
 
@@ -46,6 +47,12 @@ func (s *SysFileUpload) DeleteFileFromDB(ctx context.Context, id uint64) error {
 func (s *SysFileUpload) GetFileByMd5(ctx context.Context, md5 string) (*entity.SysFileUpload, error) {
 	var file *entity.SysFileUpload
 	err := dao.SysFileUpload.Ctx(ctx).Where(dao.SysFileUpload.Columns().Md5Hash, md5).Scan(&file)
+	if err == nil && file != nil {
+		if _, err = dao.SysFileUpload.Ctx(ctx).Where(dao.SysFileUpload.Columns().Id, file.Id).Data(dao.SysFileUpload.Columns().UpdatedAt, gtime.Now()).Update(); err != nil {
+			return nil, err
+		}
+	}
+
 	return file, err
 }
 
@@ -76,7 +83,7 @@ func (s *SysFileUpload) GetFileList(ctx context.Context, bizType string, fileNam
 	var fileList []*entity.SysFileUpload
 
 	// 分页查询并按ID降序排序
-	if err := model.OrderDesc(dao.SysFileUpload.Columns().Id).Page(page, pageSize).Scan(&fileList); err != nil {
+	if err := model.OrderDesc(dao.SysFileUpload.Columns().UpdatedAt).Page(page, pageSize).Scan(&fileList); err != nil {
 		return nil, 0, err
 	}
 

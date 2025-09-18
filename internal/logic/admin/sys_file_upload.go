@@ -84,7 +84,7 @@ func (s *sSysFileUploadLogic) UploadFile(ctx context.Context, file *ghttp.Upload
 		return nil, fmt.Errorf("保存文件失败: %v", err)
 	}
 
-	fileURL := filepath.Join(savePath, storedFileName)
+	fileURL := fmt.Sprintf("%s/%s", dateDir, storedFileName)
 
 	// 构建文件信息
 	fileInfo = &entity.SysFileUpload{

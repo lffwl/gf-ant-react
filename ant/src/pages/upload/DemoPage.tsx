@@ -97,7 +97,7 @@ const DemoPage: React.FC = () => {
         <Card size="small" title="嵌入方式上传组件" style={{ marginTop: 16 }}>
           <UploadPage 
             bizType="demo"
-            multiple={true}
+            multiple={false}
             onFileSelect={handleFileSelect}
           />
         </Card>
@@ -128,7 +128,7 @@ const DemoPage: React.FC = () => {
           }}>
             <UploadPage 
               bizType="demo"
-              multiple={true}
+              multiple={false}
               modalMode={true}
               onFileSelect={handleFileSelect}
               onClose={handleCloseUploadModal}

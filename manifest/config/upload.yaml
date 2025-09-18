@@ -10,6 +10,7 @@ allowedTypes:
   - image/gif
   - image/bmp
   - image/webp
+  - application/pdf
 
 # 可以上传的文件后缀
 allowedExtensions:
@@ -19,6 +20,7 @@ allowedExtensions:
   - .gif
   - .bmp
   - .webp
+  - .pdf
 
 # 上传文件的存储路径
 path: "resource/public/upload"
