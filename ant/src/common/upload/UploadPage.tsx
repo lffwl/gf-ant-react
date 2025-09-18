@@ -23,7 +23,7 @@ interface UploadPageProps {
 }
 
 const UploadPage: React.FC<UploadPageProps> = ({
-  bizType = 'common',
+  bizType = '',
   multiple = false,
   selectedFileIds = [],
   onFileSelect,
