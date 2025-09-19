@@ -16,6 +16,13 @@ const CategoryList: React.FC = () => {
   const [visible, setVisible] = useState(false);
   const [editCategory, setEditCategory] = useState<CategoryData | undefined>(undefined);
   const [categoryTree, setCategoryTree] = useState<any[]>([]);
+  // 设置默认的内容类型映射，确保即使接口未返回也有选项可用
+  const [categoryContentTypeMap, setCategoryContentTypeMap] = useState<Record<string, string>>({
+    article: '文章',
+    link: '链接',
+    page: '单页',
+    product: '产品'
+  });
   
   // 使用ref来跟踪上一次的查询参数
   const prevQueryParamsRef = useRef<string>('');
@@ -28,22 +35,23 @@ const CategoryList: React.FC = () => {
       width: '10%',
     },
     {
-      title: '分类名称',
+      title: '栏目名称',
       dataIndex: 'name',
       key: 'name',
       width: '20%',
     },
     {
-      title: '分类别名',
+      title: '栏目别名',
       dataIndex: 'slug',
       key: 'slug',
       width: '15%',
     },
     {
-      title: '内容类型',
-      dataIndex: 'contentType',
-      key: 'contentType',
+      title: '栏目类型',
+      dataIndex: 'cType',
+      key: 'cType',
       width: '15%',
+      render: (cType: string) => categoryContentTypeMap[cType] || cType
     },
     {
       title: '状态',
@@ -87,7 +95,7 @@ const CategoryList: React.FC = () => {
           <PermissionAction permission="sys.cms.category.delete">
             <Popconfirm
               title="确认删除"
-              description={`确认要删除ID为 ${record.key} 的分类吗？`}
+              description={`确认要删除ID为 ${record.key} 的栏目吗？`}
               onConfirm={() => handleDelete(record)}
               okText="确认"
               cancelText="取消"
@@ -102,16 +110,10 @@ const CategoryList: React.FC = () => {
     },
   ];
 
-  // 初始加载分类数据
+  // 初始加载栏目数据
   useEffect(() => {
-    // 将当前查询参数序列化为字符串进行比较
-    const currentQueryParams = JSON.stringify({ action: 'initialLoad' });
-    
-    // 只有当查询参数真正发生变化时才调用接口
-    if (prevQueryParamsRef.current !== currentQueryParams) {
-      prevQueryParamsRef.current = currentQueryParams;
-      fetchCategoryTree();
-    }
+    // 移除条件判断，确保组件首次加载时一定会获取数据
+    fetchCategoryTree();
   }, []);
 
   // 转换为TreeSelect需要的数据结构
@@ -128,21 +130,30 @@ const CategoryList: React.FC = () => {
     setLoading(true);
     try {
       const response = await categoryService.getCategoryTree();
-      if (response.code === 0 && response.data && response.data.list) {
-        console.log('后端返回的分类树形数据:', response.data.list);
-        // 转换后端返回的树形结构数据为前端需要的格式
-        const transformedData = transformCategoryData(response.data.list);
-        console.log('转换后的表格数据:', transformedData);
-        setCategoryData(transformedData);
-        // 递归获取所有节点的key，实现N级展开
-        setExpandedRowKeys(getAllCategoryKeys(transformedData));
-        // 转换为TreeSelect需要的数据结构并存储
-        const treeData = transformToTreeSelectData(transformedData);
-        setCategoryTree(treeData);
+      if (response.code === 0 && response.data) {
+        // 尝试获取内容类型映射（使用类型断言）
+        const dataWithConfig = response.data as any;
+        if (dataWithConfig.config && dataWithConfig.config.categoryContentTypeMap) {
+          setCategoryContentTypeMap(dataWithConfig.config.categoryContentTypeMap);
+        }
+        
+        // 只有当list存在且不为null时才处理栏目数据
+        if (response.data.list) {
+          console.log('后端返回的栏目树形数据:', response.data.list);
+          // 转换后端返回的树形结构数据为前端需要的格式
+          const transformedData = transformCategoryData(response.data.list);
+          console.log('转换后的表格数据:', transformedData);
+          setCategoryData(transformedData);
+          // 递归获取所有节点的key，实现N级展开
+          setExpandedRowKeys(getAllCategoryKeys(transformedData));
+          // 转换为TreeSelect需要的数据结构并存储
+          const treeData = transformToTreeSelectData(transformedData);
+          setCategoryTree(treeData);
+        }
       }
     } catch (error) {
       // 错误处理已经在categoryService中完成
-      console.error('获取分类树失败:', error);
+      console.error('获取栏目树失败:', error);
     } finally {
       setLoading(false);
     }
@@ -164,7 +175,7 @@ const CategoryList: React.FC = () => {
       }
     } catch (error) {
       // 错误处理已经在categoryService中完成
-      console.error('删除分类失败:', error);
+      console.error('删除栏目失败:', error);
     }
   };
 
@@ -204,7 +215,7 @@ const CategoryList: React.FC = () => {
                       icon={<PlusOutlined />}
                       onClick={handleCreate}
                     >
-                      新增分类
+                      新增栏目
                     </Button>
                   </Space>
                 </Col>
@@ -236,13 +247,14 @@ const CategoryList: React.FC = () => {
           </Card>
         </Content>
       </Layout>
-      {/* 分类编辑弹窗 */}
+      {/* 栏目编辑弹窗 */}
       <CategoryEdit
         visible={visible}
         editCategory={editCategory}
         onCancel={handleCancel}
         onSuccess={handleSuccess}
         categoryTree={categoryTree}
+        categoryContentTypeMap={categoryContentTypeMap}
       />
     </div>
   );

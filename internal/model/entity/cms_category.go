@@ -17,7 +17,7 @@ type CmsCategory struct {
 	ParentId       uint64      `json:"parentId"       orm:"parent_id"       description:"父级栏目ID，0表示顶级栏目"`             // 父级栏目ID，0表示顶级栏目
 	Level          uint        `json:"level"          orm:"level"           description:"栏目层级深度 (0=顶级, 1=二级, ...)"`   // 栏目层级深度 (0=顶级, 1=二级, ...)
 	Path           string      `json:"path"           orm:"path"            description:"栏目路径，如 0,1,5, 表示从根到当前栏目的路径"` // 栏目路径，如 0,1,5, 表示从根到当前栏目的路径
-	ContentType    string      `json:"contentType"    orm:"content_type"    description:"关联的内容类型"`                    // 关联的内容类型
+	CType          string      `json:"cType"          orm:"c_type"          description:"栏目类型"`                       // 栏目类型
 	IsNav          bool        `json:"isNav"          orm:"is_nav"          description:"是否显示在主导航: 0-否, 1-是"`         // 是否显示在主导航: 0-否, 1-是
 	SortOrder      int         `json:"sortOrder"      orm:"sort_order"      description:"排序权重，值越小越靠前"`                // 排序权重，值越小越靠前
 	Status         bool        `json:"status"         orm:"status"          description:"状态: 1-启用, 0-禁用"`             // 状态: 1-启用, 0-禁用

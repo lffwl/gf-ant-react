@@ -16,6 +16,9 @@ var CmsCategoryService = &CmsCategory{}
 // CreateCategory 保存分类信息到数据库
 func (s *CmsCategory) CreateCategory(ctx context.Context, category *entity.CmsCategory) (*entity.CmsCategory, error) {
 	// 插入数据库
+	if category.Extra == "" {
+		category.Extra = "{}"
+	}
 	id, err := dao.CmsCategory.Ctx(ctx).InsertAndGetId(category)
 	if err != nil {
 		return nil, err
@@ -27,6 +30,9 @@ func (s *CmsCategory) CreateCategory(ctx context.Context, category *entity.CmsCa
 
 // UpdateCategory 更新分类信息
 func (s *CmsCategory) UpdateCategory(ctx context.Context, category *entity.CmsCategory) error {
+	if category.Extra == "" {
+		category.Extra = "{}"
+	}
 	_, err := dao.CmsCategory.Ctx(ctx).
 		Where(dao.CmsCategory.Columns().Id, category.Id).
 		Update(category)

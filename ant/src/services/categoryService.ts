@@ -5,7 +5,7 @@ export interface CategoryCreateReq {
   slug: string;
   description?: string;
   parentId?: number;
-  contentType: string;
+  cType: string;
   isNav?: boolean;
   sortOrder?: number;
   status: boolean;
@@ -43,6 +43,7 @@ export interface CategoryDetailResponse {
 export const categoryService = {
   async createCategory(data: CategoryCreateReq): Promise<ApiResponse> {
     try {
+      // 后端API期望的字段名就是cType
       const processedData = {
         ...data,
         status: Number(data.status),
@@ -80,6 +81,7 @@ export const categoryService = {
 
   async updateCategory(id: string, data: CategoryCreateReq): Promise<ApiResponse> {
     try {
+      // 后端API期望的字段名就是cType
       const processedData = {
         ...data,
         status: Number(data.status),

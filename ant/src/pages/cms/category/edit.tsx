@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Switch, TreeSelect, Button, message, Modal, Space, InputNumber, Row, Col, Image, Card } from 'antd';
+import { Form, Input, Switch, TreeSelect, Button, Modal, Space, InputNumber, Row, Col, Image, Card, Select } from 'antd';
 import WangEditor from '../../../common/editor/WangEditor';
 import { CloseOutlined, UploadOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import UploadPage from '../../../common/upload/UploadPage';
@@ -12,13 +12,16 @@ interface CategoryEditProps {
   onSuccess: () => void;
   editCategory?: CategoryData;
   categoryTree: any[];
+  categoryContentTypeMap: Record<string, string>;
 }
 
-const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSuccess, editCategory, categoryTree }) => {
+const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSuccess, editCategory, categoryTree, categoryContentTypeMap }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [uploadModalVisible, setUploadModalVisible] = useState(false);
   const [coverImageValue, setCoverImageValue] = useState('');
+  const [useSourceMode, setUseSourceMode] = useState(false); // 控制是否使用源码模式
+  const [description, setDescription] = useState(''); // 本地存储description值，确保两种模式间数据同步
   const isEditMode = !!editCategory;
 
   // 处理文件选择回调
@@ -42,13 +45,13 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
       // 使用setTimeout确保DOM渲染完成
       const timer = setTimeout(() => {
         try {
-          // 如果是编辑模式，直接使用传递的分类数据填充表单
+          // 如果是编辑模式，直接使用传递的栏目数据填充表单
           if (isEditMode && editCategory) {
             form.setFieldsValue({
               name: editCategory.name,
               slug: editCategory.slug,
               description: editCategory.description,
-              contentType: editCategory.contentType,
+              cType: editCategory.cType,
               isNav: editCategory.isNav,
               sortOrder: editCategory.sortOrder || 0,
               status: editCategory.status,
@@ -59,9 +62,15 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
               extra: editCategory.extra,
               parentId: editCategory.parentId === 0 ? undefined : editCategory.parentId,
             });
+            // 同时更新本地description状态
+            setDescription(editCategory.description || '');
           } else {
-            // 新增模式下重置表单
+            // 新增模式下重置表单并确保状态默认勾选上
             form.resetFields();
+            // 单独设置状态字段为true，确保状态默认勾选上
+            form.setFieldsValue({ status: true });
+            // 清空本地description状态
+            setDescription('');
           }
         } catch (error) {
           console.warn('表单操作失败，可能是因为Form组件尚未完全挂载:', error);
@@ -103,13 +112,11 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
       }
 
       if (response.code === 0) {
-        message.success(isEditMode ? '分类更新成功' : '分类创建成功');
         form.resetFields();
         onSuccess();
       }
     } catch (error) {
       console.error('提交表单失败:', error);
-      message.error('操作失败，请重试');
     } finally {
       setLoading(false);
     }
@@ -125,7 +132,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
     return treeNode.title.indexOf(inputValue) !== -1;
   };
 
-  // 获取过滤后的分类树（编辑时排除自己，避免循环引用）
+  // 获取过滤后的栏目树（编辑时排除自己，避免循环引用）
   const getFilteredCategoryTree = () => {
     if (isEditMode && editCategory) {
       // 转换为CategoryData格式并过滤
@@ -135,7 +142,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
         name: item.title,
         slug: '',
         description: '',
-        contentType: '',
+        cType: '',
         isNav: false,
         sortOrder: 0,
         status: true,
@@ -150,7 +157,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
           name: child.title,
           slug: '',
           description: '',
-          contentType: '',
+          cType: '',
           isNav: false,
           sortOrder: 0,
           status: true,
@@ -163,7 +170,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
         })) : undefined
       }));
 
-      // 过滤掉当前编辑的分类
+      // 过滤掉当前编辑的栏目
       const filteredData = filterCategoryTree(categoryData, editCategory.key);
 
       // 转换回TreeSelect需要的格式
@@ -186,11 +193,11 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
       <Modal
         title={isEditMode ? (
           <span style={{ fontSize: '18px', fontWeight: '600', display: 'flex', alignItems: 'center' }}>
-            <EditOutlined style={{ marginRight: '8px' }} /> 编辑分类
+            <EditOutlined style={{ marginRight: '8px' }} /> 编辑栏目
           </span>
         ) : (
           <span style={{ fontSize: '18px', fontWeight: '600', display: 'flex', alignItems: 'center' }}>
-            <PlusOutlined style={{ marginRight: '8px' }} /> 新增分类
+            <PlusOutlined style={{ marginRight: '8px' }} /> 新增栏目
           </span>
         )}
         open={visible}
@@ -227,35 +234,48 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
                   <Row gutter={[24, 16]}>
                     <Col span={12}>
                       <Form.Item
-                        label="分类名称"
+                        label="栏目名称"
                         name="name"
-                        rules={[{ required: true, message: '请输入分类名称' }, { min: 2, max: 50, message: '分类名称长度必须在2-50个字符之间' }]}
+                        rules={[{ required: true, message: '请输入栏目名称' }, { min: 2, max: 50, message: '栏目名称长度必须在2-50个字符之间' }]}
                       >
-                        <Input placeholder="请输入分类名称" className="form-input" />
+                        <Input placeholder="请输入栏目名称" className="form-input" />
                       </Form.Item>
                     </Col>
 
                     <Col span={12}>
                       <Form.Item
-                        label="分类别名/URL标识"
+                        label="栏目别名/URL标识"
                         name="slug"
                         rules={[
-                          { required: true, message: '请输入分类别名' },
-                          { pattern: /^[a-zA-Z0-9_-]+$/, message: '分类别名只能包含字母、数字、下划线和连字符' }
+                          { pattern: /^[a-zA-Z0-9_-]+$/, message: '栏目别名只能包含字母、数字、下划线和连字符' }
                         ]}
                       >
-                        <Input placeholder="请输入分类别名（只能包含字母、数字、下划线和连字符）" className="form-input" />
+                        <Input placeholder="请输入栏目别名（只能包含字母、数字、下划线和连字符）" className="form-input" />
                       </Form.Item>
                     </Col>
 
                     <Col span={12}>
                       <Form.Item
-                        label="父级分类"
+                        label="栏目类型"
+                    name="cType"
+                    rules={[{ required: true, message: '请选择栏目类型' }]}
+                      >
+                        <Select placeholder="请选择栏目类型">
+                          {Object.entries(categoryContentTypeMap).map(([key, value]) => (
+                            <Select.Option key={key} value={key}>{value}</Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+
+                    <Col span={12}>
+                      <Form.Item
+                        label="父级栏目"
                         name="parentId"
                       >
                         <TreeSelect
                           style={{ width: '100%' }}
-                          placeholder="请选择父级分类"
+                          placeholder="请选择父级栏目"
                           treeData={getFilteredCategoryTree()}
                           treeDefaultExpandAll
                           allowClear
@@ -269,24 +289,13 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
                         />
                       </Form.Item>
                     </Col>
-
-                    <Col span={12}>
-                      <Form.Item
-                        label="内容类型"
-                        name="contentType"
-                        rules={[{ required: true, message: '请选择内容类型' }]}
-                      >
-                        <Input placeholder="请输入关联的内容类型" className="form-input" />
-                      </Form.Item>
-                    </Col>
                   </Row>
-
                   <Row gutter={[24, 16]}>
                     <Col span={8}>
                       <Form.Item
                         label="排序"
                         name="sortOrder"
-                        rules={[{ required: true, message: '请输入排序号' }]}
+                        rules={[]}
                       >
                         <InputNumber placeholder="请输入排序号" style={{ width: '100%' }} className="form-input" />
                       </Form.Item>
@@ -300,7 +309,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
                         style={{ marginBottom: 0 }}
                       >
                         <div style={{ marginTop: '8px' }}>
-                          <Switch checkedChildren="启用" unCheckedChildren="禁用" />
+                          <Switch defaultChecked checkedChildren="启用" unCheckedChildren="禁用" />
                         </div>
                       </Form.Item>
                     </Col>
@@ -425,7 +434,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
                   <Form.Item
                     label="封面图URL"
                     name="coverImage"
-                    rules={[{ type: 'url', message: '请输入有效的URL地址' }]}
+                    rules={[]}
                     style={{ marginTop: '16px' }}
                   >
                     <Input placeholder="也可直接输入封面图片URL地址" className="form-input" />
@@ -436,19 +445,48 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
 
             {/* 详细描述卡片 */}
             <Card
-              title={<span style={{ fontSize: '16px', fontWeight: '500' }}>分类详情</span>}
+              title={<span style={{ fontSize: '16px', fontWeight: '500' }}>栏目详情</span>}
               style={{ marginBottom: '24px', borderRadius: '8px', border: '1px solid #f0f0f0' }}
               styles={{ body: { padding: '20px' } }}
             >
               <Form.Item
-                label="分类描述"
+                label="栏目描述"
                 name="description"
               >
-                <WangEditor
-                  placeholder="请输入分类描述信息，简要介绍此分类的内容和特点"
-                  height={200}
-                  maxHeight={400} // 限制最大高度为400px，超出时显示滚动条
-                />
+                <div style={{ marginBottom: '8px' }}>
+                  <span style={{ marginRight: '8px' }}>编辑模式：</span>
+                  <Switch
+                    checked={useSourceMode}
+                    onChange={setUseSourceMode}
+                    checkedChildren="源码模式"
+                    unCheckedChildren="编辑器模式"
+                  />
+                </div>
+                {useSourceMode ? (
+                  <Input.TextArea
+                    placeholder="请输入栏目描述信息，简要介绍此栏目的内容和特点（源码模式）"
+                    rows={12}
+                    maxLength={5000}
+                    showCount
+                    value={description}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      setDescription(newValue);
+                      form.setFieldsValue({ description: newValue });
+                    }}
+                  />
+                ) : (
+                  <WangEditor
+                    placeholder="请输入栏目描述信息，简要介绍此栏目的内容和特点"
+                    height={200}
+                    maxHeight={400} // 限制最大高度为400px，超出时显示滚动条
+                    value={description}
+                    onChange={(value) => {
+                      setDescription(value);
+                      form.setFieldsValue({ description: value });
+                    }}
+                  />
+                )}
               </Form.Item>
             </Card>
 
@@ -487,7 +525,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
               >
                 <Input.TextArea
                   rows={3}
-                  placeholder="请输入SEO描述，简要概述分类内容，吸引用户点击"
+                  placeholder="请输入SEO描述，简要概述栏目内容，吸引用户点击"
                   className="form-textarea"
                 />
               </Form.Item>
@@ -502,14 +540,14 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
               <Form.Item
                 label="扩展属性"
               >
-                <Form.Item 
-                  name="extra" 
-                  rules={[{ max: 1000, message: '扩展属性长度不能超过1000个字符' }]} 
+                <Form.Item
+                  name="extra"
+                  rules={[{ max: 5000, message: '扩展属性长度不能超过5000个字符' }]}
                   noStyle
                 >
                   <Input.TextArea
                     rows={4}
-                    placeholder="请输入扩展属性（JSON格式），用于自定义分类的额外配置"
+                    placeholder="请输入扩展属性（JSON格式），用于自定义栏目的额外配置"
                     className="form-textarea"
                   />
                 </Form.Item>
@@ -554,7 +592,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
                     e.currentTarget.style.borderColor = '#1890ff';
                   }}
                 >
-                  {isEditMode ? '更新分类' : '创建分类'}
+                  {isEditMode ? '更新栏目' : '创建栏目'}
                 </Button>
               </Space>
             </div>

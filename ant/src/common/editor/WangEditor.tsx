@@ -74,9 +74,9 @@ const WangEditor: React.FC<WangEditorProps> = React.forwardRef<HTMLDivElement, W
             if (response.code === 0 && response.data) {
               const fileUrl = uploadService.getFileUrl(response.data.storagePath);
               insertImgFn(fileUrl);
-              message.success('图片上传成功');
+              // message.success('图片上传成功');
             } else {
-              message.error('图片上传失败');
+              // message.error('图片上传失败');
             }
           } catch (error) {
             console.error('图片上传失败:', error);

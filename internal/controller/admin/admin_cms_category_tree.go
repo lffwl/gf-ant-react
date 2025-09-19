@@ -5,6 +5,7 @@ import (
 
 	"gf-ant-react/api/admin/cms"
 	"gf-ant-react/internal/logic/admin"
+	adminModel "gf-ant-react/internal/model/admin"
 )
 
 func (c *ControllerCms) CategoryTree(ctx context.Context, req *cms.CategoryTreeReq) (res *cms.CategoryTreeRes, err error) {
@@ -16,5 +17,8 @@ func (c *ControllerCms) CategoryTree(ctx context.Context, req *cms.CategoryTreeR
 
 	return &cms.CategoryTreeRes{
 		List: categories,
+		Config: &cms.CategoryTreeResConfig{
+			CategoryContentTypeMap: adminModel.CmsCategoryContentTypeMap,
+		},
 	}, nil
 }

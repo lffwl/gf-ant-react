@@ -18,13 +18,16 @@ var CmsCategoryLogic = &sCmsCategoryLogic{}
 
 // CreateCategory 创建分类
 func (s *sCmsCategoryLogic) CreateCategory(ctx context.Context, req *cms.CategoryCreateReq) error {
-	// 检查slug是否已存在
-	exists, err := service.CmsCategoryService.CheckSlugExists(ctx, req.Slug, 0)
-	if err != nil {
-		return err
-	}
-	if exists {
-		return gerror.NewCode(gcode.CodeBusinessValidationFailed, "栏目别名已存在")
+
+	if req.Slug != "" {
+		// 检查slug是否已存在
+		exists, err := service.CmsCategoryService.CheckSlugExists(ctx, req.Slug, 0)
+		if err != nil {
+			return err
+		}
+		if exists {
+			return gerror.NewCode(gcode.CodeBusinessValidationFailed, "栏目别名已存在")
+		}
 	}
 
 	// 创建分类实体
@@ -33,7 +36,7 @@ func (s *sCmsCategoryLogic) CreateCategory(ctx context.Context, req *cms.Categor
 		Slug:           req.Slug,
 		Description:    req.Description,
 		ParentId:       req.ParentId,
-		ContentType:    req.ContentType,
+		CType:          req.CType,
 		IsNav:          req.IsNav,
 		SortOrder:      req.SortOrder,
 		Status:         req.Status,
@@ -67,7 +70,7 @@ func (s *sCmsCategoryLogic) CreateCategory(ctx context.Context, req *cms.Categor
 	}
 
 	// 调用服务层保存分类
-	_, err = service.CmsCategoryService.CreateCategory(ctx, category)
+	_, err := service.CmsCategoryService.CreateCategory(ctx, category)
 	return err
 }
 
@@ -82,20 +85,22 @@ func (s *sCmsCategoryLogic) UpdateCategory(ctx context.Context, req *cms.Categor
 		return gerror.NewCode(gcode.CodeBusinessValidationFailed, "分类不存在")
 	}
 
-	// 检查slug是否已被其他分类使用
-	exists, err := service.CmsCategoryService.CheckSlugExists(ctx, req.Slug, req.Id)
-	if err != nil {
-		return err
-	}
-	if exists {
-		return gerror.NewCode(gcode.CodeBusinessValidationFailed, "栏目别名已存在")
+	if req.Slug != "" {
+		// 检查slug是否已被其他分类使用
+		exists, err := service.CmsCategoryService.CheckSlugExists(ctx, req.Slug, req.Id)
+		if err != nil {
+			return err
+		}
+		if exists {
+			return gerror.NewCode(gcode.CodeBusinessValidationFailed, "栏目别名已存在")
+		}
 	}
 
 	// 更新分类信息
 	category.Name = req.Name
 	category.Slug = req.Slug
 	category.Description = req.Description
-	category.ContentType = req.ContentType
+	category.CType = req.CType
 	category.IsNav = req.IsNav
 	category.SortOrder = req.SortOrder
 	category.Status = req.Status

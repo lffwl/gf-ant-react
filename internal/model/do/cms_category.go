@@ -19,7 +19,7 @@ type CmsCategory struct {
 	ParentId       any         // 父级栏目ID，0表示顶级栏目
 	Level          any         // 栏目层级深度 (0=顶级, 1=二级, ...)
 	Path           any         // 栏目路径，如 0,1,5, 表示从根到当前栏目的路径
-	ContentType    any         // 关联的内容类型
+	CType          any         // 栏目类型
 	IsNav          any         // 是否显示在主导航: 0-否, 1-是
 	SortOrder      any         // 排序权重，值越小越靠前
 	Status         any         // 状态: 1-启用, 0-禁用
