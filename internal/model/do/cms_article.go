@@ -16,6 +16,8 @@ type CmsArticle struct {
 	Title          any         // 文章标题
 	Summary        any         // 文章摘要/简介
 	Content        any         // 文章正文内容 (支持HTML/Markdown)
+	ArticleType    any         // 文章类型: normal-普通文章, external-外链文章
+	ExternalUrl    any         // 外链地址，仅当文章类型为 external 时使用
 	CategoryId     any         // 所属栏目ID，关联 cms_category.id
 	AuthorId       any         // 作者ID (如用户ID)
 	AuthorName     any         // 作者显示名称

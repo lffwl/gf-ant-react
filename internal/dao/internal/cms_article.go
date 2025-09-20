@@ -25,6 +25,8 @@ type CmsArticleColumns struct {
 	Title          string // 文章标题
 	Summary        string // 文章摘要/简介
 	Content        string // 文章正文内容 (支持HTML/Markdown)
+	ArticleType    string // 文章类型: normal-普通文章, external-外链文章
+	ExternalUrl    string // 外链地址，仅当文章类型为 external 时使用
 	CategoryId     string // 所属栏目ID，关联 cms_category.id
 	AuthorId       string // 作者ID (如用户ID)
 	AuthorName     string // 作者显示名称
@@ -50,6 +52,8 @@ var cmsArticleColumns = CmsArticleColumns{
 	Title:          "title",
 	Summary:        "summary",
 	Content:        "content",
+	ArticleType:    "article_type",
+	ExternalUrl:    "external_url",
 	CategoryId:     "category_id",
 	AuthorId:       "author_id",
 	AuthorName:     "author_name",

@@ -12,6 +12,8 @@ interface WangEditorProps {
   maxHeight?: number;
   maxLength?: number; // 最大字数限制
   bizType?: string; // 业务类型，用于文件上传分类
+  useSourceMode?: boolean; // 是否使用源码模式
+  onSourceModeChange?: (useSourceMode: boolean) => void; // 源码模式切换回调
 }
 
 const WangEditor: React.FC<WangEditorProps> = React.forwardRef<HTMLDivElement, WangEditorProps>(({
@@ -22,14 +24,20 @@ const WangEditor: React.FC<WangEditorProps> = React.forwardRef<HTMLDivElement, W
   height = 300,
   maxHeight,
   maxLength,
-  bizType = 'editor'
+  bizType = 'editor',
+  useSourceMode = false,
+  onSourceModeChange
 }, ref) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const editorInstanceRef = useRef<any>(null);
   const [currentLength, setCurrentLength] = useState(0);
 
   useEffect(() => {
+    // 源码模式不需要初始化编辑器
+    if (useSourceMode) return;
+    
     // 确保 DOM 已挂载
     if (!editorRef.current || !toolbarRef.current) return;
 
@@ -128,25 +136,133 @@ const WangEditor: React.FC<WangEditorProps> = React.forwardRef<HTMLDivElement, W
         editorInstanceRef.current = null;
       }
     };
-  }, [placeholder, height, disabled]); // 移除 value 和 onChange 依赖
+  }, [placeholder, height, disabled, useSourceMode]); // 移除 value 和 onChange 依赖
 
   // 当 value 变化时更新编辑器内容
   useEffect(() => {
-    if (editorInstanceRef.current && value !== undefined) {
-      const currentContent = editorInstanceRef.current.txt.html();
-      if (currentContent !== value) {
-        editorInstanceRef.current.txt.html(value);
-        // 当外部 value 变化时，更新字数统计
+    if (useSourceMode) {
+      // 源码模式下，更新textarea的值
+      if (textareaRef.current && value !== undefined) {
+        textareaRef.current.value = value;
         setCurrentLength(value.length);
       }
+    } else {
+      // 编辑器模式下，更新编辑器内容
+      if (editorInstanceRef.current && value !== undefined) {
+        const currentContent = editorInstanceRef.current.txt.html();
+        if (currentContent !== value) {
+          editorInstanceRef.current.txt.html(value);
+          // 当外部 value 变化时，更新字数统计
+          setCurrentLength(value.length);
+        }
+      }
     }
-  }, [value]);
+  }, [value, useSourceMode]);
+
+  // 处理源码模式下的内容变化
+  const handleSourceModeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    setCurrentLength(newValue.length);
+    if (onChange) {
+      // 如果设置了最大字数限制，检查并截断
+      if (maxLength !== undefined && newValue.length > maxLength) {
+        const truncatedValue = newValue.slice(0, maxLength);
+        if (textareaRef.current) {
+          textareaRef.current.value = truncatedValue;
+        }
+        onChange(truncatedValue);
+        setCurrentLength(maxLength);
+        return;
+      }
+      onChange(newValue);
+    }
+  };
 
   // 确保组件只有一个根元素
   return (
     <div ref={ref} className="wang-editor-wrapper" style={{ border: '1px solid #d9d9d9', borderRadius: '6px', overflow: 'hidden' }}>
-      <div ref={toolbarRef} style={{ borderBottom: '1px solid #f0f0f0', padding: '0 16px' }} />
-      <div ref={editorRef} style={{ minHeight: `${height}px`, maxHeight: maxHeight ? `${maxHeight}px` : 'none', overflowY: maxHeight ? 'auto' : 'visible' }} />
+      {/* 源码模式切换按钮 */}
+      {onSourceModeChange && (
+        <div style={{ 
+          borderBottom: '1px solid #f0f0f0', 
+          padding: '8px 16px', 
+          backgroundColor: '#fafafa',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <span style={{ fontSize: '14px', fontWeight: 500 }}>编辑模式：</span>
+          <div>
+            <button
+              type="button"
+              onClick={() => onSourceModeChange(false)}
+              style={{
+                padding: '4px 12px',
+                border: '1px solid #d9d9d9',
+                backgroundColor: useSourceMode ? 'white' : '#1890ff',
+                color: useSourceMode ? '#666' : 'white',
+                borderRadius: '4px 0 0 4px',
+                cursor: 'pointer',
+                marginRight: '-1px'
+              }}
+            >
+              编辑器模式
+            </button>
+            <button
+              type="button"
+              onClick={() => onSourceModeChange(true)}
+              style={{
+                padding: '4px 12px',
+                border: '1px solid #d9d9d9',
+                backgroundColor: useSourceMode ? '#1890ff' : 'white',
+                color: useSourceMode ? 'white' : '#666',
+                borderRadius: '0 4px 4px 0',
+                cursor: 'pointer'
+              }}
+            >
+              源码模式
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {useSourceMode ? (
+        // 源码模式：显示文本区域
+        <div style={{ position: 'relative' }}>
+          <textarea
+            ref={textareaRef}
+            placeholder={placeholder}
+            disabled={disabled}
+            value={value || ''}
+            onChange={handleSourceModeChange}
+            style={{
+              width: '100%',
+              minHeight: `${height}px`,
+              maxHeight: maxHeight ? `${maxHeight}px` : 'none',
+              border: 'none',
+              padding: '12px',
+              resize: 'vertical',
+              fontFamily: 'monospace',
+              fontSize: '14px',
+              lineHeight: '1.5'
+            }}
+          />
+        </div>
+      ) : (
+        // 编辑器模式：显示富文本编辑器
+        <>
+          <div ref={toolbarRef} style={{ borderBottom: '1px solid #f0f0f0', padding: '0 16px' }} />
+          <div 
+            ref={editorRef} 
+            style={{ 
+              minHeight: `${height}px`, 
+              maxHeight: maxHeight ? `${maxHeight}px` : 'none', 
+              overflowY: maxHeight ? 'auto' : 'visible' 
+            }} 
+          />
+        </>
+      )}
+      
       {/* 字数统计显示 */}
       {maxLength !== undefined && (
         <div style={{

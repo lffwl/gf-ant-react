@@ -12,6 +12,14 @@ import (
 )
 
 type IAdminCms interface {
+	ArticleCreate(ctx context.Context, req *cms.ArticleCreateReq) (res *cms.ArticleCreateRes, err error)
+	ArticleUpdate(ctx context.Context, req *cms.ArticleUpdateReq) (res *cms.ArticleUpdateRes, err error)
+	ArticleDelete(ctx context.Context, req *cms.ArticleDeleteReq) (res *cms.ArticleDeleteRes, err error)
+	ArticleList(ctx context.Context, req *cms.ArticleListReq) (res *cms.ArticleListRes, err error)
+	ArticleStatusUpdate(ctx context.Context, req *cms.ArticleStatusUpdateReq) (res *cms.ArticleStatusUpdateRes, err error)
+	ArticleTopUpdate(ctx context.Context, req *cms.ArticleTopUpdateReq) (res *cms.ArticleTopUpdateRes, err error)
+	ArticleHotUpdate(ctx context.Context, req *cms.ArticleHotUpdateReq) (res *cms.ArticleHotUpdateRes, err error)
+	ArticleRecommendUpdate(ctx context.Context, req *cms.ArticleRecommendUpdateReq) (res *cms.ArticleRecommendUpdateRes, err error)
 	CategoryCreate(ctx context.Context, req *cms.CategoryCreateReq) (res *cms.CategoryCreateRes, err error)
 	CategoryUpdate(ctx context.Context, req *cms.CategoryUpdateReq) (res *cms.CategoryUpdateRes, err error)
 	CategoryDelete(ctx context.Context, req *cms.CategoryDeleteReq) (res *cms.CategoryDeleteRes, err error)

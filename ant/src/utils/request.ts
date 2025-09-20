@@ -176,4 +176,16 @@ export const del = <T = any>(url: string, options?: Omit<RequestOptions, 'url' |
   });
 };
 
+/**
+ * PATCH请求封装
+ */
+export const patch = <T = any>(url: string, data?: any, options?: Omit<RequestOptions, 'url' | 'method' | 'data'>): Promise<T> => {
+  return request<T>({
+    url,
+    method: 'PATCH',
+    data,
+    ...options
+  });
+};
+
 export default request;

@@ -9,7 +9,8 @@ import {
   UserAddOutlined,
   SettingOutlined,
   AppstoreOutlined,
-  UploadOutlined
+  UploadOutlined,
+  FileTextOutlined
 } from '@ant-design/icons';
 import Welcome from '../pages/Welcome';
 import UserManagement from '../pages/permission/user/index';
@@ -19,6 +20,7 @@ import RoleManagement from '../pages/permission/role/index';
 import LoginPage from '../pages/auth/LoginPage';
 import PermissionExample from '../pages/PermissionExample';
 import CategoryList from '../pages/cms/category/index';
+import ArticleList from '../pages/cms/article/index';
 import DemoPage from '../pages/upload/DemoPage';
 
 export interface MenuItem {
@@ -51,6 +53,13 @@ export const menuItems: MenuItem[] = [
         label: '栏目管理',
         permission: 'sys.cms.category.tree',
         component: CategoryList
+      },
+      {
+        key: '/cms/article',
+        icon: React.createElement(FileTextOutlined),
+        label: '文章管理',
+        permission: 'sys.cms.article',
+        component: ArticleList
       }
     ]
   },
