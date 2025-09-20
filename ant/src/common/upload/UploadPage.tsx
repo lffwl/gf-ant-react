@@ -230,13 +230,13 @@ const UploadPage: React.FC<UploadPageProps> = ({
   const renderFooter = () => {
     if (!modalMode) return null;
     return (
-      <div style={{ 
-        textAlign: 'right', 
-        marginTop: 16,
+      <div style={{
+        textAlign: 'right',
+        marginTop: 12,
         position: 'sticky',
         bottom: 0,
         backgroundColor: '#fff',
-        padding: '16px 0',
+        padding: '12px 0',
         borderTop: '1px solid #f0f0f0',
         zIndex: 100 // 确保按钮浮层在最上层
       }}>
@@ -252,9 +252,10 @@ const UploadPage: React.FC<UploadPageProps> = ({
     <>
       <Card
         title={modalMode ? '选择文件' : '文件上传'}
+        size="small"
         extra={modalMode && (
-          <span style={{ color: '#1890ff', cursor: 'pointer' }} onClick={() => confirmModalRef.current?.show()}>
-            <CheckCircleOutlined /> 已选择 {selectedRowKeys.length} 个文件
+          <span style={{ color: '#1890ff', cursor: 'pointer', fontSize: 12 }} onClick={() => confirmModalRef.current?.show()}>
+            <CheckCircleOutlined style={{ fontSize: 12 }} /> 已选择 {selectedRowKeys.length} 个文件
           </span>
         )}
         style={{
@@ -262,40 +263,40 @@ const UploadPage: React.FC<UploadPageProps> = ({
           flexDirection: 'column',
           height: '100%'
         }}
+        styles={{ body: { padding: '16px', flex: 1, display: 'flex', flexDirection: 'column' } }}
       >
-        {/* 上传区域 */}
-        <Card size="small" title="上传新文件" style={{ marginBottom: 16 }}>
+        {/* 合并为单一区域，不再使用多个Card嵌套 */}
+        <div style={{ marginBottom: 12 }}>
+          <h4 style={{ marginBottom: 8, fontSize: 13 }}>上传新文件</h4>
           <Dragger {...uploadProps}>
             <p className="ant-upload-drag-icon">
-              <InboxOutlined />
+              <InboxOutlined style={{ fontSize: 24 }} />
             </p>
-            <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
-            <p className="ant-upload-hint">支持单个文件上传，最大10MB</p>
+            <p className="ant-upload-text" style={{ fontSize: 12 }}>点击或拖拽文件到此区域上传</p>
+            <p className="ant-upload-hint" style={{ fontSize: 11 }}>支持单个文件上传，最大10MB</p>
           </Dragger>
-        </Card>
+        </div>
+
+        {/* 搜索区域 - 更紧凑的样式 */}
+        <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'flex-end' }}>
+          <Search
+            placeholder="搜索文件名"
+            allowClear
+            enterButton={<SearchOutlined />}
+            size="middle"
+            onSearch={handleSearch}
+            style={{ width: 250 }}
+          />
+        </div>
 
         {/* 内容区域容器 - 限制高度并添加滚动条 */}
-        <div style={{ 
+        <div style={{
           flex: 1,
           overflowY: 'auto',
-          marginBottom: '16px'
+          marginBottom: '12px'
         }}>
-
-        {/* 文件列表 */}
-        <Card size="small" title="文件列表">
-          <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
-            <Search
-              placeholder="搜索文件名"
-              allowClear
-              enterButton={<SearchOutlined />}
-              size="large"
-              onSearch={handleSearch}
-              style={{ width: 300 }}
-            />
-          </div>
-
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px 0' }}>
+            <div style={{ textAlign: 'center', padding: '30px 0' }}>
               加载中...
             </div>
           ) : fileList.length === 0 ? (
@@ -305,9 +306,9 @@ const UploadPage: React.FC<UploadPageProps> = ({
               {/* 图片网格布局 - 更紧凑版本 */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-                gap: '8px',
-                marginBottom: '16px'
+                gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                gap: '6px',
+                marginBottom: '12px'
               }}>
                 {fileList.map(file => {
                   const isSelected = selectedRowKeys.includes(file.id);
@@ -318,29 +319,25 @@ const UploadPage: React.FC<UploadPageProps> = ({
                     <div 
                       key={file.id} 
                       style={{
-                        border: `2px solid ${isSelected ? '#1890ff' : '#f0f0f0'}`,
+                        border: `1px solid ${isSelected ? '#1890ff' : '#f0f0f0'}`,
                         borderRadius: '4px',
-                        padding: '4px',
+                        padding: '3px',
                         position: 'relative',
                         backgroundColor: '#fff',
                         cursor: 'pointer'
                       }}
                       onClick={() => {
                         if (modalMode) {
-                          // 弹窗模式下点击切换选择状态
                           if (multiple) {
-                            // 允许多选
                             if (isSelected) {
                               handleSelectionChange(selectedRowKeys.filter(key => key !== file.id));
                             } else {
                               handleSelectionChange([...selectedRowKeys, file.id]);
                             }
                           } else {
-                            // 不允许多选，直接替换
                             handleSelectionChange([file.id]);
                           }
                         } else {
-                          // 非弹窗模式下点击预览
                           handleViewFile(file);
                         }
                       }}
@@ -350,127 +347,126 @@ const UploadPage: React.FC<UploadPageProps> = ({
                         <div 
                           style={{
                             position: 'absolute',
-                            top: '8px',
-                            right: '8px',
-                            width: '20px',
-                            height: '20px',
+                            top: '5px',
+                            right: '5px',
+                            width: '16px',
+                            height: '16px',
                             borderRadius: '50%',
                             backgroundColor: isSelected ? '#1890ff' : '#fff',
-                            border: `2px solid ${isSelected ? '#1890ff' : '#d9d9d9'}`,
+                            border: `1px solid ${isSelected ? '#1890ff' : '#d9d9d9'}`,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            zIndex: 10 // 确保选择勾选浮层低于按钮浮层
+                            zIndex: 10
                           }}
                         >
                           {isSelected && (
-                            <CheckCircleOutlined style={{ color: '#fff', fontSize: '14px' }} />
+                            <CheckCircleOutlined style={{ color: '#fff', fontSize: '12px' }} />
                           )}
                         </div>
                       )}
-                       
+                        
                       {/* 文件预览区域 */}
-                      <div style={{ marginBottom: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <div style={{ marginBottom: '6px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         {isImage ? (
                           <Image
                             src={fileUrl}
                             alt={file.fileName}
-                            style={{ width: '100%', height: '120px', objectFit: 'cover' }}
+                            style={{ width: '100%', height: '100px', objectFit: 'cover' }}
                             preview={false}
-                            // 移除预览功能，让点击事件冒泡到父级div触发选择逻辑
                             fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QdDFcvjV3jOD1+QK//t3vR8a6/Wt4Nwv7WpemOA7TiVhlCafZvpskfncCfx8pOhJzd76bJWeYFnFciwcYfubRc12Ip/ppIhA1/mSZ/RxjFDrJC5xifFjJpY2Xl5zXdguFqYyTR1zSp1Y9p+tktDYYSNflcxI0iyO4TPBdlRcpeqjK/piF5bklq77VSEaA+z8qmJTFzIWiitbnzR794USKBUaT0NTEsVjZqLaFVqJoPN9ODG70IPbfBHKK+/q/AWR0tJzYHRULOa4MP+W/HfGadZUbfw177G7j/OGbIs8TahLyynl4X4RinF793Oz+BU0saXtUHrVBFT/DnA3ctNPoGbs4hRIjTok8i+algT1lTHi4SxFvONKNrgQFAq2/gFnWMXgwffgYMJpiKYkmW3tTg3ZQ9Jq+f8XN+A5eeUKHWvJWJ2sgJ1Sop+wwhqFVijqWaJhwtD8MNlSBeWNNWTa5Z5kPZw5+LbVT99wqTdx29lMUH4OIG/D86ruKEauBjvH5xy6um/Sfj7ei6UUVk4AIl3MyD4MSSTOFgSwsH/QJWaQ5as7ZcmgBZkzjjU1UrQ74ci1gWBCSGHtuV1H2mhSnO3Wp/3fEV5a+4wz//6qy8JxjZsmxxy5+4w9CDNJY09T072iKG0EnOS0arEYgXqYnXcYHwjTtUNAcMelOd4xpkoqiTYICWFq0JSiPfPDQdnt+4/wuqcXY47QILbgAAAABJRU5ErkJggg=="
                           />
                         ) : (
-                          <div style={{ width: '100%', height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
+                          <div style={{ width: '100%', height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
                             {getFileIcon(file.fileType)}
                           </div>
                         )}
                       </div>
-                       
-                      {/* 文件名 */}
-                      <Tooltip title={file.fileName}>
-                        <div style={{ textAlign: 'center', wordBreak: 'break-all' }}>
-                          {file.fileName}
+                        
+                      {/* 文件名和操作按钮区域合并 */}
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <Tooltip title={file.fileName}>
+                          <div style={{ textAlign: 'center', wordBreak: 'break-all', marginBottom: '4px', fontSize: 12 }}>
+                            {file.fileName}
+                          </div>
+                        </Tooltip>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '4px' }}>
+                          <Button
+                            type="text"
+                            icon={<SearchOutlined />}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewFile(file);
+                            }}
+                            size="small"
+                          >
+                            预览
+                          </Button>
+                          <Button
+                            type="text"
+                            icon={<DownloadOutlined />}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownloadFile(file);
+                            }}
+                            size="small"
+                          >
+                            下载
+                          </Button>
                         </div>
-                      </Tooltip>
-                       
-                      {/* 操作按钮 */}
-                      <div style={{ marginTop: '4px', display: 'flex', justifyContent: 'center', gap: '4px' }}>
-                        <Button
-                          type="text"
-                          icon={<SearchOutlined />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleViewFile(file);
-                          }}
-                          size="small"
-                        >
-                          预览
-                        </Button>
-                        <Button
-                          type="text"
-                          icon={<DownloadOutlined />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDownloadFile(file);
-                          }}
-                          size="small"
-                        >
-                          下载
-                        </Button>
                       </div>
                     </div>
                   );
                 })}
               </div>
-               
-              {/* 分页 */}
-              <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                
+              {/* 分页 - 更紧凑的样式 */}
+              <div style={{ textAlign: 'center', marginTop: '12px' }}>
                 <Button 
                   disabled={currentPage === 1 || total === 0} 
                   onClick={() => handlePageChange(currentPage - 1)}
+                  size="small"
                 >
                   上一页
                 </Button>
-                <span style={{ margin: '0 16px' }}>第 {total === 0 ? 0 : currentPage} 页 / 共 {total === 0 ? 0 : Math.ceil(total / pageSize)} 页</span>
+                <span style={{ margin: '0 12px', fontSize: 12 }}>第 {total === 0 ? 0 : currentPage} 页 / 共 {total === 0 ? 0 : Math.ceil(total / pageSize)} 页</span>
                 <Button 
                   disabled={currentPage === Math.ceil(total / pageSize) || total === 0}
                   onClick={() => handlePageChange(currentPage + 1)}
+                  size="small"
                 >
                   下一页
                 </Button>
-                <span style={{ marginLeft: '16px' }}>共 {total} 个文件</span>
+                <span style={{ marginLeft: '12px', fontSize: 12 }}>共 {total} 个文件</span>
               </div>
             </div>
           )}
-        </Card>
-      </div>
+        </div>
 
         {/* 确认选择区域 */}
-      {renderFooter()}
-    </Card>
-
-
+        {renderFooter()}
+      </Card>
 
       {/* 确认选择弹窗，用于展示已选文件 */}
       <Modal
         title="已选择文件"
         open={false}
         footer={null}
-        width={600}
+        width={500}
         onCancel={() => confirmModalRef.current?.close()}
         getContainer={() => document.body}
       >
         {selectedRowKeys.length > 0 ? (
-          <div style={{ maxHeight: '400px', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ maxHeight: '350px', display: 'flex', flexDirection: 'column' }}>
             {/* 文件列表内容区 - 可滚动 */}
-            <div style={{ flex: 1, overflowY: 'auto', marginBottom: '16px' }}>
+            <div style={{ flex: 1, overflowY: 'auto', marginBottom: '12px' }}>
               {fileList
                 .filter(file => selectedRowKeys.includes(file.id))
                 .map(file => (
-                  <div key={file.id} style={{ display: 'flex', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f0f0f0' }}>
+                  <div key={file.id} style={{ display: 'flex', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #f0f0f0' }}>
                     {getFileIcon(file.fileType)}
-                    <span style={{ marginLeft: 8, flex: 1 }}>{file.fileName}</span>
+                    <span style={{ marginLeft: 8, flex: 1, fontSize: 12 }}>{file.fileName}</span>
                     <Button type="text" size="small" onClick={() => handleDownloadFile(file)}>
                       下载
                     </Button>
@@ -479,13 +475,13 @@ const UploadPage: React.FC<UploadPageProps> = ({
               }
             </div>
             {/* 按钮区域 - 固定在底部 */}
-            <div style={{ 
+            <div style={{
               textAlign: 'right', 
-              paddingTop: '16px',
+              paddingTop: '12px',
               borderTop: '1px solid #f0f0f0'
             }}>
-              <Button onClick={() => confirmModalRef.current?.close()} style={{ marginRight: 8 }}>取消</Button>
-              <Button type="primary" onClick={handleConfirmSelect}>
+              <Button onClick={() => confirmModalRef.current?.close()} style={{ marginRight: 8 }} size="small">取消</Button>
+              <Button type="primary" onClick={handleConfirmSelect} size="small">
                 确认选择
               </Button>
             </div>

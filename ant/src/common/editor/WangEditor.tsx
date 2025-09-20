@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import wangEditor from 'wangeditor';
 import { message } from 'antd';
 import { uploadService } from '../../services/uploadService';
@@ -10,6 +10,7 @@ interface WangEditorProps {
   disabled?: boolean;
   height?: number;
   maxHeight?: number;
+  maxLength?: number; // 最大字数限制
   bizType?: string; // 业务类型，用于文件上传分类
 }
 
@@ -20,11 +21,13 @@ const WangEditor: React.FC<WangEditorProps> = React.forwardRef<HTMLDivElement, W
   disabled = false,
   height = 300,
   maxHeight,
+  maxLength,
   bizType = 'editor'
 }, ref) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const editorInstanceRef = useRef<any>(null);
+  const [currentLength, setCurrentLength] = useState(0);
 
   useEffect(() => {
     // 确保 DOM 已挂载
@@ -88,7 +91,21 @@ const WangEditor: React.FC<WangEditorProps> = React.forwardRef<HTMLDivElement, W
 
     // 监听内容变化
     editor.config.onchange = (newHtml: string) => {
+      // 更新字数统计
+      setCurrentLength(newHtml.length);
+      
       if (onChange) {
+        // 如果设置了最大字数限制，检查并截断
+        if (maxLength !== undefined && newHtml.length > maxLength) {
+          // 获取编辑器实例，截断内容
+          if (editorInstanceRef.current) {
+            const truncatedHtml = newHtml.slice(0, maxLength);
+            editorInstanceRef.current.txt.html(truncatedHtml);
+            onChange(truncatedHtml);
+            setCurrentLength(maxLength); // 更新字数统计
+            return;
+          }
+        }
         onChange(newHtml);
       }
     };
@@ -119,6 +136,8 @@ const WangEditor: React.FC<WangEditorProps> = React.forwardRef<HTMLDivElement, W
       const currentContent = editorInstanceRef.current.txt.html();
       if (currentContent !== value) {
         editorInstanceRef.current.txt.html(value);
+        // 当外部 value 变化时，更新字数统计
+        setCurrentLength(value.length);
       }
     }
   }, [value]);
@@ -128,6 +147,23 @@ const WangEditor: React.FC<WangEditorProps> = React.forwardRef<HTMLDivElement, W
     <div ref={ref} className="wang-editor-wrapper" style={{ border: '1px solid #d9d9d9', borderRadius: '6px', overflow: 'hidden' }}>
       <div ref={toolbarRef} style={{ borderBottom: '1px solid #f0f0f0', padding: '0 16px' }} />
       <div ref={editorRef} style={{ minHeight: `${height}px`, maxHeight: maxHeight ? `${maxHeight}px` : 'none', overflowY: maxHeight ? 'auto' : 'visible' }} />
+      {/* 字数统计显示 */}
+      {maxLength !== undefined && (
+        <div style={{
+          borderTop: '1px solid #f0f0f0',
+          padding: '4px 12px',
+          fontSize: '12px',
+          color: '#666',
+          textAlign: 'right',
+          backgroundColor: '#fafafa'
+        }}>
+          <span style={{
+            color: currentLength >= maxLength * 0.9 ? '#ff4d4f' : '#666'
+          }}>
+            {currentLength}/{maxLength}
+          </span>
+        </div>
+      )}
     </div>
   );
 });

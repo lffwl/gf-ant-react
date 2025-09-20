@@ -12,7 +12,7 @@ type CategoryCreateReq struct {
 	g.Meta         `path:"/sys/cms/category" tags:"Category" method:"post" summary:"新增"`
 	Name           string      `p:"name" v:"required|length:2,50#栏目名称不能为空|栏目名称长度必须在2-50个字符之间" description:"栏目名称"`
 	Slug           string      `p:"slug" v:"regex:^[a-zA-Z0-9_-]+$#栏目别名只能包含字母、数字、下划线和连字符" description:"栏目别名/URL标识"`
-	Description    string      `p:"description" v:"length:0,255#栏目描述长度不能超过255个字符" description:"栏目描述"`
+	Description    string      `p:"description" v:"length:0,16383#栏目描述长度不能超过16383个字符" description:"栏目描述"`
 	ParentId       uint64      `p:"parentId" v:"integer#父级栏目ID必须为整数" description:"父级栏目ID"`
 	CType          string      `p:"cType" v:"required#关联的内容类型不能为空" description:"关联的内容类型"`
 	IsNav          bool        `p:"isNav" description:"是否显示在主导航"`
@@ -37,7 +37,7 @@ type CategoryUpdateReq struct {
 	Id             uint64      `p:"id" v:"required|integer#ID不能为空|ID必须为整数" description:"ID"`
 	Name           string      `p:"name" v:"required|length:2,50#栏目名称不能为空|栏目名称长度必须在2-50个字符之间" description:"栏目名称"`
 	Slug           string      `p:"slug" v:"regex:^[a-zA-Z0-9_-]+$#栏目别名只能包含字母、数字、下划线和连字符" description:"栏目别名/URL标识"`
-	Description    string      `p:"description" v:"length:0,255#栏目描述长度不能超过255个字符" description:"栏目描述"`
+	Description    string      `p:"description" v:"length:0,16383#栏目描述长度不能超过16383个字符" description:"栏目描述"`
 	ParentId       uint64      `p:"parentId" v:"integer#父级栏目ID必须为整数" description:"父级栏目ID"`
 	CType          string      `p:"cType" v:"required#关联的内容类型不能为空" description:"关联的内容类型"`
 	IsNav          bool        `p:"isNav" description:"是否显示在主导航"`
