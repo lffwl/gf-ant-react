@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Table, Button, Space, Popconfirm, Card, Row, Col, Layout, Image, Tag, Input, Select } from 'antd';
+import { Table, Button, Space, Popconfirm, Card, Row, Col, Layout, Image, Tag, Input, Select, TreeSelect } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { articleService } from '../../../services/articleService';
 import type { ColumnsType } from 'antd/es/table';
@@ -18,7 +18,7 @@ interface ArticleData {
   categoryId?: number;
   categoryName?: string;
   authorName?: string;
-  articleType: string;
+  articleType: string; 
   status: boolean;
   isTop: boolean;
   isHot: boolean;
@@ -27,6 +27,7 @@ interface ArticleData {
   publishAt?: string;
   createdAt?: string;
   updatedAt?: string;
+  content?: string; // 确保接口包含content字段
 }
 
 const ArticleList: React.FC = () => {
@@ -40,14 +41,20 @@ const ArticleList: React.FC = () => {
   const [searchParams, setSearchParams] = useState({
     title: '',
     categoryId: undefined,
-    status: 'all',
-    articleType: 'all',
-    isTop: 'all',
-    isHot: 'all',
-    isRecommend: 'all'
+    status: undefined,
+    articleType: undefined,
+    isTop: undefined,
+    isHot: undefined,
+    isRecommend: undefined,
   });
+  
+  // 控制是否显示高级搜索条件
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [visible, setVisible] = useState(false);
   const [editArticle, setEditArticle] = useState<ArticleData | undefined>(undefined);
+  const [categoryTree, setCategoryTree] = useState<any[]>([]);
+  // 新增：存储原始栏目列表数据
+  const [categoryList, setCategoryList] = useState<any[]>([]);
   
   // 使用ref来跟踪上一次的查询参数
   const prevQueryParamsRef = useRef<string>('');
@@ -67,16 +74,16 @@ const ArticleList: React.FC = () => {
       render: (coverImage: string) => (
         coverImage ? (
           <Image
-            width={60}
-            height={40}
-            src={coverImage}
+            width={100}
+            height={67}
+            src={`${import.meta.env.VITE_FILE_SERVER_URL}/${coverImage}`}
             alt="封面图"
             style={{ objectFit: 'cover' }}
           />
         ) : (
           <div style={{ 
-            width: 60, 
-            height: 40, 
+            width: 100, 
+            height: 67,
             backgroundColor: '#f0f0f0', 
             display: 'flex', 
             alignItems: 'center', 
@@ -97,10 +104,16 @@ const ArticleList: React.FC = () => {
     },
     {
       title: '栏目',
-      dataIndex: 'categoryName',
-      key: 'categoryName',
+      dataIndex: 'categoryId',
+      key: 'categoryId',
       width: '10%',
-      render: (categoryName: string) => categoryName || '未分类',
+      render: (categoryId: number) => {
+        // 从categoryList中查找对应id的栏目名称
+        if (!categoryId) return '未分类';
+        
+        const category = categoryList.find(item => item.id === categoryId);
+        return category ? category.name : '未分类';
+      },
     },
     {
       title: '作者',
@@ -216,7 +229,7 @@ const ArticleList: React.FC = () => {
       
       const response = await articleService.getArticleList(params);
       if (response.code === 0 && response.data) {
-        const { list, total } = response.data;
+        const { list, total, config } = response.data;
         // 处理list为null或undefined的情况
         const formattedData = (list || []).map((item: any) => ({
           key: item.id,
@@ -235,7 +248,8 @@ const ArticleList: React.FC = () => {
           viewCount: item.viewCount,
           publishAt: item.publishAt,
           createdAt: item.createdAt,
-          updatedAt: item.updatedAt
+          updatedAt: item.updatedAt,
+          // 这里不包含content字段，因为列表数据通常不包含完整内容
         }));
         
         setArticleData(formattedData);
@@ -243,9 +257,18 @@ const ArticleList: React.FC = () => {
           ...prev,
           total: total || 0
         }));
+        
+        // 处理栏目数据并转换为树形结构
+        if (config && config.categoryList) {
+          // 保存原始栏目列表数据
+          setCategoryList(config.categoryList);
+          const treeData = transformToTree(config.categoryList);
+          setCategoryTree(treeData);
+        }
       } else {
         // 如果响应不成功，设置空数据和0总数
         setArticleData([]);
+        setCategoryList([]);
         setPagination(prev => ({
           ...prev,
           total: 0
@@ -255,6 +278,7 @@ const ArticleList: React.FC = () => {
       console.error('获取文章列表失败:', error);
       // 发生错误时也设置空数据
       setArticleData([]);
+      setCategoryList([]);
       setPagination(prev => ({
         ...prev,
         total: 0
@@ -262,6 +286,42 @@ const ArticleList: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+  
+  // 将平面栏目数据转换为树形结构
+  const transformToTree = (categories: any[]): any[] => {
+    const categoryMap = new Map<number, any>();
+    const tree: any[] = [];
+    
+    // 创建所有节点的映射
+    categories.forEach(category => {
+      categoryMap.set(category.id, {
+        value: category.id,
+        title: category.name,
+        children: []
+      });
+    });
+    
+    // 构建树形结构
+    categories.forEach(category => {
+      const currentNode = categoryMap.get(category.id);
+      
+      if (category.parentId === 0) {
+        // 根节点
+        tree.push(currentNode);
+      } else {
+        // 子节点
+        const parentNode = categoryMap.get(category.parentId);
+        if (parentNode) {
+          parentNode.children.push(currentNode);
+        } else {
+          // 如果父节点不存在，也添加到根节点
+          tree.push(currentNode);
+        }
+      }
+    });
+    
+    return tree;
   };
 
   const handleTableChange = (newPagination: any) => {
@@ -284,11 +344,11 @@ const ArticleList: React.FC = () => {
     setSearchParams({
       title: '',
       categoryId: undefined,
-      status: 'all',
-      articleType: 'all',
-      isTop: 'all',
-      isHot: 'all',
-      isRecommend: 'all'
+      status: undefined,
+      articleType: undefined,
+      isTop: undefined,
+      isHot: undefined,
+      isRecommend: undefined
     });
     setPagination({
       current: 1,
@@ -297,9 +357,45 @@ const ArticleList: React.FC = () => {
     });
   };
 
-   const handleEdit = (record: ArticleData) => {
-     setEditArticle(record);
-     setVisible(true);
+   // 修改handleEdit函数，在编辑时获取文章的完整数据（包含内容）
+   const handleEdit = async (record: ArticleData) => {
+     try {
+       // 获取文章的完整数据
+       const response = await articleService.getArticleDetail(record.id.toString());
+       if (response.code === 0 && response.data) {
+         // 设置包含完整内容的文章数据
+         setEditArticle({
+           key: response.data.id,
+           id: response.data.id,
+           title: response.data.title,
+           summary: response.data.summary,
+           coverImage: response.data.coverImage,
+           categoryId: response.data.categoryId,
+           categoryName: response.data.categoryName,
+           authorName: response.data.authorName,
+           articleType: response.data.articleType,
+           status: response.data.status,
+           isTop: response.data.isTop,
+           isHot: response.data.isHot,
+           isRecommend: response.data.isRecommend,
+           viewCount: response.data.viewCount,
+           publishAt: response.data.publishAt,
+           createdAt: response.data.createdAt,
+           updatedAt: response.data.updatedAt,
+           content: response.data.content || '' // 确保content字段存在
+         });
+       } else {
+         // 如果获取失败，使用列表中的数据（不包含完整内容）
+         setEditArticle(record);
+         console.warn('获取文章详情失败，使用列表数据');
+       }
+     } catch (error) {
+       console.error('获取文章详情失败:', error);
+       // 发生错误时，使用列表中的数据
+       setEditArticle(record);
+     } finally {
+       setVisible(true);
+     }
    };
  
    const handleDelete = async (record: ArticleData) => {
@@ -338,53 +434,149 @@ const ArticleList: React.FC = () => {
         <Content style={{ padding: '10px 0' }}>
           {/* 搜索区域 */}
           <Card style={{ marginBottom: 16 }}>
-            <Row gutter={16}>
-              <Col span={6}>
-                <Input
-                  placeholder="搜索文章标题"
-                  value={searchParams.title}
-                  onChange={(e) => setSearchParams({...searchParams, title: e.target.value})}
-                  onPressEnter={handleSearch}
-                />
+            <Row gutter={16} align="middle">
+              <Col xs={24} sm={24} md={12} lg={8} xl={6}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span style={{ marginRight: '8px', color: '#595959', fontSize: '14px', width: '80px', textAlign: 'right' }}>文章标题：</span>
+                  <Input
+                    placeholder="搜索文章标题"
+                    value={searchParams.title}
+                    onChange={(e) => setSearchParams({...searchParams, title: e.target.value})}
+                    onPressEnter={handleSearch}
+                    style={{ flex: 1 }}
+                  />
+                </div>
               </Col>
-              <Col span={4}>
-                <Select
-                  placeholder="文章状态"
-                  value={searchParams.status}
-                  onChange={(value) => setSearchParams({...searchParams, status: value})}
-                  style={{ width: '100%' }}
-                >
-                  <Option value="all">全部状态</Option>
-                  <Option value="1">已发布</Option>
-                  <Option value="0">草稿</Option>
-                </Select>
+              <Col xs={24} sm={24} md={12} lg={8} xl={6}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span style={{ marginRight: '8px', color: '#595959', fontSize: '14px', width: '80px', textAlign: 'right' }}>文章栏目：</span>
+                  <TreeSelect
+                    placeholder="选择栏目"
+                    style={{ flex: 1 }}
+                    treeData={categoryTree}
+                    allowClear
+                    value={searchParams.categoryId}
+                    onChange={(value) => setSearchParams({...searchParams, categoryId: value})}
+                    treeDefaultExpandAll
+                    showSearch
+                    treeNodeFilterProp="title"
+                  />
+                </div>
               </Col>
-              <Col span={4}>
-                <Select
-                  placeholder="文章类型"
-                  value={searchParams.articleType}
-                  onChange={(value) => setSearchParams({...searchParams, articleType: value})}
-                  style={{ width: '100%' }}
-                >
-                  <Option value="all">全部类型</Option>
-                  <Option value="normal">普通文章</Option>
-                  <Option value="external">外链文章</Option>
-                </Select>
+              <Col xs={24} sm={24} md={12} lg={8} xl={6}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span style={{ marginRight: '8px', color: '#595959', fontSize: '14px', width: '80px', textAlign: 'right' }}>文章状态：</span>
+                  <Select
+                    placeholder="文章状态"
+                    value={searchParams.status}
+                    onChange={(value) => setSearchParams({...searchParams, status: value})}
+                    style={{ flex: 1 }}
+                    allowClear
+                  >
+                    <Option value="1">已发布</Option>
+                    <Option value="0">草稿</Option>
+                  </Select>
+                </div>
               </Col>
-              <Col span={4}>
-                <Button 
-                  type="primary" 
-                  icon={<SearchOutlined />} 
-                  onClick={handleSearch}
-                >
-                  搜索
-                </Button>
-                <Button 
-                  style={{ marginLeft: 8 }}
-                  onClick={handleReset}
-                >
-                  重置
-                </Button>
+              <Col xs={24} sm={24} md={12} lg={8} xl={6}>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', paddingLeft: '88px' }}>
+                  <Button 
+                    type="dashed" 
+                    onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+                    style={{ marginRight: 8 }}
+                  >
+                    {showAdvancedSearch ? '收起高级搜索' : '展开高级搜索'}
+                  </Button>
+                </div>
+              </Col>
+            </Row>
+            
+            {/* 高级搜索条件，默认隐藏 */}
+            {showAdvancedSearch && (
+              <>
+                <Row gutter={16} align="middle" style={{ marginTop: 16 }}>
+                  <Col xs={24} sm={24} md={12} lg={8} xl={6}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{ marginRight: '8px', color: '#595959', fontSize: '14px', width: '80px', textAlign: 'right' }}>文章类型：</span>
+                      <Select
+                        placeholder="文章类型"
+                        value={searchParams.articleType}
+                        onChange={(value) => setSearchParams({...searchParams, articleType: value})}
+                        style={{ flex: 1 }}
+                        allowClear
+                      >
+                        <Option value="normal">普通文章</Option>
+                        <Option value="external">外链文章</Option>
+                      </Select>
+                    </div>
+                  </Col>
+                  <Col xs={24} sm={24} md={12} lg={8} xl={6}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{ marginRight: '8px', color: '#595959', fontSize: '14px', width: '80px', textAlign: 'right' }}>是否置顶：</span>
+                      <Select
+                        placeholder="是否置顶"
+                        value={searchParams.isTop}
+                        onChange={(value) => setSearchParams({...searchParams, isTop: value})}
+                        style={{ flex: 1 }}
+                        allowClear
+                      >
+                        <Option value="1">是</Option>
+                        <Option value="0">否</Option>
+                      </Select>
+                    </div>
+                  </Col>
+                  <Col xs={24} sm={24} md={12} lg={8} xl={6}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{ marginRight: '8px', color: '#595959', fontSize: '14px', width: '80px', textAlign: 'right' }}>是否热门：</span>
+                      <Select
+                        placeholder="是否热门"
+                        value={searchParams.isHot}
+                        onChange={(value) => setSearchParams({...searchParams, isHot: value})}
+                        style={{ flex: 1 }}
+                        allowClear
+                      >
+                        <Option value="1">是</Option>
+                        <Option value="0">否</Option>
+                      </Select>
+                    </div>
+                  </Col>
+                  <Col xs={24} sm={24} md={12} lg={8} xl={6}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{ marginRight: '8px', color: '#595959', fontSize: '14px', width: '80px', textAlign: 'right' }}>是否推荐：</span>
+                      <Select
+                        placeholder="是否推荐"
+                        value={searchParams.isRecommend}
+                        onChange={(value) => setSearchParams({...searchParams, isRecommend: value})}
+                        style={{ flex: 1 }}
+                        allowClear
+                      >
+                        <Option value="1">是</Option>
+                        <Option value="0">否</Option>
+                      </Select>
+                    </div>
+                  </Col>
+                </Row>
+              </>
+            )}
+            
+            {/* 搜索和重置按钮 */}
+            <Row gutter={16} align="middle" style={{ marginTop: 16 }}>
+              <Col xs={24} sm={24} md={12} lg={8} xl={6}>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', paddingLeft: '88px' }}>
+                  <Button 
+                    type="primary" 
+                    icon={<SearchOutlined />} 
+                    onClick={handleSearch}
+                    style={{ marginRight: 8 }}
+                  >
+                    搜索
+                  </Button>
+                  <Button 
+                    onClick={handleReset}
+                  >
+                    重置
+                  </Button>
+                </div>
               </Col>
             </Row>
           </Card>
@@ -429,6 +621,7 @@ const ArticleList: React.FC = () => {
             editArticle={editArticle}
             onCancel={handleCancel}
             onSuccess={handleSuccess}
+            categoryTree={categoryTree}
           />
      </div>
    );

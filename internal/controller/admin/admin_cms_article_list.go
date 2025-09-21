@@ -11,16 +11,25 @@ import (
 func (c *ControllerCms) ArticleList(ctx context.Context, req *cms.ArticleListReq) (res *cms.ArticleListRes, err error) {
 	var articles []*entity.CmsArticle
 	var total int
-	
+
 	articles, total, err = admin.CmsArticleLogic.GetArticleList(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	
+
+	// 调用服务层获取分类列表
+	categoryList, err := admin.CmsCategoryLogic.GetCategoryTree(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	return &cms.ArticleListRes{
 		List:  articles,
 		Total: total,
 		Page:  req.Page,
 		Size:  req.Size,
+		Config: &cms.ArticleListResConfig{
+			CategoryList: categoryList,
+		},
 	}, nil
 }

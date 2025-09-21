@@ -80,20 +80,25 @@ type ArticleListReq struct {
 	Size        int    `p:"size" v:"min:1|max:100#每页数量必须大于0|每页数量不能超过100" description:"每页数量"`
 	Title       string `p:"title" description:"文章标题（模糊搜索）"`
 	CategoryId  uint64 `p:"categoryId" v:"integer#栏目ID必须为整数" description:"栏目ID"`
-	Status      string `p:"status" v:"in:0,1,all#状态必须是0、1或all" description:"状态: 0-草稿, 1-已发布, all-全部"`
+	Status      *int   `p:"status" v:"in:0,1#状态必须是0、1或all" description:"状态: 0-草稿, 1-已发布, all-全部"`
 	ArticleType string `p:"articleType" v:"in:normal,external,all#文章类型必须是normal、external或all" description:"文章类型: normal-普通, external-外链, all-全部"`
-	IsTop       string `p:"isTop" v:"in:0,1,all#置顶状态必须是0、1或all" description:"是否置顶: 0-不置顶, 1-置顶, all-全部"`
-	IsHot       string `p:"isHot" v:"in:0,1,all#热门状态必须是0、1或all" description:"是否热门: 0-普通, 1-热门, all-全部"`
-	IsRecommend string `p:"isRecommend" v:"in:0,1,all#推荐状态必须是0、1或all" description:"是否推荐: 0-不推荐, 1-推荐, all-全部"`
+	IsTop       *int   `p:"isTop" v:"in:0,1#置顶状态必须是0、1" description:"是否置顶: 0-不置顶, 1-置顶"`
+	IsHot       *int   `p:"isHot" v:"in:0,1#热门状态必须是0、1" description:"是否热门: 0-普通, 1-热门"`
+	IsRecommend *int   `p:"isRecommend" v:"in:0,1#推荐状态必须是0、1" description:"是否推荐: 0-不推荐, 1-推荐"`
 }
 
 // 文章列表接口响应
 type ArticleListRes struct {
 	g.Meta `mime:"application/json" example:"{}"`
-	List   []*entity.CmsArticle `json:"list"`
-	Total  int                  `json:"total"`
-	Page   int                  `json:"page"`
-	Size   int                  `json:"size"`
+	List   []*entity.CmsArticle  `json:"list"`
+	Total  int                   `json:"total"`
+	Page   int                   `json:"page"`
+	Size   int                   `json:"size"`
+	Config *ArticleListResConfig `json:"config"`
+}
+
+type ArticleListResConfig struct {
+	CategoryList []*entity.CmsCategory `json:"categoryList"`
 }
 
 // 文章状态更新接口
@@ -152,6 +157,6 @@ type ArticleDetailReq struct {
 
 // 文章详情接口响应
 type ArticleDetailRes struct {
-	g.Meta     `mime:"application/json" example:"{}"`
-	CmsArticle *entity.CmsArticle `json:"cmsArticle"`
+	g.Meta `mime:"application/json" example:"{}"`
+	*entity.CmsArticle
 }

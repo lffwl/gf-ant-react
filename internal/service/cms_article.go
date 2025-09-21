@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gf-ant-react/internal/dao"
+	"gf-ant-react/internal/model/admin"
 	"gf-ant-react/internal/model/entity"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -29,6 +30,33 @@ func (s *CmsArticle) CreateArticle(ctx context.Context, article *entity.CmsArtic
 	return article, nil
 }
 
+// CreateArticleWithParams 使用参数结构体创建文章
+func (s *CmsArticle) CreateArticleWithParams(ctx context.Context, params *admin.ArticleCreateParams) (*entity.CmsArticle, error) {
+	// 转换参数结构体为实体
+	article := &entity.CmsArticle{
+		Title:          params.Title,
+		Summary:        params.Summary,
+		Content:        params.Content,
+		ArticleType:    params.ArticleType,
+		ExternalUrl:    params.ExternalUrl,
+		CategoryId:     params.CategoryId,
+		AuthorName:     params.AuthorName,
+		CoverImage:     params.CoverImage,
+		Status:         params.Status,
+		IsTop:          params.IsTop,
+		IsHot:          params.IsHot,
+		IsRecommend:    params.IsRecommend,
+		PublishAt:      params.PublishAt,
+		SeoTitle:       params.SeoTitle,
+		SeoKeywords:    params.SeoKeywords,
+		SeoDescription: params.SeoDescription,
+		Extra:          params.Extra,
+	}
+
+	// 调用现有方法创建文章
+	return s.CreateArticle(ctx, article)
+}
+
 // UpdateArticle 更新文章信息
 func (s *CmsArticle) UpdateArticle(ctx context.Context, article *entity.CmsArticle) error {
 	if article.Extra == "" {
@@ -38,6 +66,34 @@ func (s *CmsArticle) UpdateArticle(ctx context.Context, article *entity.CmsArtic
 		Where(dao.CmsArticle.Columns().Id, article.Id).
 		Update(article)
 	return err
+}
+
+// UpdateArticleWithParams 使用参数结构体更新文章
+func (s *CmsArticle) UpdateArticleWithParams(ctx context.Context, params *admin.ArticleUpdateParams) error {
+	// 转换参数结构体为实体
+	article := &entity.CmsArticle{
+		Id:             params.Id,
+		Title:          params.Title,
+		Summary:        params.Summary,
+		Content:        params.Content,
+		ArticleType:    params.ArticleType,
+		ExternalUrl:    params.ExternalUrl,
+		CategoryId:     params.CategoryId,
+		AuthorName:     params.AuthorName,
+		CoverImage:     params.CoverImage,
+		Status:         params.Status,
+		IsTop:          params.IsTop,
+		IsHot:          params.IsHot,
+		IsRecommend:    params.IsRecommend,
+		PublishAt:      params.PublishAt,
+		SeoTitle:       params.SeoTitle,
+		SeoKeywords:    params.SeoKeywords,
+		SeoDescription: params.SeoDescription,
+		Extra:          params.Extra,
+	}
+
+	// 调用现有方法更新文章
+	return s.UpdateArticle(ctx, article)
 }
 
 // DeleteArticle 从数据库中删除文章（软删除）
@@ -58,30 +114,32 @@ func (s *CmsArticle) GetArticleById(ctx context.Context, id uint64) (*entity.Cms
 }
 
 // GetArticleList 获取文章列表
-func (s *CmsArticle) GetArticleList(ctx context.Context, page, size int, filters map[string]interface{}) ([]*entity.CmsArticle, int, error) {
+func (s *CmsArticle) GetArticleList(ctx context.Context, page, size int, params *admin.ArticleSearchParams) ([]*entity.CmsArticle, int, error) {
 	model := dao.CmsArticle.Ctx(ctx)
 
 	// 应用筛选条件
-	if title, ok := filters["title"]; ok && title != "" {
-		model = model.WhereLike(dao.CmsArticle.Columns().Title, "%"+gconv.String(title)+"%")
-	}
-	if categoryId, ok := filters["categoryId"]; ok && categoryId != "" && categoryId != "0" {
-		model = model.Where(dao.CmsArticle.Columns().CategoryId, categoryId)
-	}
-	if status, ok := filters["status"]; ok && status != "" && status != "all" {
-		model = model.Where(dao.CmsArticle.Columns().Status, status)
-	}
-	if articleType, ok := filters["articleType"]; ok && articleType != "" && articleType != "all" {
-		model = model.Where(dao.CmsArticle.Columns().ArticleType, articleType)
-	}
-	if isTop, ok := filters["isTop"]; ok && isTop != "" && isTop != "all" {
-		model = model.Where(dao.CmsArticle.Columns().IsTop, isTop)
-	}
-	if isHot, ok := filters["isHot"]; ok && isHot != "" && isHot != "all" {
-		model = model.Where(dao.CmsArticle.Columns().IsHot, isHot)
-	}
-	if isRecommend, ok := filters["isRecommend"]; ok && isRecommend != "" && isRecommend != "all" {
-		model = model.Where(dao.CmsArticle.Columns().IsRecommend, isRecommend)
+	if params != nil {
+		if params.Title != "" {
+			model = model.WhereLike(dao.CmsArticle.Columns().Title, "%"+params.Title+"%")
+		}
+		if params.CategoryId > 0 {
+			model = model.Where(dao.CmsArticle.Columns().CategoryId, params.CategoryId)
+		}
+		if params.Status != nil {
+			model = model.Where(dao.CmsArticle.Columns().Status, params.Status)
+		}
+		if params.ArticleType != "" && params.ArticleType != "all" {
+			model = model.Where(dao.CmsArticle.Columns().ArticleType, params.ArticleType)
+		}
+		if params.IsTop != nil {
+			model = model.Where(dao.CmsArticle.Columns().IsTop, params.IsTop)
+		}
+		if params.IsHot != nil {
+			model = model.Where(dao.CmsArticle.Columns().IsHot, params.IsHot)
+		}
+		if params.IsRecommend != nil {
+			model = model.Where(dao.CmsArticle.Columns().IsRecommend, params.IsRecommend)
+		}
 	}
 
 	// 获取总数

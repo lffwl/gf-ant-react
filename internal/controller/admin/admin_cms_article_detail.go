@@ -12,7 +12,7 @@ func (c *ControllerCms) ArticleDetail(ctx context.Context, req *cms.ArticleDetai
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &cms.ArticleDetailRes{
 		CmsArticle: article,
 	}, nil

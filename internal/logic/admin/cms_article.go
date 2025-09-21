@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"gf-ant-react/api/admin/cms"
+	"gf-ant-react/internal/model/admin"
 	"gf-ant-react/internal/model/entity"
 	"gf-ant-react/internal/service"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
 )
 
 type sCmsArticleLogic struct{}
@@ -27,8 +27,8 @@ func (s *sCmsArticleLogic) CreateArticle(ctx context.Context, req *cms.ArticleCr
 		return gerror.NewCode(gcode.CodeBusinessValidationFailed, "文章标题已存在")
 	}
 
-	// 创建文章实体
-	article := &entity.CmsArticle{
+	// 构建业务层参数
+	params := &admin.ArticleCreateParams{
 		Title:          req.Title,
 		Summary:        req.Summary,
 		Content:        req.Content,
@@ -48,8 +48,8 @@ func (s *sCmsArticleLogic) CreateArticle(ctx context.Context, req *cms.ArticleCr
 		Extra:          req.Extra,
 	}
 
-	// 调用服务层保存文章
-	_, err = service.CmsArticleService.CreateArticle(ctx, article)
+	// 调用服务层新的参数结构体方法创建文章
+	_, err = service.CmsArticleService.CreateArticleWithParams(ctx, params)
 	return err
 }
 
@@ -73,27 +73,30 @@ func (s *sCmsArticleLogic) UpdateArticle(ctx context.Context, req *cms.ArticleUp
 		return gerror.NewCode(gcode.CodeBusinessValidationFailed, "文章标题已存在")
 	}
 
-	// 更新文章信息
-	article.Title = req.Title
-	article.Summary = req.Summary
-	article.Content = req.Content
-	article.ArticleType = req.ArticleType
-	article.ExternalUrl = req.ExternalUrl
-	article.CategoryId = req.CategoryId
-	article.AuthorName = req.AuthorName
-	article.CoverImage = req.CoverImage
-	article.Status = req.Status
-	article.IsTop = req.IsTop
-	article.IsHot = req.IsHot
-	article.IsRecommend = req.IsRecommend
-	article.PublishAt = req.PublishAt
-	article.SeoTitle = req.SeoTitle
-	article.SeoKeywords = req.SeoKeywords
-	article.SeoDescription = req.SeoDescription
-	article.Extra = req.Extra
+	// 构建业务层参数
+	params := &admin.ArticleUpdateParams{
+		Id:             req.Id,
+		Title:          req.Title,
+		Summary:        req.Summary,
+		Content:        req.Content,
+		ArticleType:    req.ArticleType,
+		ExternalUrl:    req.ExternalUrl,
+		CategoryId:     req.CategoryId,
+		AuthorName:     req.AuthorName,
+		CoverImage:     req.CoverImage,
+		Status:         req.Status,
+		IsTop:          req.IsTop,
+		IsHot:          req.IsHot,
+		IsRecommend:    req.IsRecommend,
+		PublishAt:      req.PublishAt,
+		SeoTitle:       req.SeoTitle,
+		SeoKeywords:    req.SeoKeywords,
+		SeoDescription: req.SeoDescription,
+		Extra:          req.Extra,
+	}
 
-	// 调用服务层更新文章
-	return service.CmsArticleService.UpdateArticle(ctx, article)
+	// 调用服务层新的参数结构体方法更新文章
+	return service.CmsArticleService.UpdateArticleWithParams(ctx, params)
 }
 
 // DeleteArticle 删除文章
@@ -127,19 +130,19 @@ func (s *sCmsArticleLogic) GetArticleDetail(ctx context.Context, id uint64) (*en
 
 // GetArticleList 获取文章列表
 func (s *sCmsArticleLogic) GetArticleList(ctx context.Context, req *cms.ArticleListReq) ([]*entity.CmsArticle, int, error) {
-	// 构建筛选条件
-	filters := g.Map{
-		"title":       req.Title,
-		"categoryId":  req.CategoryId,
-		"status":      req.Status,
-		"articleType": req.ArticleType,
-		"isTop":       req.IsTop,
-		"isHot":       req.IsHot,
-		"isRecommend": req.IsRecommend,
+	// 构建搜索参数
+	searchParams := &admin.ArticleSearchParams{
+		Title:       req.Title,
+		CategoryId:  req.CategoryId,
+		Status:      req.Status,
+		ArticleType: req.ArticleType,
+		IsTop:       req.IsTop,
+		IsHot:       req.IsHot,
+		IsRecommend: req.IsRecommend,
 	}
 
 	// 调用服务层获取文章列表
-	articles, total, err := service.CmsArticleService.GetArticleList(ctx, req.Page, req.Size, filters)
+	articles, total, err := service.CmsArticleService.GetArticleList(ctx, req.Page, req.Size, searchParams)
 	if err != nil {
 		return nil, 0, err
 	}

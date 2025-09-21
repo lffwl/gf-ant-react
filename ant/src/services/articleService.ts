@@ -50,6 +50,9 @@ export interface ArticleListResponse {
     total: number;
     page: number;
     size: number;
+    config?: {
+      categoryList: any[];
+    };
   };
 }
 
