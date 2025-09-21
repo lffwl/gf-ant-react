@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Table, Button, Space, Popconfirm, Card, Row, Col, Layout, Image, Tag, Input, Select, TreeSelect } from 'antd';
+import { Table, Button, Space, Popconfirm, Card, Row, Col, Layout, Image, Tag, Input, Select, TreeSelect, Switch } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { articleService } from '../../../services/articleService';
 import type { ColumnsType } from 'antd/es/table';
-import { PermissionAction } from '../../../utils/permission';
+import { PermissionAction, usePermission } from '../../../utils/permission';
 import ArticleEdit from './edit';
 
 const { Content } = Layout;
@@ -28,6 +28,10 @@ interface ArticleData {
   createdAt?: string;
   updatedAt?: string;
   content?: string; // 确保接口包含content字段
+  // 添加SEO相关字段
+  seoTitle?: string;
+  seoKeywords?: string;
+  seoDescription?: string;
 }
 
 const ArticleList: React.FC = () => {
@@ -137,11 +141,16 @@ const ArticleList: React.FC = () => {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      width: '6%',
-      render: (status: boolean) => (
-        <Tag color={status ? 'green' : 'red'}>
-          {status ? '已发布' : '草稿'}
-        </Tag>
+      width: '10%',
+      render: (status: boolean, record: ArticleData) => (
+        <Switch
+          checked={status}
+          checkedChildren="已发布"
+          unCheckedChildren="草稿"
+          onChange={(checked) => hasUpdatePermission && handleStatusChange(record.id, checked)}
+          disabled={!hasUpdatePermission}
+          style={{ marginBottom: 4 }}
+        />
       ),
     },
     {
@@ -149,10 +158,15 @@ const ArticleList: React.FC = () => {
       dataIndex: 'isTop',
       key: 'isTop',
       width: '6%',
-      render: (isTop: boolean) => (
-        <Tag color={isTop ? 'blue' : 'default'}>
-          {isTop ? '是' : '否'}
-        </Tag>
+      render: (isTop: boolean, record: ArticleData) => (
+        <Switch
+          checked={isTop}
+          checkedChildren="是"
+          unCheckedChildren="否"
+          onChange={(checked) => hasUpdatePermission && handleTopStatusChange(record.id, checked)}
+          disabled={!hasUpdatePermission}
+          style={{ marginBottom: 4 }}
+        />
       ),
     },
     {
@@ -160,10 +174,15 @@ const ArticleList: React.FC = () => {
       dataIndex: 'isHot',
       key: 'isHot',
       width: '6%',
-      render: (isHot: boolean) => (
-        <Tag color={isHot ? 'red' : 'default'}>
-          {isHot ? '是' : '否'}
-        </Tag>
+      render: (isHot: boolean, record: ArticleData) => (
+        <Switch
+          checked={isHot}
+          checkedChildren="是"
+          unCheckedChildren="否"
+          onChange={(checked) => hasUpdatePermission && handleHotStatusChange(record.id, checked)}
+          disabled={!hasUpdatePermission}
+          style={{ marginBottom: 4 }}
+        />
       ),
     },
     {
@@ -171,10 +190,15 @@ const ArticleList: React.FC = () => {
       dataIndex: 'isRecommend',
       key: 'isRecommend',
       width: '6%',
-      render: (isRecommend: boolean) => (
-        <Tag color={isRecommend ? 'green' : 'default'}>
-          {isRecommend ? '是' : '否'}
-        </Tag>
+      render: (isRecommend: boolean, record: ArticleData) => (
+        <Switch
+          checked={isRecommend}
+          checkedChildren="是"
+          unCheckedChildren="否"
+          onChange={(checked) => hasUpdatePermission && handleRecommendStatusChange(record.id, checked)}
+          disabled={!hasUpdatePermission}
+          style={{ marginBottom: 4 }}
+        />
       ),
     },
     {
@@ -382,7 +406,11 @@ const ArticleList: React.FC = () => {
            publishAt: response.data.publishAt,
            createdAt: response.data.createdAt,
            updatedAt: response.data.updatedAt,
-           content: response.data.content || '' // 确保content字段存在
+           content: response.data.content || '', // 确保content字段存在
+           // 为SEO字段提供默认空字符串值，确保表单正确显示
+           seoTitle: response.data.seoTitle || '',
+           seoKeywords: response.data.seoKeywords || '',
+           seoDescription: response.data.seoDescription || '',
          });
        } else {
          // 如果获取失败，使用列表中的数据（不包含完整内容）
@@ -423,10 +451,57 @@ const ArticleList: React.FC = () => {
    };
  
    const handleSuccess = () => {
-     setVisible(false);
-     setEditArticle(undefined);
-     fetchArticleList();
-   };
+    setVisible(false);
+    setEditArticle(undefined);
+    fetchArticleList();
+  };
+
+  // 处理文章状态开关切换
+  const handleStatusChange = async (id: number, checked: boolean) => {
+    try {
+      await articleService.updateArticleStatus(id.toString(), checked);
+      // 更新成功后重新加载数据
+      fetchArticleList();
+    } catch (error) {
+      console.error('更新文章状态失败:', error);
+    }
+  };
+
+  // 处理文章置顶状态开关切换
+  const handleTopStatusChange = async (id: number, checked: boolean) => {
+    try {
+      await articleService.updateArticleTopStatus(id.toString(), checked);
+      // 更新成功后重新加载数据
+      fetchArticleList();
+    } catch (error) {
+      console.error('更新文章置顶状态失败:', error);
+    }
+  };
+
+  // 处理文章热门状态开关切换
+  const handleHotStatusChange = async (id: number, checked: boolean) => {
+    try {
+      await articleService.updateArticleHotStatus(id.toString(), checked);
+      // 更新成功后重新加载数据
+      fetchArticleList();
+    } catch (error) {
+      console.error('更新文章热门状态失败:', error);
+    }
+  };
+
+  // 处理文章推荐状态开关切换
+  const handleRecommendStatusChange = async (id: number, checked: boolean) => {
+    try {
+      await articleService.updateArticleRecommendStatus(id.toString(), checked);
+      // 更新成功后重新加载数据
+      fetchArticleList();
+    } catch (error) {
+      console.error('更新文章推荐状态失败:', error);
+    }
+  };
+
+  // 获取更新文章的权限状态
+  const hasUpdatePermission = usePermission('sys.cms.article.update');
 
   return (
     <div>

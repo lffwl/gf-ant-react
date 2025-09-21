@@ -94,7 +94,18 @@ export const articleService = {
   // 获取文章详情
   async getArticleDetail(id: string): Promise<ArticleDetailResponse> {
     try {
-      return get<ArticleDetailResponse>(`/sys/cms/article/${id}`);
+      const response = await get<ArticleDetailResponse>(`/sys/cms/article/${id}`);
+      // 将数字状态值转换为布尔值
+      return {
+        ...response,
+        data: {
+          ...response.data,
+          status: Boolean(response.data.status),
+          isTop: Boolean(response.data.isTop),
+          isHot: Boolean(response.data.isHot),
+          isRecommend: Boolean(response.data.isRecommend)
+        }
+      };
     } catch (error) {
       throw error;
     }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Switch, Select, Button, Modal, Row, Col, Image, Tabs, DatePicker, TreeSelect } from 'antd';
+import { Form, Input, Select, Button, Modal, Row, Col, Image, Tabs, DatePicker, TreeSelect, Switch } from 'antd';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import WangEditor from '../../../common/editor/WangEditor';
 import { CloseOutlined, UploadOutlined } from '@ant-design/icons';
@@ -28,10 +28,11 @@ interface ArticleData {
   updatedAt?: string;
   content?: string;
   externalUrl?: string;
+  extra?: string;
+  // 添加 SEO 相关字段
   seoTitle?: string;
   seoKeywords?: string;
   seoDescription?: string;
-  extra?: string;
 }
 
 interface ArticleEditProps {
@@ -89,34 +90,45 @@ const ArticleEdit: React.FC<ArticleEditProps> = ({ visible, onCancel, onSuccess,
       
       // 如果是编辑模式，填充表单数据
       if (isEditMode && editArticle) {
-        form.setFieldsValue({
-          title: editArticle.title,
-          summary: editArticle.summary,
-          coverImage: editArticle.coverImage,
+        
+        console.log('editArticle', editArticle);
+        // 确保所有字段都有值，即使editArticle中没有提供
+        const formValues = {
+          title: editArticle.title || '',
+          summary: editArticle.summary || '',
+          coverImage: editArticle.coverImage || '',
           categoryId: editArticle.categoryId,
-          articleType: editArticle.articleType,
-          externalUrl: editArticle.externalUrl,
-          authorName: editArticle.authorName,
-          status: editArticle.status,
-          isTop: editArticle.isTop,
-          isHot: editArticle.isHot,
-          isRecommend: editArticle.isRecommend,
+          articleType: editArticle.articleType || 'normal',
+          externalUrl: editArticle.externalUrl || '',
+          authorName: editArticle.authorName || '',
           publishAt: editArticle.publishAt ? new Date(editArticle.publishAt) : undefined,
-          seoTitle: editArticle.seoTitle,
-          seoKeywords: editArticle.seoKeywords,
-          seoDescription: editArticle.seoDescription,
-          extra: editArticle.extra,
-          content: editArticle.content
-        });
+          extra: editArticle.extra || '',
+          content: editArticle.content || '',
+          // 添加 SEO 相关字段，确保即使原数据中没有这些字段也会正确初始化
+          seoTitle: editArticle.seoTitle || '',
+          seoKeywords: editArticle.seoKeywords || '',
+          seoDescription: editArticle.seoDescription || '',
+          // 添加状态、置顶、热门、推荐开关的值
+          status: typeof editArticle.status === 'boolean' ? editArticle.status : true,
+          isTop: typeof editArticle.isTop === 'boolean' ? editArticle.isTop : false,
+          isHot: typeof editArticle.isHot === 'boolean' ? editArticle.isHot : false,
+          isRecommend: typeof editArticle.isRecommend === 'boolean' ? editArticle.isRecommend : false
+        };
+        
+        form.setFieldsValue(formValues);
         setContent(editArticle.content || '');
         setCoverImageValue(editArticle.coverImage || '');
         setArticleType(editArticle.articleType || 'normal');
+        
+
       } else {
         // 新增模式下重置表单并设置默认值
         form.resetFields();
         form.setFieldsValue({
-          status: true,
           articleType: 'normal',
+          // 设置默认状态为已发布
+          status: true,
+          // 设置默认值为不置顶、不热门、不推荐
           isTop: false,
           isHot: false,
           isRecommend: false
@@ -260,29 +272,45 @@ const ArticleEdit: React.FC<ArticleEditProps> = ({ visible, onCancel, onSuccess,
                           />
                         </Form.Item>
                       </Col>
+                      {/* 添加状态、置顶、热门、推荐开关 */}
                       <Col span={6}>
                         <Form.Item
                           name="status"
-                          label={<span style={{ fontWeight: 500, color: '#262626' }}>发布状态</span>}
+                          label={<span style={{ fontWeight: 500, color: '#262626' }}>状态</span>}
                           valuePropName="checked"
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', height: '32px' }}>
-                            <Switch 
-                              checkedChildren="发布" 
-                              unCheckedChildren="草稿" 
-                            />
-                          </div>
+                          <Switch checkedChildren="已发布" unCheckedChildren="未发布" />
                         </Form.Item>
                       </Col>
+                    </Row>
+
+                    {/* 新增一行放置置顶、热门、推荐开关 */}
+                    <Row gutter={[16, 12]}>
                       <Col span={6}>
                         <Form.Item
                           name="isTop"
                           label={<span style={{ fontWeight: 500, color: '#262626' }}>置顶</span>}
                           valuePropName="checked"
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', height: '32px' }}>
-                            <Switch />
-                          </div>
+                          <Switch />
+                        </Form.Item>
+                      </Col>
+                      <Col span={6}>
+                        <Form.Item
+                          name="isHot"
+                          label={<span style={{ fontWeight: 500, color: '#262626' }}>热门</span>}
+                          valuePropName="checked"
+                        >
+                          <Switch />
+                        </Form.Item>
+                      </Col>
+                      <Col span={6}>
+                        <Form.Item
+                          name="isRecommend"
+                          label={<span style={{ fontWeight: 500, color: '#262626' }}>推荐</span>}
+                          valuePropName="checked"
+                        >
+                          <Switch />
                         </Form.Item>
                       </Col>
                     </Row>
@@ -300,32 +328,6 @@ const ArticleEdit: React.FC<ArticleEditProps> = ({ visible, onCancel, onSuccess,
                         />
                       </Form.Item>
                     )}
-
-                    {/* 热门和推荐开关 */}
-                    <Row gutter={[16, 12]}>
-                      <Col span={6}>
-                        <Form.Item
-                          name="isHot"
-                          label={<span style={{ fontWeight: 500, color: '#262626' }}>热门</span>}
-                          valuePropName="checked"
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', height: '32px' }}>
-                            <Switch />
-                          </div>
-                        </Form.Item>
-                      </Col>
-                      <Col span={6}>
-                        <Form.Item
-                          name="isRecommend"
-                          label={<span style={{ fontWeight: 500, color: '#262626' }}>推荐</span>}
-                          valuePropName="checked"
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', height: '32px' }}>
-                            <Switch />
-                          </div>
-                        </Form.Item>
-                      </Col>
-                    </Row>
 
                     {/* 发布时间 */}
                     <Row gutter={[16, 12]}>
@@ -496,7 +498,7 @@ const ArticleEdit: React.FC<ArticleEditProps> = ({ visible, onCancel, onSuccess,
                     onSourceModeChange={setUseSourceMode}
                     height={400}
                     maxHeight={600}
-                    maxLength={65535} // 从16383修改为65535，允许输入更多文字
+                    maxLength={65535}
                     placeholder="请输入文章内容"
                   />
                 </Form.Item>
@@ -504,30 +506,41 @@ const ArticleEdit: React.FC<ArticleEditProps> = ({ visible, onCancel, onSuccess,
             },
             {
               key: '3',
-              label: 'SEO设置',
+              label: 'SEO 设置',
               children: (
                 <>
                   <Form.Item
                     name="seoTitle"
-                    label="SEO标题"
+                    label={<span style={{ fontWeight: 500, color: '#262626' }}>SEO 标题</span>}
+                    tooltip="页面的标题，用于搜索引擎优化"
                   >
-                    <Input placeholder="请输入SEO标题" />
+                    <Input 
+                      placeholder="请输入SEO标题（留空则使用文章标题）" 
+                      style={{ borderRadius: '6px' }}
+                    />
                   </Form.Item>
-
+                  
                   <Form.Item
                     name="seoKeywords"
-                    label="SEO关键词"
+                    label={<span style={{ fontWeight: 500, color: '#262626' }}>SEO 关键词</span>}
+                    tooltip="页面的关键词，多个关键词用英文逗号分隔"
                   >
-                    <Input placeholder="请输入SEO关键词，多个用逗号分隔" />
+                    <Input.TextArea 
+                      rows={2} 
+                      placeholder="请输入SEO关键词，多个关键词用英文逗号分隔"
+                      style={{ borderRadius: '6px' }}
+                    />
                   </Form.Item>
-
+                  
                   <Form.Item
                     name="seoDescription"
-                    label="SEO描述"
+                    label={<span style={{ fontWeight: 500, color: '#262626' }}>SEO 描述</span>}
+                    tooltip="页面的描述信息，用于搜索引擎优化"
                   >
                     <Input.TextArea 
                       rows={3} 
-                      placeholder="请输入SEO描述" 
+                      placeholder="请输入SEO描述（留空则使用文章摘要）"
+                      style={{ borderRadius: '6px' }}
                     />
                   </Form.Item>
                 </>
