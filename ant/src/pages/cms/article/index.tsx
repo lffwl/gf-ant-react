@@ -74,7 +74,7 @@ const ArticleList: React.FC = () => {
       title: '封面图',
       dataIndex: 'coverImage',
       key: 'coverImage',
-      width: '8%',
+      width: 120,
       render: (coverImage: string) => (
         coverImage ? (
           <Image
@@ -209,9 +209,24 @@ const ArticleList: React.FC = () => {
       render: (viewCount: number) => viewCount || 0,
     },
     {
+      title: '创建时间',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      width: '15%',
+      render: (createdAt: string) => createdAt || '-',
+    },
+    {
+      title: '更新时间',
+      dataIndex: 'updatedAt',
+      key: 'updatedAt',
+      width: '15%',
+      render: (updatedAt: string) => updatedAt || '-',
+    },
+    {
       title: '操作',
       key: 'action',
       width: '14%',
+      fixed: 'right',
       render: (_, record) => (
         <Space size="middle">
           <PermissionAction permission="sys.cms.article.update">
