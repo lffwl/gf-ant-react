@@ -6,6 +6,7 @@ export interface CategoryData {
   slug: string;
   description: string;
   cType: string;
+  linkUrl: string;
   isNav: boolean;
   sortOrder: number;
   status: boolean;
@@ -31,6 +32,7 @@ export const buildTreeFromParentId = (flatData: any[]): CategoryData[] => {
       slug: item.slug || '',
       description: item.description || '',
       cType: item.cType || '',
+      linkUrl: item.linkUrl || '',
       isNav: item.isNav ? true : false,
       sortOrder: item.sortOrder || 0,
       status: item.status ? true : false,
@@ -74,6 +76,7 @@ export const transformCategoryData = (data: any[]): CategoryData[] => {
       slug: item.slug || '',
       description: item.description || '',
       cType: item.cType || '',
+      linkUrl: item.linkUrl || '',
       isNav: item.isNav ? true : false,
       sortOrder: item.sortOrder || 0,
       status: item.status ? true : false,
@@ -109,7 +112,8 @@ export const transformFormData = (values: any): any => {
     status: values.status ? 1 : 0,
     isNav: values.isNav ? 1 : 0,
     parentId: values.parentId !== undefined ? values.parentId : 0,
-    sortOrder: values.sortOrder !== undefined ? values.sortOrder : 0
+    sortOrder: values.sortOrder !== undefined ? values.sortOrder : 0,
+    linkUrl: values.linkUrl || ''
   };
 };
 

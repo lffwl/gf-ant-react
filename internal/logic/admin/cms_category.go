@@ -37,6 +37,7 @@ func (s *sCmsCategoryLogic) CreateCategory(ctx context.Context, req *cms.Categor
 		Description:    req.Description,
 		ParentId:       req.ParentId,
 		CType:          req.CType,
+		LinkUrl:        req.LinkUrl,
 		IsNav:          req.IsNav,
 		SortOrder:      req.SortOrder,
 		Status:         req.Status,
@@ -101,6 +102,7 @@ func (s *sCmsCategoryLogic) UpdateCategory(ctx context.Context, req *cms.Categor
 	category.Slug = req.Slug
 	category.Description = req.Description
 	category.CType = req.CType
+	category.LinkUrl = req.LinkUrl
 	category.IsNav = req.IsNav
 	category.SortOrder = req.SortOrder
 	category.Status = req.Status

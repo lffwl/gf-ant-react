@@ -15,6 +15,7 @@ type CategoryCreateReq struct {
 	Description    string      `p:"description" v:"length:0,16383#栏目描述长度不能超过16383个字符" description:"栏目描述"`
 	ParentId       uint64      `p:"parentId" v:"integer#父级栏目ID必须为整数" description:"父级栏目ID"`
 	CType          string      `p:"cType" v:"required#关联的内容类型不能为空" description:"关联的内容类型"`
+	LinkUrl        string      `p:"linkUrl" description:"外链地址，c_type 为 link 使用"`
 	IsNav          bool        `p:"isNav" description:"是否显示在主导航"`
 	SortOrder      int         `p:"sortOrder" v:"integer#排序权重必须为整数" description:"排序权重"`
 	Status         bool        `p:"status" description:"状态"`
@@ -40,6 +41,7 @@ type CategoryUpdateReq struct {
 	Description    string      `p:"description" v:"length:0,16383#栏目描述长度不能超过16383个字符" description:"栏目描述"`
 	ParentId       uint64      `p:"parentId" v:"integer#父级栏目ID必须为整数" description:"父级栏目ID"`
 	CType          string      `p:"cType" v:"required#关联的内容类型不能为空" description:"关联的内容类型"`
+	LinkUrl        string      `p:"linkUrl" description:"外链地址，c_type 为 link 使用"`
 	IsNav          bool        `p:"isNav" description:"是否显示在主导航"`
 	SortOrder      int         `p:"sortOrder" v:"integer#排序权重必须为整数" description:"排序权重"`
 	Status         bool        `p:"status" description:"状态"`

@@ -29,6 +29,7 @@ type CmsCategoryColumns struct {
 	Level          string // 栏目层级深度 (0=顶级, 1=二级, ...)
 	Path           string // 栏目路径，如 0,1,5, 表示从根到当前栏目的路径
 	CType          string // 栏目类型
+	LinkUrl        string // 外链地址，c_type 为 link 使用
 	IsNav          string // 是否显示在主导航: 0-否, 1-是
 	SortOrder      string // 排序权重，值越小越靠前
 	Status         string // 状态: 1-启用, 0-禁用
@@ -52,6 +53,7 @@ var cmsCategoryColumns = CmsCategoryColumns{
 	Level:          "level",
 	Path:           "path",
 	CType:          "c_type",
+	LinkUrl:        "link_url",
 	IsNav:          "is_nav",
 	SortOrder:      "sort_order",
 	Status:         "status",

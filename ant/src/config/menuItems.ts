@@ -67,6 +67,7 @@ export const menuItems: MenuItem[] = [
     key: '/upload',
     icon: React.createElement(UploadOutlined),
     label: '文件上传',
+    hidden: true,
     component: DemoPage,
   },
   {

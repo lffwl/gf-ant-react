@@ -71,6 +71,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
               seoDescription: editCategory.seoDescription,
               extra: editCategory.extra,
               parentId: editCategory.parentId === 0 ? undefined : editCategory.parentId,
+              linkUrl: editCategory.linkUrl,
             });
             // 同时更新本地description状态
             setDescription(editCategory.description || '');
@@ -153,6 +154,7 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
         slug: '',
         description: '',
         cType: '',
+        linkUrl: '',
         isNav: false,
         sortOrder: 0,
         status: true,
@@ -306,6 +308,15 @@ const CategoryEdit: React.FC<CategoryEditProps> = ({ visible, onCancel, onSucces
                                     }}
                                     className="form-select"
                                   />
+                                </Form.Item>
+                              </Col>
+                              <Col span={12}>
+                                <Form.Item
+                                  label="外链地址"
+                                  name="linkUrl"
+                                  tooltip="当栏目类型为link时使用"
+                                >
+                                  <Input placeholder="请输入外链地址" className="form-input" />
                                 </Form.Item>
                               </Col>
                             </Row>

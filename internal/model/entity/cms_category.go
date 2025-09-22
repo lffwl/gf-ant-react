@@ -18,6 +18,7 @@ type CmsCategory struct {
 	Level          uint        `json:"level"          orm:"level"           description:"栏目层级深度 (0=顶级, 1=二级, ...)"`   // 栏目层级深度 (0=顶级, 1=二级, ...)
 	Path           string      `json:"path"           orm:"path"            description:"栏目路径，如 0,1,5, 表示从根到当前栏目的路径"` // 栏目路径，如 0,1,5, 表示从根到当前栏目的路径
 	CType          string      `json:"cType"          orm:"c_type"          description:"栏目类型"`                       // 栏目类型
+	LinkUrl        string      `json:"linkUrl"        orm:"link_url"        description:"外链地址，c_type 为 link 使用"`      // 外链地址，c_type 为 link 使用
 	IsNav          bool        `json:"isNav"          orm:"is_nav"          description:"是否显示在主导航: 0-否, 1-是"`         // 是否显示在主导航: 0-否, 1-是
 	SortOrder      int         `json:"sortOrder"      orm:"sort_order"      description:"排序权重，值越小越靠前"`                // 排序权重，值越小越靠前
 	Status         bool        `json:"status"         orm:"status"          description:"状态: 1-启用, 0-禁用"`             // 状态: 1-启用, 0-禁用
