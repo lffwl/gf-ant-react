@@ -20,11 +20,17 @@ type IAdminCms interface {
 	ArticleTopUpdate(ctx context.Context, req *cms.ArticleTopUpdateReq) (res *cms.ArticleTopUpdateRes, err error)
 	ArticleHotUpdate(ctx context.Context, req *cms.ArticleHotUpdateReq) (res *cms.ArticleHotUpdateRes, err error)
 	ArticleRecommendUpdate(ctx context.Context, req *cms.ArticleRecommendUpdateReq) (res *cms.ArticleRecommendUpdateRes, err error)
+	ArticleDetail(ctx context.Context, req *cms.ArticleDetailReq) (res *cms.ArticleDetailRes, err error)
 	CategoryCreate(ctx context.Context, req *cms.CategoryCreateReq) (res *cms.CategoryCreateRes, err error)
 	CategoryUpdate(ctx context.Context, req *cms.CategoryUpdateReq) (res *cms.CategoryUpdateRes, err error)
 	CategoryDelete(ctx context.Context, req *cms.CategoryDeleteReq) (res *cms.CategoryDeleteRes, err error)
 	CategoryDetail(ctx context.Context, req *cms.CategoryDetailReq) (res *cms.CategoryDetailRes, err error)
 	CategoryTree(ctx context.Context, req *cms.CategoryTreeReq) (res *cms.CategoryTreeRes, err error)
+	SiteSettingCreate(ctx context.Context, req *cms.SiteSettingCreateReq) (res *cms.SiteSettingCreateRes, err error)
+	SiteSettingUpdate(ctx context.Context, req *cms.SiteSettingUpdateReq) (res *cms.SiteSettingUpdateRes, err error)
+	SiteSettingDelete(ctx context.Context, req *cms.SiteSettingDeleteReq) (res *cms.SiteSettingDeleteRes, err error)
+	SiteSettingDetail(ctx context.Context, req *cms.SiteSettingDetailReq) (res *cms.SiteSettingDetailRes, err error)
+	SiteSettingList(ctx context.Context, req *cms.SiteSettingListReq) (res *cms.SiteSettingListRes, err error)
 }
 
 type IAdminV1 interface {

@@ -10,7 +10,8 @@ import {
   SettingOutlined,
   AppstoreOutlined,
   UploadOutlined,
-  FileTextOutlined
+  FileTextOutlined,
+  EnvironmentOutlined
 } from '@ant-design/icons';
 import Welcome from '../pages/Welcome';
 import UserManagement from '../pages/permission/user/index';
@@ -22,6 +23,7 @@ import PermissionExample from '../pages/PermissionExample';
 import CategoryList from '../pages/cms/category/index';
 import ArticleList from '../pages/cms/article/index';
 import DemoPage from '../pages/upload/DemoPage';
+import SiteSettingList from '../pages/cms/site-setting/index';
 
 export interface MenuItem {
   key: string;
@@ -60,6 +62,13 @@ export const menuItems: MenuItem[] = [
         label: '文章管理',
         permission: 'sys.cms.article',
         component: ArticleList
+      },
+      {
+        key: '/cms/site-setting',
+        icon: React.createElement(EnvironmentOutlined),
+        label: '网站设置',
+        permission: 'sys.cms.site_setting.list',
+        component: SiteSettingList
       }
     ]
   },
