@@ -109,10 +109,10 @@ func (s *sCmsSiteSettingLogic) GetSiteSettingDetail(ctx context.Context, id uint
 func (s *sCmsSiteSettingLogic) GetSiteSettingList(ctx context.Context, req *cms.SiteSettingListReq) ([]*entity.CmsSiteSetting, int, error) {
 	// 调用服务层获取网站设置列表
 	return service.CmsSiteSettingService.GetSiteSettingList(ctx, admin.GetSiteSettingListReq{
-		Page:  req.Page,
-		Size:  req.Size,
-		Group: req.Group,
-		Key:   req.Key,
+		Page:       req.Page,
+		Size:       req.Size,
+		Group:      req.Group,
+		SettingKey: req.SettingKey,
 	})
 }
 

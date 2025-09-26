@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Button, Space, Popconfirm, Card, Row, Col, Input, Select, Layout } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { siteSettingService } from '../../../services/siteSettingService';
@@ -30,7 +30,7 @@ const SiteSettingList: React.FC = () => {
   });
   const [searchParams, setSearchParams] = useState({
     group: undefined,
-    key: '',
+    settingKey: '',
     page: 1,
     size: 10
   });
@@ -38,8 +38,6 @@ const SiteSettingList: React.FC = () => {
   const [editSetting, setEditSetting] = useState<SiteSettingData | undefined>(undefined);
   const [groupOptions, setGroupOptions] = useState<Array<{label: string; value: string}>>([]);
   
-  // 使用ref来跟踪上一次的查询参数
-  const prevQueryParamsRef = useRef<string>('');
 
   // 获取权限
   const hasCreatePermission = usePermission('sys.cms.site_setting.create');
@@ -124,13 +122,14 @@ const SiteSettingList: React.FC = () => {
   // 处理搜索
   const handleSearch = () => {
     setSearchParams(prev => ({ ...prev, page: 1 }));
+    fetchSiteSettingList();
   };
 
   // 处理重置
   const handleReset = () => {
     setSearchParams({
       group: undefined,
-      key: '',
+      settingKey: '',
       page: 1,
       size: 10
     });
@@ -249,12 +248,9 @@ const SiteSettingList: React.FC = () => {
 
   // 监听搜索参数变化，重新获取数据
   useEffect(() => {
-    const currentQueryParams = JSON.stringify(searchParams);
-    if (currentQueryParams !== prevQueryParamsRef.current) {
-      prevQueryParamsRef.current = currentQueryParams;
-      fetchSiteSettingList();
-    }
-  }, [searchParams]);
+    // 组件挂载时获取数据
+    fetchSiteSettingList();
+  }, []);
 
   return (
     <div>
@@ -285,15 +281,15 @@ const SiteSettingList: React.FC = () => {
                   <Input
                     placeholder="请输入配置项键名"
                     allowClear
-                    value={searchParams.key}
-                    onChange={(e) => setSearchParams(prev => ({ ...prev, key: e.target.value }))}
+                    value={searchParams.settingKey}
+                    onChange={(e) => setSearchParams(prev => ({ ...prev, settingKey: e.target.value }))}
                     onPressEnter={handleSearch}
                     style={{ flex: 1 }}
                   />
                 </div>
               </Col>
               <Col xs={24} sm={24} md={24} lg={24} xl={12}>
-                <div style={{ display: 'flex', justifyContent: 'flex-start', paddingLeft: '108px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
                   <Button 
                     type="primary" 
                     icon={<SearchOutlined />}

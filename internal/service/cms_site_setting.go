@@ -58,8 +58,8 @@ func (s *CmsSiteSetting) GetSiteSettingList(ctx context.Context, req admin.GetSi
 	if req.Group != "" {
 		model = model.Where(dao.CmsSiteSetting.Columns().Group, req.Group)
 	}
-	if req.Key != "" {
-		model = model.WhereLike(dao.CmsSiteSetting.Columns().SettingKey, "%"+req.Key+"%")
+	if req.SettingKey != "" {
+		model = model.WhereLike(dao.CmsSiteSetting.Columns().SettingKey, "%"+req.SettingKey+"%")
 	}
 
 	// 获取总数
