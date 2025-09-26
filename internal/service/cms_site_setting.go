@@ -51,14 +51,21 @@ func (s *CmsSiteSetting) GetSiteSettingById(ctx context.Context, id uint64) (*en
 }
 
 // GetSiteSettingList 获取网站设置列表
-func (s *CmsSiteSetting) GetSiteSettingList(ctx context.Context, group string) ([]*entity.CmsSiteSetting, error) {
+func (s *CmsSiteSetting) GetSiteSettingList(ctx context.Context, group string) ([]*entity.CmsSiteSetting, int, error) {
 	var settings []*entity.CmsSiteSetting
 	model := dao.CmsSiteSetting.Ctx(ctx)
 	if group != "" {
 		model = model.Where(dao.CmsSiteSetting.Columns().Group, group)
 	}
-	err := model.OrderAsc(dao.CmsSiteSetting.Columns().Id).Scan(&settings)
-	return settings, err
+
+	// 获取总数
+	total, err := model.Count()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	err = model.OrderAsc(dao.CmsSiteSetting.Columns().Id).Scan(&settings)
+	return settings, total, err
 }
 
 // CheckSettingKeyExists 检查设置键是否已存在
@@ -73,4 +80,13 @@ func (s *CmsSiteSetting) CheckSettingKeyExists(ctx context.Context, settingKey s
 		return false, err
 	}
 	return count > 0, nil
+}
+
+// 分组获取网站设置列表
+func (s *CmsSiteSetting) GetSiteSettingGroups(ctx context.Context) ([]string, error) {
+	groups, err := dao.CmsSiteSetting.Ctx(ctx).
+		Distinct().
+		Fields(dao.CmsSiteSetting.Columns().Group).
+		Array()
+	return gconv.Strings(groups), err
 }

@@ -33,6 +33,9 @@ export interface SiteSettingListResponse {
     total: number;
     page: number;
     size: number;
+    config?: {
+      groups?: string[];
+    };
   };
 }
 

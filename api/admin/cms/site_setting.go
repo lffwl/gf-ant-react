@@ -71,4 +71,10 @@ type SiteSettingListReq struct {
 type SiteSettingListRes struct {
 	g.Meta `mime:"application/json" example:"{}"`
 	List   []*entity.CmsSiteSetting `json:"list"`
+	Total  int                      `json:"total"`
+	Config SiteSettingListResConfig `json:"config"`
+}
+
+type SiteSettingListResConfig struct {
+	Groups []string `json:"groups"`
 }

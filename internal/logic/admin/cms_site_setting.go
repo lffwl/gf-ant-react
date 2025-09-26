@@ -105,7 +105,13 @@ func (s *sCmsSiteSettingLogic) GetSiteSettingDetail(ctx context.Context, id uint
 }
 
 // GetSiteSettingList 获取网站设置列表
-func (s *sCmsSiteSettingLogic) GetSiteSettingList(ctx context.Context, req *cms.SiteSettingListReq) ([]*entity.CmsSiteSetting, error) {
+func (s *sCmsSiteSettingLogic) GetSiteSettingList(ctx context.Context, req *cms.SiteSettingListReq) ([]*entity.CmsSiteSetting, int, error) {
 	// 调用服务层获取网站设置列表
 	return service.CmsSiteSettingService.GetSiteSettingList(ctx, req.Group)
+}
+
+// GetSiteSettingGroups 获取网站设置分组列表
+func (s *sCmsSiteSettingLogic) GetSiteSettingGroups(ctx context.Context) ([]string, error) {
+	// 调用服务层获取网站设置分组列表
+	return service.CmsSiteSettingService.GetSiteSettingGroups(ctx)
 }

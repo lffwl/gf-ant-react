@@ -23,25 +23,56 @@ interface SiteSettingEditProps {
 const SiteSettingEdit: React.FC<SiteSettingEditProps> = ({ visible, onCancel, onSuccess, editSetting }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [groupOptions, setGroupOptions] = useState<Array<{label: string; value: string}>>([]);
   const isEditMode = !!editSetting;
-
-  // 配置分组选项
-  const groupOptions = [
-    { label: '通用设置', value: 'general' },
-    { label: 'SEO设置', value: 'seo' },
-    { label: '邮箱设置', value: 'email' },
-    { label: '社交设置', value: 'social' },
-    { label: '安全设置', value: 'security' },
-  ];
 
   // 配置值类型选项
   const valueTypeOptions = [
-    { label: '文本', value: 'text' },
-    { label: '数字', value: 'number' },
-    { label: '布尔值', value: 'boolean' },
+    { label: '字符串', value: 'string' },
     { label: 'JSON', value: 'json' },
-    { label: 'HTML', value: 'html' },
   ];
+
+  // 获取配置分组选项
+  const fetchGroupOptions = async () => {
+    try {
+      const response = await siteSettingService.getSiteSettingList({
+        page: 1,
+        size: 1
+      });
+      
+      if (response.code === 0 && response.data && response.data.config && response.data.config.groups) {
+        const newGroupOptions = response.data.config.groups.map((group: string) => ({
+          label: group,
+          value: group
+        }));
+        setGroupOptions(newGroupOptions);
+      } else {
+        // 如果没有从接口获取到分组数据，使用默认分组
+        setGroupOptions([
+          { label: '通用设置', value: '通用设置' },
+          { label: 'SEO设置', value: 'SEO设置' },
+          { label: '邮箱设置', value: '邮箱设置' },
+          { label: '社交设置', value: '社交设置' },
+          { label: '安全设置', value: '安全设置' },
+        ]);
+      }
+    } catch (error) {
+      console.error('获取配置分组选项失败:', error);
+      // 出错时使用默认分组
+      setGroupOptions([
+        { label: '通用设置', value: '通用设置' },
+        { label: 'SEO设置', value: 'SEO设置' },
+        { label: '邮箱设置', value: '邮箱设置' },
+        { label: '社交设置', value: '社交设置' },
+        { label: '安全设置', value: '安全设置' },
+      ]);
+    }
+  };
+
+  // 组件挂载时获取分组选项
+  useEffect(() => {
+    fetchGroupOptions();
+  }, []);
 
   useEffect(() => {
     if (visible) {
@@ -51,7 +82,7 @@ const SiteSettingEdit: React.FC<SiteSettingEditProps> = ({ visible, onCancel, on
           settingKey: editSetting.settingKey || '',
           settingValue: editSetting.settingValue || '',
           valueType: editSetting.valueType || 'text',
-          group: editSetting.group || 'general',
+          group: editSetting.group || '通用设置',
           description: editSetting.description || '',
         });
       } else {
@@ -112,7 +143,7 @@ const SiteSettingEdit: React.FC<SiteSettingEditProps> = ({ visible, onCancel, on
       <Form
         form={form}
         layout="vertical"
-        style={{ maxHeight: '60vh', overflowY: 'auto' }}
+        style={{ maxHeight: '60vh', overflowY: 'auto', overflowX: 'hidden' }}
       >
         <Row gutter={16}>
           <Col span={24}>
@@ -158,10 +189,23 @@ const SiteSettingEdit: React.FC<SiteSettingEditProps> = ({ visible, onCancel, on
               name="group"
               label="配置分组"
               rules={[
-                { required: true, message: '请选择配置分组' },
+                { required: true, message: '请选择或输入配置分组' },
               ]}
             >
-              <Select placeholder="请选择配置分组">
+              <Select 
+                mode="tags"
+                placeholder="请选择或输入配置分组"
+                allowClear
+                maxTagCount={1}
+                maxTagTextLength={20}
+                style={{ width: '100%' }}
+                onChange={(value) => {
+                  // 限制只能选择一个，如果选择了多个，只保留最后一个
+                  if (Array.isArray(value) && value.length > 1) {
+                    form.setFieldsValue({ group: [value[value.length - 1]] });
+                  }
+                }}
+              >
                 {groupOptions.map(option => (
                   <Option key={option.value} value={option.value}>{option.label}</Option>
                 ))}

@@ -3,7 +3,7 @@ import { Table, Button, Space, Popconfirm, Card, Row, Col, Input, Select, Layout
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { siteSettingService } from '../../../services/siteSettingService';
 import type { ColumnsType } from 'antd/es/table';
-import { usePermission } from '../../../utils/permission';
+import { PermissionAction, usePermission } from '../../../utils/permission';
 import SiteSettingEdit from './edit';
 
 const { Content } = Layout;
@@ -36,23 +36,14 @@ const SiteSettingList: React.FC = () => {
   });
   const [visible, setVisible] = useState(false);
   const [editSetting, setEditSetting] = useState<SiteSettingData | undefined>(undefined);
+  const [groupOptions, setGroupOptions] = useState<Array<{label: string; value: string}>>([]);
   
   // 使用ref来跟踪上一次的查询参数
   const prevQueryParamsRef = useRef<string>('');
 
-  // 配置分组选项
-  const groupOptions = [
-    { label: '通用设置', value: 'general' },
-    { label: 'SEO设置', value: 'seo' },
-    { label: '邮箱设置', value: 'email' },
-    { label: '社交设置', value: 'social' },
-    { label: '安全设置', value: 'security' },
-  ];
-
   // 获取权限
   const hasCreatePermission = usePermission('sys.cms.site_setting.create');
-  const hasUpdatePermission = usePermission('sys.cms.site_setting.update');
-  const hasDeletePermission = usePermission('sys.cms.site_setting.delete');
+  // 已移除未使用的权限变量
 
   // 获取网站设置列表
   const fetchSiteSettingList = async () => {
@@ -80,6 +71,24 @@ const SiteSettingList: React.FC = () => {
           current: data.page || 1,
           pageSize: data.size || 10
         }));
+        
+        // 更新分组选项
+        if (data.config && data.config.groups && data.config.groups.length > 0) {
+          const newGroupOptions = data.config.groups.map((group: string) => ({
+            label: group,
+            value: group
+          }));
+          setGroupOptions(newGroupOptions);
+        } else {
+          // 如果没有从接口获取到分组数据，使用默认分组
+          setGroupOptions([
+            { label: '通用设置', value: '通用设置' },
+            { label: 'SEO设置', value: 'SEO设置' },
+            { label: '邮箱设置', value: '邮箱设置' },
+            { label: '社交设置', value: '社交设置' },
+            { label: '安全设置', value: '安全设置' },
+          ]);
+        }
       }
     } catch (error) {
       console.error('获取网站设置列表失败:', error);
@@ -151,11 +160,8 @@ const SiteSettingList: React.FC = () => {
   // 获取值类型显示名称
   const getValueLabel = (valueType: string) => {
     const typeMap: Record<string, string> = {
-      'text': '文本',
-      'number': '数字',
-      'boolean': '布尔值',
+      'string': '字符串',
       'json': 'JSON',
-      'html': 'HTML'
     };
     return typeMap[valueType] || valueType;
   };
@@ -216,25 +222,26 @@ const SiteSettingList: React.FC = () => {
       title: '操作',
       key: 'action',
       width: '15%',
+      fixed: 'right',
       render: (_, record) => (
         <Space size="middle">
-          {hasUpdatePermission && (
-            <Button size="small" onClick={() => handleEdit(record)}>
+          <PermissionAction permission="sys.cms.site_setting.update">
+            <Button type="link" size="small" onClick={() => handleEdit(record)}>
               编辑
             </Button>
-          )}
-          {hasDeletePermission && (
+          </PermissionAction>
+          <PermissionAction permission="sys.cms.site_setting.delete">
             <Popconfirm
               title="确定要删除这个配置项吗？"
               onConfirm={() => handleDelete(record.id)}
               okText="确定"
               cancelText="取消"
             >
-              <Button size="small" danger>
+              <Button type="link" size="small" danger>
                 删除
               </Button>
             </Popconfirm>
-          )}
+          </PermissionAction>
         </Space>
       ),
     },
