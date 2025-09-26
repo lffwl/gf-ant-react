@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gf-ant-react/api/admin/cms"
+	"gf-ant-react/internal/model/admin"
 	"gf-ant-react/internal/model/entity"
 	"gf-ant-react/internal/service"
 	"gf-ant-react/utility/auth"
@@ -107,7 +108,12 @@ func (s *sCmsSiteSettingLogic) GetSiteSettingDetail(ctx context.Context, id uint
 // GetSiteSettingList 获取网站设置列表
 func (s *sCmsSiteSettingLogic) GetSiteSettingList(ctx context.Context, req *cms.SiteSettingListReq) ([]*entity.CmsSiteSetting, int, error) {
 	// 调用服务层获取网站设置列表
-	return service.CmsSiteSettingService.GetSiteSettingList(ctx, req.Group)
+	return service.CmsSiteSettingService.GetSiteSettingList(ctx, admin.GetSiteSettingListReq{
+		Page:  req.Page,
+		Size:  req.Size,
+		Group: req.Group,
+		Key:   req.Key,
+	})
 }
 
 // GetSiteSettingGroups 获取网站设置分组列表

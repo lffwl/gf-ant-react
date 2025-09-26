@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gf-ant-react/internal/dao"
+	"gf-ant-react/internal/model/admin"
 	"gf-ant-react/internal/model/entity"
 
 	"github.com/gogf/gf/v2/util/gconv"
@@ -51,11 +52,14 @@ func (s *CmsSiteSetting) GetSiteSettingById(ctx context.Context, id uint64) (*en
 }
 
 // GetSiteSettingList 获取网站设置列表
-func (s *CmsSiteSetting) GetSiteSettingList(ctx context.Context, group string) ([]*entity.CmsSiteSetting, int, error) {
+func (s *CmsSiteSetting) GetSiteSettingList(ctx context.Context, req admin.GetSiteSettingListReq) ([]*entity.CmsSiteSetting, int, error) {
 	var settings []*entity.CmsSiteSetting
 	model := dao.CmsSiteSetting.Ctx(ctx)
-	if group != "" {
-		model = model.Where(dao.CmsSiteSetting.Columns().Group, group)
+	if req.Group != "" {
+		model = model.Where(dao.CmsSiteSetting.Columns().Group, req.Group)
+	}
+	if req.Key != "" {
+		model = model.WhereLike(dao.CmsSiteSetting.Columns().SettingKey, "%"+req.Key+"%")
 	}
 
 	// 获取总数
@@ -64,7 +68,9 @@ func (s *CmsSiteSetting) GetSiteSettingList(ctx context.Context, group string) (
 		return nil, 0, err
 	}
 
-	err = model.OrderAsc(dao.CmsSiteSetting.Columns().Id).Scan(&settings)
+	err = model.OrderAsc(dao.CmsSiteSetting.Columns().Id).
+		Page(req.Page, req.Size).
+		Scan(&settings)
 	return settings, total, err
 }
 

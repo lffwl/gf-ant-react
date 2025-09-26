@@ -63,6 +63,8 @@ type SiteSettingDetailRes struct {
 // 网站设置列表接口
 type SiteSettingListReq struct {
 	g.Meta `path:"/sys/cms/site-setting/list" tags:"SiteSetting" method:"get" summary:"网站设置列表"`
+	Page   int    `p:"page" d:"1" v:"required|integer#分页页码不能为空|分页页码必须为整数" description:"分页页码"`
+	Size   int    `p:"size" d:"10" v:"required|integer#分页数量不能为空|分页数量必须为整数" description:"分页数量"`
 	Group  string `p:"group" description:"配置分组，如 general, seo, email, social, security"`
 	Key    string `p:"key" description:"配置项键名"`
 }

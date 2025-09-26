@@ -351,6 +351,7 @@ const SiteSettingList: React.FC = () => {
         onCancel={() => setVisible(false)}
         onSuccess={handleSuccess}
         editSetting={editSetting}
+        groupOptions={groupOptions}
       />
     </div>
   );

@@ -18,9 +18,10 @@ interface SiteSettingEditProps {
   onCancel: () => void;
   onSuccess: () => void;
   editSetting?: SiteSettingData;
+  groupOptions?: Array<{label: string; value: string}>;
 }
 
-const SiteSettingEdit: React.FC<SiteSettingEditProps> = ({ visible, onCancel, onSuccess, editSetting }) => {
+const SiteSettingEdit: React.FC<SiteSettingEditProps> = ({ visible, onCancel, onSuccess, editSetting, groupOptions: propGroupOptions }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [groupOptions, setGroupOptions] = useState<Array<{label: string; value: string}>>([]);
@@ -32,33 +33,13 @@ const SiteSettingEdit: React.FC<SiteSettingEditProps> = ({ visible, onCancel, on
     { label: 'JSON', value: 'json' },
   ];
 
-  // 获取配置分组选项
-  const fetchGroupOptions = async () => {
-    try {
-      const response = await siteSettingService.getSiteSettingList({
-        page: 1,
-        size: 1
-      });
-      
-      if (response.code === 0 && response.data && response.data.config && response.data.config.groups) {
-        const newGroupOptions = response.data.config.groups.map((group: string) => ({
-          label: group,
-          value: group
-        }));
-        setGroupOptions(newGroupOptions);
-      } else {
-        // 如果没有从接口获取到分组数据，使用默认分组
-        setGroupOptions([
-          { label: '通用设置', value: '通用设置' },
-          { label: 'SEO设置', value: 'SEO设置' },
-          { label: '邮箱设置', value: '邮箱设置' },
-          { label: '社交设置', value: '社交设置' },
-          { label: '安全设置', value: '安全设置' },
-        ]);
-      }
-    } catch (error) {
-      console.error('获取配置分组选项失败:', error);
-      // 出错时使用默认分组
+  // 组件挂载时获取分组选项
+  useEffect(() => {
+    // 使用父组件传递的分组选项
+    if (propGroupOptions && propGroupOptions.length > 0) {
+      setGroupOptions(propGroupOptions);
+    } else {
+      // 如果没有传递分组选项，使用默认分组
       setGroupOptions([
         { label: '通用设置', value: '通用设置' },
         { label: 'SEO设置', value: 'SEO设置' },
@@ -67,12 +48,7 @@ const SiteSettingEdit: React.FC<SiteSettingEditProps> = ({ visible, onCancel, on
         { label: '安全设置', value: '安全设置' },
       ]);
     }
-  };
-
-  // 组件挂载时获取分组选项
-  useEffect(() => {
-    fetchGroupOptions();
-  }, []);
+  }, [propGroupOptions]);
 
   useEffect(() => {
     if (visible) {
